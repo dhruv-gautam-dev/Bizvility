@@ -7,7 +7,7 @@ const StoreDetailPage = () => {
   const { slug, storeId } = useParams();
   const store = healthCategoryData.find((s) => String(s.id) === storeId);
   const [activeTab, setActiveTab] = useState("Overview");
-
+  console.log(store);
   if (!store) {
     return (
       <div className="flex items-center justify-center min-h-screen pt-20 bg-gray-50">
@@ -30,32 +30,28 @@ const StoreDetailPage = () => {
     "Quick Info",
     "Services",
     "Photos",
-    "Explore",
     "Reviews",
   ];
 
   return (
     <div className="pt-24 bg-gray-50">
-      {/* Photo Gallery */}
-      {/* <div className="grid grid-cols-4 gap-1">
-        {store.photos.slice(0, 6).map((url, idx) => (
-          <img
-            key={idx}
-            src={url}
-            alt={`${store.name} photo ${idx + 1}`}
-            className="object-cover w-full h-48"
-          />
-        ))}
-        {store.photos.length > 6 && (
-          <div className="flex items-center justify-center w-full h-48 text-xl font-semibold text-white bg-black/40">
-            +{store.photos.length - 6} More
-          </div>
-        )}
-      </div> */}
+      <div
+        className="relative px-4 py-40 text-white bg-center bg-cover md:px-16"
+        style={{ backgroundImage: `url(${store.photos[0]})` }}
+      ></div>
+
+      {/* Circle Doctor Profile Image */}
+      <div className="absolute flex flex-col items-center left-3 top-60 md:w-1/3 md:mt-0">
+        <img
+          src={store.image}
+          alt={store.name}
+          className="object-cover border-4 border-white rounded-full shadow-lg w-72 h-72"
+        />
+      </div>
 
       {/* Header Info */}
-      <div className="container flex flex-col py-6 mx-auto md:flex-row md:items-center md:justify-between">
-        <div>
+      <div className="container flex flex-col py-6 mx-auto mt-32 ml-28 md:flex-row md:items-center md:justify-between">
+        <div className="ml-16 ">
           <h2 className="text-3xl font-bold">{store.name}</h2>
           <div className="flex items-center mt-2 space-x-2">
             <span className="px-2 py-1 text-white bg-green-600 rounded">
@@ -96,7 +92,7 @@ const StoreDetailPage = () => {
 
       {/* Tabs */}
       <div className="container flex flex-col w-2/3 mx-2 bg-white border-t ">
-        <nav className="flex px-6 space-x-8 border-b">
+        <nav className="flex px-6 pl-16 space-x-8 border-b">
           {tabList.map((tab) => (
             <button
               key={tab}
@@ -113,7 +109,7 @@ const StoreDetailPage = () => {
         </nav>
 
         {/* Tab Content */}
-        <div className="w-2/3 p-6">
+        <div className="w-full p-6 pl-16">
           {activeTab === "Overview" && (
             <div>
               <h3 className="text-xl font-semibold">Welcome to {store.name}</h3>
@@ -144,7 +140,7 @@ const StoreDetailPage = () => {
             </div>
           )}
           {activeTab === "Photos" && (
-            <div className="grid grid-cols-3 gap-2 ">
+            <div className="grid grid-cols-4 gap-2 ">
               {store.photos.map((url, idx) => (
                 <img
                   key={idx}
@@ -154,11 +150,7 @@ const StoreDetailPage = () => {
               ))}
             </div>
           )}
-          {activeTab === "Explore" && (
-            <div>
-              <p>🔍 Discover more pharmacies nearby...</p>
-            </div>
-          )}
+
           {activeTab === "Reviews" && (
             <div>
               <p>⭐ Customer reviews coming soon...</p>
