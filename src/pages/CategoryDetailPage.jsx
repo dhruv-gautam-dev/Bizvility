@@ -44,34 +44,36 @@ const CategoryDetailPage = () => {
               <h2 className="mb-4 text-2xl font-semibold">
                 Popular in {category.name}
               </h2>
-              <div className="space-y-6">
+              <div className="grid grid-cols-2 ">
                 {healthCategoryData.map((biz) => (
                   <Link
                     to={`/categories/${slug}/store/${biz.id}`}
                     key={biz.id}
-                    className="block pb-6 border-b border-gray-200 hover:bg-gray-50 last:border-0 last:pb-0"
+                    className="block gap-3 p-4 pb-6 border-b border-gray-200 rounded-sm hover:bg-gray-50 last:border-0 last:pb-0"
                   >
                     <div
                       key={biz.id}
-                      className="pb-6 border-b border-gray-200 last:border-0 last:pb-0"
+                      className="pb-6 border-b border-gray-200 rounded-lg last:border-0 last:pb-0"
                     >
                       <div className="flex items-start">
-                        <img
-                          src={biz.image}
-                          alt={biz.alt}
-                          className="object-cover w-24 h-24 rounded-lg"
-                        />
+                        <div>
+                          <img
+                            src={biz.image}
+                            alt={biz.alt}
+                            className="object-cover w-24 h-24 rounded-lg"
+                          />
+                          <div className="flex items-center justify-center mt-2">
+                            <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                            <span className="ml-1 text-gray-600">
+                              {biz.rating}
+                            </span>
+                          </div>
+                        </div>
                         <div className="flex-1 ml-4">
                           <div className="flex items-center justify-between">
                             <h3 className="text-lg font-semibold">
                               {biz.name}
                             </h3>
-                            <div className="flex items-center">
-                              <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                              <span className="ml-1 text-gray-600">
-                                {biz.rating}
-                              </span>
-                            </div>
                           </div>
                           <div className="flex items-center mt-2 text-sm text-gray-500">
                             <MapPin className="w-4 h-4 mr-1" />

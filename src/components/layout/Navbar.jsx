@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Compass, Heart } from "lucide-react";
 import BizvilityLogo from "../imgs/bizvility-dark-logo.png";
+import SearchForm from "./SearchForm";
 
 const Navbar = ({ scrolled }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -10,12 +11,14 @@ const Navbar = ({ scrolled }) => {
     location.pathname === "/signin" || location.pathname === "/signup";
   const authLink = location.pathname === "/signin" ? "/signup" : "/signin";
   const authText = location.pathname === "/signin" ? "Sign Up" : "Sign In";
-
+  const isHome = location.pathname === "/";
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-white shadow-md py-3" : "bg-transparent py-4"
-      }`}
+      className={`
+    fixed top-0 w-full z-50 transition-all duration-300
+    flex items-center justify-between 
+    ${scrolled ? "bg-white shadow-md h-22 " : "bg-transparent pt-4 h-15"}
+  `}
     >
       <div className="container px-4 mx-auto sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
@@ -29,7 +32,9 @@ const Navbar = ({ scrolled }) => {
           </Link>
 
           {/* Desktop Navigation */}
+
           <nav className="items-center hidden space-x-8 lg:flex">
+            {!isHome && <SearchForm />}
             <Link
               to="/"
               className="mr-2 font-medium text-gray-700 transition-colors hover:text-blue-600"
@@ -99,8 +104,9 @@ const Navbar = ({ scrolled }) => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="px-4 pb-4 mt-4 lg:hidden">
+          <div className="absolute left-0 z-40 w-full px-4 pb-4 transition-all duration-300 bg-white shadow-md top-full lg:hidden">
             <nav className="flex flex-col space-y-4">
+              {!isHome && <SearchForm />}
               <Link
                 to="/"
                 className="font-medium text-gray-700 transition-colors hover:text-blue-600"

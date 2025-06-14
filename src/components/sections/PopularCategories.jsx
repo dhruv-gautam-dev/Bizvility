@@ -33,26 +33,27 @@ const CategoryCard = ({ icon, title, count, color, path }) => {
 const PopularCategories = () => {
   const categories = [
     {
-      icon: <Utensils className="w-8 h-8 text-white" />,
-      title: "Restaurants & Food",
-      count: 1283,
-      color: "bg-red-500",
-      path: "/categories/restaurants",
-      // },
-      // {
-      //   icon: <ShoppingBag className="w-8 h-8 text-white" />,
-      //   title: 'Shopping & Retail',
-      //   count: 964,
-      //   color: 'bg-blue-500',
-      //   path: '/categories/shopping'
-    },
-    {
       icon: <Stethoscope className="w-8 h-8 text-white" />,
       title: "Health & Medical",
       count: 752,
       color: "bg-green-500",
       path: "/categories/health",
     },
+    {
+      icon: <Utensils className="w-8 h-8 text-white" />,
+      title: "Restaurants & Food",
+      count: 1283,
+      color: "bg-red-500",
+      path: "/categories/restaurants",
+    },
+    // {
+    //   icon: <ShoppingBag className="w-8 h-8 text-white" />,
+    //   title: 'Shopping & Retail',
+    //   count: 964,
+    //   color: 'bg-blue-500',
+    //   path: '/categories/shopping'
+    // },
+
     // {
     //   icon: <Home className="w-8 h-8 text-white" />,
     //   title: 'Home Services',
