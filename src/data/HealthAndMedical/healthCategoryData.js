@@ -1,3 +1,5 @@
+import { useParams } from "react-router-dom";
+
 export const healthCategoryData = [
   {
     id: 1,
@@ -126,7 +128,21 @@ export const healthCategoryData = [
                 text: "Exceptional environment, polite staff, very satisfied overall!"
               }
         ],
-    openHours: "Mon–Sat 9 AM–9 PM; Sun Closed"
+    openHours: "Mon–Sat 9 AM–9 PM; Sun Closed",
+
+    // data for the quick details sub nav
+    email: "dr.shivani@example.com",  
+    registerNumber: "MP1234567",  
+    walkin: "no",
+    appointmentLink: "https://drshivaniappointments.com/book", 
+    experience: "10 years",  
+    award: "Best Physician 2022",
+    affiliation: "Agra Central Hospital",
+    speciality: "General Medicine", 
+    socialMedia: {
+      facebook: "https://facebook.com/drshivani",  
+      instagram: "https://instagram.com/drshivani" 
+    }
   },
   {
     id: 2,
@@ -586,3 +602,5 @@ export const healthCategoryData = [
     openHours: "Open 24 Hours (Everyday)"
   }
 ];
+
+

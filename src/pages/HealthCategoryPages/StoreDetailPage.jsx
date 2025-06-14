@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
 import { healthCategoryData } from "../../data/HealthAndMedical/healthCategoryData";
+import { Mail, Phone } from "lucide-react";
 import {
   FaStar,
   FaRegStar,
@@ -174,15 +175,160 @@ const StoreDetailPage = () => {
                 </div>
               )}
               {activeTab === "Quick Info" && (
-                <div>
-                  <p>📌 {store.openHours}</p>
-                  <p>📍 Address: {store.address}</p>
-                  <p>
-                    🌐 Website:{" "}
-                    <a className="text-blue-600" href={store.website}>
-                      {store.website}
-                    </a>
-                  </p>
+                <div className="w-5/6 p-6 space-y-6 bg-white rounded ">
+                  <h2 className="ml-10 text-2xl font-semibold ">Quick Info</h2>
+
+                  <div className="pl-16 bg-white rounded-lg ">
+                    <div className="divide-y divide-gray-200">
+                      {/* Row Item */}
+                      <div className="grid grid-cols-2 py-3">
+                        <div className="font-medium text-gray-700">Phone</div>
+                        <div>{store.phone || "Not Available"}</div>
+                      </div>
+
+                      <div className="grid grid-cols-2 py-3">
+                        <div className="font-medium text-gray-700">Email</div>
+                        <div>{store.email || "Not Available"}</div>
+                      </div>
+
+                      <div className="grid grid-cols-2 py-3">
+                        <div className="font-medium text-gray-700">
+                          Register Number
+                        </div>
+                        <div>{store.registerNumber || "Not Available"}</div>
+                      </div>
+
+                      <div className="grid grid-cols-2 py-3">
+                        <div className="font-medium text-gray-700">Walkin</div>
+                        <div>{store.walkin || "Not Available"}</div>
+                      </div>
+
+                      <div className="grid grid-cols-2 py-3">
+                        <div className="font-medium text-gray-700">
+                          Appointment Link
+                        </div>
+                        <div>
+                          {store.appointmentLink ? (
+                            <a
+                              href={store.appointmentLink}
+                              className="text-blue-600 underline"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Book Now
+                            </a>
+                          ) : (
+                            "Not Available"
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 py-3">
+                        <div className="font-medium text-gray-700">
+                          Experience
+                        </div>
+                        <div>{store.experience || "Not Available"}</div>
+                      </div>
+
+                      <div className="grid grid-cols-2 py-3">
+                        <div className="font-medium text-gray-700">Award</div>
+                        <div>{store.award || "Not Available"}</div>
+                      </div>
+
+                      <div className="grid grid-cols-2 py-3">
+                        <div className="font-medium text-gray-700">
+                          Affiliation
+                        </div>
+                        <div>{store.affiliation || "Not Available"}</div>
+                      </div>
+
+                      <div className="grid grid-cols-2 py-3">
+                        <div className="font-medium text-gray-700">
+                          Speciality
+                        </div>
+                        <div>{store.speciality || "Not Available"}</div>
+                      </div>
+
+                      <div className="grid grid-cols-2 py-3">
+                        <div className="font-medium text-gray-700">Website</div>
+                        <div>
+                          {store.website ? (
+                            <a
+                              href={store.website}
+                              className="text-blue-600 underline"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {store.website}
+                            </a>
+                          ) : (
+                            "Not Available"
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 py-3">
+                        <div className="font-medium text-gray-700">
+                          Video URL
+                        </div>
+                        <div>
+                          {store.videoURL ? (
+                            <a
+                              href={store.videoURL}
+                              className="text-blue-600 underline"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Watch Video
+                            </a>
+                          ) : (
+                            "Not Available"
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 py-3">
+                        <div className="font-medium text-gray-700">
+                          Customer Reviews
+                        </div>
+                        <div>{store.reviews?.length || 0}</div>
+                      </div>
+
+                      <div className="grid grid-cols-2 py-3">
+                        <div className="font-medium text-gray-700">
+                          Social Media
+                        </div>
+                        <div className="flex space-x-4">
+                          {store.socialMedia?.facebook && (
+                            <a
+                              href={store.socialMedia.facebook}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <img
+                                src="https://cdn-icons-png.flaticon.com/512/145/145802.png"
+                                alt="Facebook"
+                                className="w-5 h-5"
+                              />
+                            </a>
+                          )}
+                          {store.socialMedia?.instagram && (
+                            <a
+                              href={store.socialMedia.instagram}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <img
+                                src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
+                                alt="Instagram"
+                                className="w-5 h-5"
+                              />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
               {activeTab === "Services" && (
@@ -191,23 +337,25 @@ const StoreDetailPage = () => {
                 </div>
               )}
               {activeTab === "Photos" && (
-                <section className="w-full max-w-4xl p-6 space-y-6 bg-white rounded ">
-                  <h2 className="mt-4 ml-10 text-2xl font-semibold">Photos</h2>
-                  <div className="grid grid-cols-4 gap-2 mx-auto my-4 space-x-2 w-6/7 ">
-                    {store.photos.map((url, idx) => (
-                      <img
-                        key={idx}
-                        src={url}
-                        className="object-cover w-full h-48 rounded-md"
-                      />
-                    ))}
+                <section className="w-5/6 p-6 space-y-6 bg-white rounded ">
+                  <h2 className="ml-10 text-2xl font-semibold ">Photos</h2>
+                  <div>
+                    <div className="grid grid-cols-4 gap-2 my-4 ml-18 ">
+                      {store.photos.map((url, idx) => (
+                        <img
+                          key={idx}
+                          src={url}
+                          className="object-cover w-full h-48 rounded-md"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </section>
               )}
 
               {activeTab === "Reviews" && (
                 <section className="w-4/5 max-w-4xl p-6 space-y-6 bg-white rounded ">
-                  <h2 className="mt-4 ml-10 text-2xl font-semibold">
+                  <h2 className="ml-10 text-2xl font-semibold ">
                     User Reviews
                   </h2>
                   {/* Filter Tabs */}
@@ -362,6 +510,133 @@ const StoreDetailPage = () => {
                   Get Direction
                 </button>
               </a>
+            </div>
+            {/* Contact and Info Section  quick info */}
+            <div>
+              <div className="p-4 space-y-4 bg-white rounded-lg text-md ">
+                <div className="flex items-center space-x-2">
+                  <Phone className="w-4 h-4" />
+                  <span>{store.phone || "Not Available"}</span>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Mail className="w-4 h-4" />
+                  <span>{store.email || "Not Available"}</span>
+                </div>
+
+                <div>
+                  <strong>Register Number:</strong>{" "}
+                  {store.registerNumber || "Not Available"}
+                </div>
+
+                <div>
+                  <strong>Walkin:</strong> {store.walkin || "Not Available"}
+                </div>
+
+                <div>
+                  <strong>Appointment Link:</strong>{" "}
+                  {store.appointmentLink ? (
+                    <a
+                      href={store.appointmentLink}
+                      className="text-blue-600 underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Book Now
+                    </a>
+                  ) : (
+                    "Not Available"
+                  )}
+                </div>
+
+                <div>
+                  <strong>Experience:</strong>{" "}
+                  {store.experience || "Not Available"}
+                </div>
+
+                <div>
+                  <strong>Award:</strong> {store.award || "Not Available"}
+                </div>
+
+                <div>
+                  <strong>Affiliation:</strong>{" "}
+                  {store.affiliation || "Not Available"}
+                </div>
+
+                <div>
+                  <strong>Speciality:</strong>{" "}
+                  {store.speciality || "Not Available"}
+                </div>
+
+                <div>
+                  <strong>Website:</strong>{" "}
+                  {store.website ? (
+                    <a
+                      href={store.website}
+                      className="text-blue-600 underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {store.website}
+                    </a>
+                  ) : (
+                    "Not Available"
+                  )}
+                </div>
+
+                <div>
+                  <strong>VideoURL:</strong>{" "}
+                  {store.videoURL ? (
+                    <a
+                      href={store.videoURL}
+                      className="text-blue-600 underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Watch Video
+                    </a>
+                  ) : (
+                    "Not Available"
+                  )}
+                </div>
+
+                <div>
+                  <strong>Customer Reviews:</strong>{" "}
+                  {store.reviews?.length || 0}
+                </div>
+
+                <div>
+                  <strong>Social Media:</strong>
+                  <div className="flex items-center mt-1 space-x-4">
+                    {store.socialMedia?.facebook && (
+                      <a
+                        href={store.socialMedia.facebook}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src="https://cdn-icons-png.flaticon.com/512/145/145802.png"
+                          alt="Facebook"
+                          className="w-5 h-5"
+                        />
+                      </a>
+                    )}
+                    {store.socialMedia?.instagram && (
+                      <a
+                        href={store.socialMedia.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
+                          alt="Instagram"
+                          className="w-5 h-5"
+                        />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         </section>

@@ -5,6 +5,7 @@ import { MapPin, Phone, Globe, Clock, Star } from "lucide-react";
 import { healthCategoryData } from "../data/HealthAndMedical/healthCategoryData";
 
 console.log(healthCategoryData);
+
 const CategoryDetailPage = () => {
   const { slug } = useParams();
   const category = CategoryData.find((cat) => cat.slug === slug);
