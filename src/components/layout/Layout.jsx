@@ -15,6 +15,7 @@ const Layout = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
   useEffect(() => {
     // Scroll to the top on navigation
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });

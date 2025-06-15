@@ -8,6 +8,7 @@ const CategoryData = [
         listingCount: 1283,
         subcategories: ['Cafes', 'Fine Dining', 'Fast Food', 'Bakeries', 'Pizza', 'Sushi', 'Vegetarian', 'Food Trucks'],
         tags: ['popular', 'trending']
+        
     },
     // {
     //     id: 2,

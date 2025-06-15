@@ -46,9 +46,12 @@ const ListBusinessPage = () => {
     sundayOpen: "",
     sundayClose: "",
     // Media
-    photos: [],
-    logo: null,
+    Gallery: [],
+    profilePhoto: null,
+    Banner: null,
+    Certifications: [],
   });
+  console.log(formData);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -59,15 +62,45 @@ const ListBusinessPage = () => {
 
   const handleFileChange = (e) => {
     if (e.target.files) {
-      if (e.target.name === "logo") {
+      if (e.target.name === "profilePhoto") {
         setFormData({
           ...formData,
-          logo: e.target.files[0],
+          profilePhoto: e.target.files[0],
         });
-      } else if (e.target.name === "photos") {
+      } else if (e.target.name === "Gallery") {
         setFormData({
           ...formData,
-          photos: Array.from(e.target.files),
+          Gallery: [
+            ...formData.Gallery,
+            ...Array.from(e.target.files).filter(
+              (newFile) =>
+                !formData.Gallery.some(
+                  (existing) =>
+                    existing.name === newFile.name &&
+                    existing.size === newFile.size
+                )
+            ),
+          ],
+        });
+      } else if (e.target.name === "Banner") {
+        setFormData({
+          ...formData,
+          Banner: e.target.files[0],
+        });
+      } else if (e.target.name === "Certifications") {
+        setFormData({
+          ...formData,
+          Certifications: [
+            ...formData.Certifications,
+            ...Array.from(e.target.files).filter(
+              (newFile) =>
+                !formData.Certifications.some(
+                  (existing) =>
+                    existing.name === newFile.name &&
+                    existing.size === newFile.size
+                )
+            ),
+          ],
         });
       }
     }
@@ -413,22 +446,23 @@ const ListBusinessPage = () => {
     <div>
       <h2 className="mb-6 text-2xl font-bold">Photos & Media</h2>
       <div className="space-y-6">
+        {/* Profile Photo */}
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">
-            Business Logo
+            Profile Photo
           </label>
           <div className="flex justify-center px-6 pt-5 pb-6 mt-1 border-2 border-gray-300 border-dashed rounded-md">
             <div className="space-y-1 text-center">
               <Camera className="w-12 h-12 mx-auto text-gray-400" />
               <div className="flex text-sm text-gray-600">
                 <label
-                  htmlFor="logo"
+                  htmlFor="profilePhoto"
                   className="relative font-medium text-blue-600 bg-white rounded-md cursor-pointer hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                 >
-                  <span>Upload a logo</span>
+                  <span>Upload a Profile Photo</span>
                   <input
-                    id="logo"
-                    name="logo"
+                    id="profilePhoto"
+                    name="profilePhoto"
                     type="file"
                     className="sr-only"
                     accept="image/*"
@@ -437,27 +471,114 @@ const ListBusinessPage = () => {
                 </label>
                 <p className="pl-1">or drag and drop</p>
               </div>
-              <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
+              <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
             </div>
           </div>
         </div>
-
+        {/* Banner Image */}
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">
-            Business Photos
+            Banner
           </label>
           <div className="flex justify-center px-6 pt-5 pb-6 mt-1 border-2 border-gray-300 border-dashed rounded-md">
             <div className="space-y-1 text-center">
               <Camera className="w-12 h-12 mx-auto text-gray-400" />
               <div className="flex text-sm text-gray-600">
                 <label
-                  htmlFor="photos"
+                  htmlFor="Banner"
+                  className="relative font-medium text-blue-600 bg-white rounded-md cursor-pointer hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                >
+                  <span>Upload a Banner Photo</span>
+                  <input
+                    id="Banner"
+                    name="Banner"
+                    type="file"
+                    className="sr-only"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                </label>
+                <p className="pl-1">or drag and drop</p>
+              </div>
+              <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
+            </div>
+          </div>
+        </div>
+        {/* Certifications */}
+        <div>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            Certifications
+          </label>
+          <div className="flex justify-center px-6 pt-5 pb-6 mt-1 border-2 border-gray-300 border-dashed rounded-md">
+            <div className="space-y-1 text-center">
+              <Camera className="w-12 h-12 mx-auto text-gray-400" />
+              <div className="flex text-sm text-gray-600">
+                <label
+                  htmlFor="Certifications"
+                  className="relative font-medium text-blue-600 bg-white rounded-md cursor-pointer hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                >
+                  <span>Upload Certifications</span>
+                  <input
+                    id="Certifications"
+                    name="Certifications"
+                    type="file"
+                    className="sr-only"
+                    multiple
+                    accept="application/pdf"
+                    onChange={handleFileChange}
+                  />
+                </label>
+                <p className="pl-1">or drag and drop</p>
+              </div>
+              <p className="text-xs text-gray-500">PNG, JPG up to 5MB each</p>
+            </div>
+          </div>
+        </div>
+        {formData.Certifications.length > 0 && (
+          <div>
+            <h3 className="mb-2 text-sm font-medium text-gray-700">
+              Selected Certifications
+            </h3>
+            <ul className="space-y-2">
+              {formData.Certifications.map((file, index) => (
+                <li
+                  key={index}
+                  className="flex items-center justify-between p-3 bg-gray-100 rounded-md"
+                >
+                  <span className="w-2/3 text-sm font-medium text-gray-800 truncate">
+                    {file.name}
+                  </span>
+                  <a
+                    href={URL.createObjectURL(file)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    View
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Gallery */}
+        <div>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            Gallery
+          </label>
+          <div className="flex justify-center px-6 pt-5 pb-6 mt-1 border-2 border-gray-300 border-dashed rounded-md">
+            <div className="space-y-1 text-center">
+              <Camera className="w-12 h-12 mx-auto text-gray-400" />
+              <div className="flex text-sm text-gray-600">
+                <label
+                  htmlFor="Gallery"
                   className="relative font-medium text-blue-600 bg-white rounded-md cursor-pointer hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                 >
                   <span>Upload photos</span>
                   <input
-                    id="photos"
-                    name="photos"
+                    id="Gallery"
+                    name="Gallery"
                     type="file"
                     className="sr-only"
                     multiple
@@ -467,18 +588,18 @@ const ListBusinessPage = () => {
                 </label>
                 <p className="pl-1">or drag and drop</p>
               </div>
-              <p className="text-xs text-gray-500">PNG, JPG up to 10MB each</p>
+              <p className="text-xs text-gray-500">PNG, JPG up to 5MB each</p>
             </div>
           </div>
         </div>
 
-        {formData.photos.length > 0 && (
+        {formData.Gallery.length > 0 && (
           <div>
             <h3 className="mb-2 text-sm font-medium text-gray-700">
               Selected Photos
             </h3>
             <div className="grid grid-cols-3 gap-4">
-              {formData.photos.map((photo, index) => (
+              {formData.Gallery.map((photo, index) => (
                 <div key={index} className="relative">
                   <img
                     src={URL.createObjectURL(photo)}
