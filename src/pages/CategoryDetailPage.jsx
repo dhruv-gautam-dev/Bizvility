@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
 import CategoryData from "../data/Categories";
+console.log(CategoryData);
 import { MapPin, Phone, Globe, Clock, Star } from "lucide-react";
 import { healthCategoryData } from "../data/HealthAndMedical/healthCategoryData";
 
@@ -8,6 +9,8 @@ console.log(healthCategoryData);
 
 const CategoryDetailPage = () => {
   const { slug } = useParams();
+
+  //construct the category in such by using loops or something in such a way it stores the details of targeted category data
   const category = CategoryData.find((cat) => cat.slug === slug);
 
   if (!category) {

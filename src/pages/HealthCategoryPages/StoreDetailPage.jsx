@@ -13,6 +13,8 @@ import {
 
 const StoreDetailPage = () => {
   const { slug, storeId } = useParams();
+
+  //construct the store in such by using loops or something in such a way it stores the details of targeted category data
   const store = healthCategoryData.find((s) => String(s.id) === storeId);
   const [activeTab, setActiveTab] = useState("Overview");
   const [filter, setFilter] = useState("Relevant");
