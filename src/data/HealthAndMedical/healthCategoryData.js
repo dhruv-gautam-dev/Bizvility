@@ -128,17 +128,15 @@ export const healthCategoryData = [
                 text: "Exceptional environment, polite staff, very satisfied overall!"
               }
         ],
+    summary : "Dr. Shivani is a highly experienced physician with over 10 years in general medicine. She is known for her compassionate care and has received the 'Best Physician' award in 2022. Her clinic is conveniently located on Sikandra Bodla Road, Agra, and offers a range of medical services.",
     openHours: "Mon–Sat 9 AM–9 PM; Sun Closed",
 
-    // data for the quick details sub nav
     email: "dr.shivani@example.com",  
     registerNumber: "MP1234567",  
-    walkin: "no",
     appointmentLink: "https://drshivaniappointments.com/book", 
     experience: "10 years",  
-    award: "Best Physician 2022",
-    affiliation: "Agra Central Hospital",
-    speciality: "General Medicine", 
+    awards:[ "Best Physician 2022","Best Physician 2022"],
+    specialty: "General Medicine", 
     socialMedia: {
       facebook: "https://facebook.com/drshivani",  
       instagram: "https://instagram.com/drshivani" 

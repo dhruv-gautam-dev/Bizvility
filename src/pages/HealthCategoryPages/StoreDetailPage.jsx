@@ -16,7 +16,7 @@ const StoreDetailPage = () => {
   const store = healthCategoryData.find((s) => String(s.id) === storeId);
   const [activeTab, setActiveTab] = useState("Overview");
   const [filter, setFilter] = useState("Relevant");
-  console.log(store);
+  // console.log(store);
 
   function formatAddressPretty(address) {
     return address
@@ -46,7 +46,6 @@ const StoreDetailPage = () => {
   const formattedLoc = formatAddressPretty(store.address);
   const iframeSrc = `https://www.google.com/maps?q=${formattedLoc}&output=embed`;
 
-  // write an api key to embed google map------------------------------------------------------------
   if (!store) {
     return (
       <div className="flex items-center justify-center min-h-screen pt-20 bg-gray-50">
@@ -94,7 +93,7 @@ const StoreDetailPage = () => {
           {/* Header Info */}
           <div className="container flex flex-col py-6 mx-auto mt-32 ml-28 md:flex-row md:items-center md:justify-between">
             <div className="ml-16 ">
-              <h2 className="text-3xl font-bold">{store.name}</h2>
+              <h2 className="text-4xl font-bold">{store.name}</h2>
               <div className="flex items-center mt-2 space-x-2">
                 <span className="px-2 py-1 text-white bg-green-600 rounded">
                   {store.rating} ★
@@ -161,12 +160,67 @@ const StoreDetailPage = () => {
             {/* Tab Content */}
             <div className="w-full ">
               {activeTab === "Overview" && (
-                <div>
-                  <h3 className="text-xl font-semibold">
-                    Welcome to {store.name}
-                  </h3>
-                  <p>{store.alt}</p>
-                  <p className="mt-2 text-gray-600">{store.address}</p>
+                <div className="w-full">
+                  <section className="max-w-4xl p-6 ml-10 bg-white rounded-lg ">
+                    <header className="mb-3">
+                      <h2 className="text-2xl font-semibold ">Overview</h2>
+                    </header>
+
+                    <div className="w-full space-y-4 text-gray-700 bg-white rounded-lg pl-7">
+                      {/* 1. Summary */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          Summary
+                        </h3>
+                        <p className="w-full ml-4 text-justify">
+                          {store.summary}
+                        </p>
+                      </div>
+
+                      {/* 2. Specialty */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          Specialty
+                        </h3>
+                        <p className="ml-4">{store.specialty}</p>
+                      </div>
+
+                      {/* 3. Year of Establishment */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          Year of Establishment
+                        </h3>
+                        <p className="ml-4">{store.years}</p>
+                      </div>
+
+                      {/* 4. Experience */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          Experience
+                        </h3>
+                        <p className="ml-4">
+                          {store.years} {store.years === 1 ? "year" : "years"}{" "}
+                          in practice
+                        </p>
+                      </div>
+
+                      {/* 5. Awards */}
+                      {store.awards.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-800">
+                            Awards & Recognitions
+                          </h3>
+                          <ul className="list-disc list-inside">
+                            {store.awards.map((award, idx) => (
+                              <li className="ml-5" key={idx}>
+                                {award}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </section>
                 </div>
               )}
               {activeTab === "Catalogue" && (
@@ -175,7 +229,7 @@ const StoreDetailPage = () => {
                 </div>
               )}
               {activeTab === "Quick Info" && (
-                <div className="w-5/6 p-6 space-y-6 bg-white rounded ">
+                <div className="w-5/6 p-6 space-y-4 bg-white rounded ">
                   <h2 className="ml-10 text-2xl font-semibold ">Quick Info</h2>
 
                   <div className="pl-16 bg-white rounded-lg ">
@@ -196,11 +250,6 @@ const StoreDetailPage = () => {
                           Register Number
                         </div>
                         <div>{store.registerNumber || "Not Available"}</div>
-                      </div>
-
-                      <div className="grid grid-cols-2 py-3">
-                        <div className="font-medium text-gray-700">Walkin</div>
-                        <div>{store.walkin || "Not Available"}</div>
                       </div>
 
                       <div className="grid grid-cols-2 py-3">
@@ -230,9 +279,17 @@ const StoreDetailPage = () => {
                         <div>{store.experience || "Not Available"}</div>
                       </div>
 
-                      <div className="grid grid-cols-2 py-3">
+                      <div className="grid grid-cols-2 py-1">
                         <div className="font-medium text-gray-700">Award</div>
-                        <div>{store.award || "Not Available"}</div>
+                        {store.awards.length > 0 && (
+                          <div>
+                            <ul className="p-0 m-0 list-none list-inside">
+                              {store.awards.map((award, idx) => (
+                                <li key={idx}>{award}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
 
                       <div className="grid grid-cols-2 py-3">
@@ -244,9 +301,9 @@ const StoreDetailPage = () => {
 
                       <div className="grid grid-cols-2 py-3">
                         <div className="font-medium text-gray-700">
-                          Speciality
+                          Specialty
                         </div>
-                        <div>{store.speciality || "Not Available"}</div>
+                        <div>{store.specialty || "Not Available"}</div>
                       </div>
 
                       <div className="grid grid-cols-2 py-3">
