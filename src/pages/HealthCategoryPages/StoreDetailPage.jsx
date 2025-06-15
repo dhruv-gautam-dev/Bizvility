@@ -93,7 +93,7 @@ const StoreDetailPage = () => {
           {/* Header Info */}
           <div className="container flex flex-col py-6 mx-auto mt-32 ml-28 md:flex-row md:items-center md:justify-between">
             <div className="ml-16 ">
-              <h2 className="text-4xl font-bold">{store.name}</h2>
+              <h2 className="text-3xl font-bold">{store.name}</h2>
               <div className="flex items-center mt-2 space-x-2">
                 <span className="px-2 py-1 text-white bg-green-600 rounded">
                   {store.rating} ★

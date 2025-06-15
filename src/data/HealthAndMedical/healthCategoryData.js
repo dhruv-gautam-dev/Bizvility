@@ -261,7 +261,8 @@ export const healthCategoryData = [
                 text: "Exceptional environment, polite staff, very satisfied overall!"
               }
         ],
-
+    summary : "Dr. Manisha is a well-respected physician with 6 years of experience in family medicine. She is known for her patient-centered approach and has been awarded for her excellence in healthcare. Her clinic is located in Bhore Ram Gopal Market, Agra, providing accessible medical services to the community.",
+    awards:[ "Best Physician 2022","Best Physician 2022"],
     openHours: "Mon–Sun 8 AM–10 PM"
   },
 
@@ -375,6 +376,8 @@ export const healthCategoryData = [
                 text: "Exceptional environment, polite staff, very satisfied overall!"
               }
         ],
+    summary : "Prise Fair Chemist is a well-established medical store located on Hospital Road, Agra. Known for its wide range of pharmaceutical products and friendly service, it has been serving the community for over 4 years. The store is committed to providing quality healthcare products at fair prices.",
+    awards:[ "Best Physician 2022","Best Physician 2022"],
     openHours: "Mon–Sat 10 AM–8 PM; Sun Closed"
   },
   {
@@ -394,6 +397,7 @@ export const healthCategoryData = [
     years: 7,
     price: 0,
     hours: "Open Now • 7 AM – 9 PM",
+    
     photos: [
       "https://t4.ftcdn.net/jpg/01/33/33/41/360_F_133334155_X23HzbJKawbIgXVaub4bPM8CjpkS5uMS.jpg",
       "https://insidefmcg.com.au/wp-content/uploads/2022/01/ezgif.com-gif-maker.jpg",
@@ -486,6 +490,8 @@ export const healthCategoryData = [
                 text: "Exceptional environment, polite staff, very satisfied overall!"
               }
         ],
+    summary : "Agarwal Medical Store is a trusted pharmacy located near Sindhi Bazar on Hospital Road, Agra. With over 7 years of experience, it offers a wide range of medical products and services. The store is known for its friendly staff and commitment to customer care.",
+    awards:[ "Best Pharmacy 2023","Customer Choice Award 2024"],
     openHours: "Mon–Sun 7 AM–9 PM"
   },
   {
@@ -597,6 +603,8 @@ export const healthCategoryData = [
                 text: "Exceptional environment, polite staff, very satisfied overall!"
               }
         ],
+    summary : "Help Agra Pharmacy is a 24-hour pharmacy run by the NGO Help Agra. Located near Sarojini Naidu Medical College, it provides essential medical supplies and services to the community. With over 8 years of service, it is known for its commitment to healthcare accessibility.",
+    awards:[ "Best NGO Pharmacy 2023","Community Service Award 2024"],
     openHours: "Open 24 Hours (Everyday)"
   }
 ];
