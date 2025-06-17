@@ -9,7 +9,8 @@ import {
   Camera,
   UserIcon,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
+import StoreDetailPage from "./HealthCategoryPages/StoreDetailPage";
 
 const ListBusinessPage = () => {
   const [currentStep, setCurrentStep] = useState("basic");
@@ -30,23 +31,33 @@ const ListBusinessPage = () => {
     city: "",
     state: "",
     zipCode: "",
-    // Hours
-    mondayOpen: "",
-    mondayClose: "",
-    tuesdayOpen: "",
-    tuesdayClose: "",
-    wednesdayOpen: "",
-    wednesdayClose: "",
-    thursdayOpen: "",
-    thursdayClose: "",
-    fridayOpen: "",
-    fridayClose: "",
-    saturdayOpen: "",
-    saturdayClose: "",
-    sundayOpen: "",
-    sundayClose: "",
+    // Hours  // it should inside an array
+    businessHours: [
+      { day: "Monday", open: "", close: "" },
+      { day: "Tuesday", open: "", close: "" },
+      { day: "Wednesday", open: "", close: "" },
+      { day: "Thursday", open: "", close: "" },
+      { day: "Friday", open: "", close: "" },
+      { day: "Saturday", open: "", close: "" },
+      { day: "Sunday", open: "", close: "" },
+    ],
+
+    // mondayOpen: "",
+    // mondayClose: "",
+    // tuesdayOpen: "",
+    // tuesdayClose: "",
+    // wednesdayOpen: "",
+    // wednesdayClose: "",
+    // thursdayOpen: "",
+    // thursdayClose: "",
+    // fridayOpen: "",
+    // fridayClose: "",
+    // saturdayOpen: "",
+    // saturdayClose: "",
+    // sundayOpen: "",
+    // sundayClose: "",
     // Media
-    Gallery: [],
+    gallery: [],
     profilePhoto: null,
     Banner: null,
     Certifications: [],
@@ -59,50 +70,59 @@ const ListBusinessPage = () => {
       [e.target.name]: e.target.value,
     });
   };
+  const handleBusinessHourChange = (index, field, value) => {
+    setFormData((prev) => {
+      const updatedHours = [...prev.businessHours];
+      updatedHours[index] = {
+        ...updatedHours[index],
+        [field]: value,
+      };
+      return {
+        ...prev,
+        businessHours: updatedHours,
+      };
+    });
+  };
 
   const handleFileChange = (e) => {
-    if (e.target.files) {
-      if (e.target.name === "profilePhoto") {
-        setFormData({
-          ...formData,
-          profilePhoto: e.target.files[0],
-        });
-      } else if (e.target.name === "Gallery") {
-        setFormData({
-          ...formData,
-          Gallery: [
-            ...formData.Gallery,
-            ...Array.from(e.target.files).filter(
-              (newFile) =>
-                !formData.Gallery.some(
-                  (existing) =>
-                    existing.name === newFile.name &&
-                    existing.size === newFile.size
-                )
-            ),
-          ],
-        });
-      } else if (e.target.name === "Banner") {
-        setFormData({
-          ...formData,
-          Banner: e.target.files[0],
-        });
-      } else if (e.target.name === "Certifications") {
-        setFormData({
-          ...formData,
-          Certifications: [
-            ...formData.Certifications,
-            ...Array.from(e.target.files).filter(
-              (newFile) =>
-                !formData.Certifications.some(
-                  (existing) =>
-                    existing.name === newFile.name &&
-                    existing.size === newFile.size
-                )
-            ),
-          ],
-        });
-      }
+    const { name, files } = e.target;
+    if (!files?.length) return;
+
+    const fileArray = Array.from(files);
+
+    if (name === "profilePhoto" || name === "Banner") {
+      const file = fileArray[0];
+      const preview = URL.createObjectURL(file);
+
+      setFormData((prev) => {
+        prev[name] && URL.revokeObjectURL(prev[name]);
+        return {
+          ...prev,
+          [name]: preview,
+        };
+      });
+    } else if (name === "gallery" || name === "Certifications") {
+      const key = name;
+      const newItems = fileArray
+        .filter(
+          (file) =>
+            !formData[key]?.some(
+              (existing) =>
+                existing.name === file.name && existing.size === file.size
+            )
+        )
+        .map((file) => ({
+          name: file.name,
+          size: file.size,
+          preview: URL.createObjectURL(file),
+        }));
+
+      setFormData((prev) => ({
+        ...prev,
+        [key]: [...prev[key], ...newItems],
+      }));
+    } else if (name === "businessHours") {
+      handleBusinessHourChange();
     }
   };
 
@@ -383,57 +403,41 @@ const ListBusinessPage = () => {
     <div>
       <h2 className="mb-6 text-2xl font-bold">Business Hours</h2>
       <div className="space-y-6">
-        {[
-          "monday",
-          "tuesday",
-          "wednesday",
-          "thursday",
-          "friday",
-          "saturday",
-          "sunday",
-        ].map((day) => (
-          <div key={day} className="flex items-center space-x-4">
-            <div className="w-24">
-              <span className="capitalize">{day}</span>
-            </div>
-            <div className="flex items-center flex-1 space-x-4">
-              <div className="flex-1">
-                <label
-                  htmlFor={`${day}Open`}
-                  className="block mb-1 text-sm font-medium text-gray-700"
-                >
-                  Open
-                </label>
-                <div className="relative">
-                  <Clock className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
-                  <input
-                    type="time"
-                    id={`${day}Open`}
-                    name={`${day}Open`}
-                    className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={formData[`${day}Open`]}
-                    onChange={handleInputChange}
-                  />
-                </div>
+        {formData.businessHours.map((bh, index) => (
+          <div key={bh.day} className="flex items-center space-x-4">
+            <div className="w-24 capitalize">{bh.day}</div>
+
+            <div className="flex-1">
+              <label className="block mb-1 text-sm font-medium text-gray-700">
+                Open
+              </label>
+              <div className="relative">
+                <Clock className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+                <input
+                  type="time"
+                  value={bh.open}
+                  onChange={(e) =>
+                    handleBusinessHourChange(index, "open", e.target.value)
+                  }
+                  className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
-              <div className="flex-1">
-                <label
-                  htmlFor={`${day}Close`}
-                  className="block mb-1 text-sm font-medium text-gray-700"
-                >
-                  Close
-                </label>
-                <div className="relative">
-                  <Clock className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
-                  <input
-                    type="time"
-                    id={`${day}Close`}
-                    name={`${day}Close`}
-                    className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={formData[`${day}Close`]}
-                    onChange={handleInputChange}
-                  />
-                </div>
+            </div>
+
+            <div className="flex-1">
+              <label className="block mb-1 text-sm font-medium text-gray-700">
+                Close
+              </label>
+              <div className="relative">
+                <Clock className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+                <input
+                  type="time"
+                  value={bh.close}
+                  onChange={(e) =>
+                    handleBusinessHourChange(index, "close", e.target.value)
+                  }
+                  className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
             </div>
           </div>
@@ -549,7 +553,7 @@ const ListBusinessPage = () => {
                     {file.name}
                   </span>
                   <a
-                    href={URL.createObjectURL(file)}
+                    href={file.preview}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-blue-600 hover:underline"
@@ -572,13 +576,13 @@ const ListBusinessPage = () => {
               <Camera className="w-12 h-12 mx-auto text-gray-400" />
               <div className="flex text-sm text-gray-600">
                 <label
-                  htmlFor="Gallery"
+                  htmlFor="gallery"
                   className="relative font-medium text-blue-600 bg-white rounded-md cursor-pointer hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                 >
                   <span>Upload photos</span>
                   <input
-                    id="Gallery"
-                    name="Gallery"
+                    id="gallery"
+                    name="gallery"
                     type="file"
                     className="sr-only"
                     multiple
@@ -593,18 +597,18 @@ const ListBusinessPage = () => {
           </div>
         </div>
 
-        {formData.Gallery.length > 0 && (
+        {formData.gallery.length > 0 && (
           <div>
             <h3 className="mb-2 text-sm font-medium text-gray-700">
               Selected Photos
             </h3>
-            <div className="grid grid-cols-3 gap-4">
-              {formData.Gallery.map((photo, index) => (
+            <div className="flex gap-4 h-45">
+              {formData.gallery.map((photo, index) => (
                 <div key={index} className="relative">
                   <img
-                    src={URL.createObjectURL(photo)}
+                    src={photo.preview}
                     alt={`Business photo ${index + 1}`}
-                    className="object-cover w-full h-24 rounded-md"
+                    className="h-full rounded-md object-fit w-45"
                   />
                 </div>
               ))}
@@ -615,69 +619,76 @@ const ListBusinessPage = () => {
     </div>
   );
 
-  const renderReviewStep = () => (
-    <div>
-      <h2 className="mb-6 text-2xl font-bold">Review Your Information</h2>
-      <div className="space-y-8">
-        <div>
-          <h3 className="mb-2 text-lg font-semibold">Basic Information</h3>
-          <div className="p-4 rounded-md bg-gray-50">
-            <p>
-              <strong>Business Name:</strong> {formData.businessName}
-            </p>
-            <p>
-              <strong>Category:</strong> {formData.category}
-            </p>
-            <p>
-              <strong>Description:</strong> {formData.description}
-            </p>
-          </div>
-        </div>
+  const renderReviewStep = () => {
+    // <div>
+    //   <h2 className="mb-6 text-2xl font-bold">Review Your Information</h2>
+    //   <div className="space-y-8">
+    //     <div>
+    //       <h3 className="mb-2 text-lg font-semibold">Basic Information</h3>
+    //       <div className="p-4 rounded-md bg-gray-50">
+    //         <p>
+    //           <strong>Business Name:</strong> {formData.businessName}
+    //         </p>
+    //         <p>
+    //           <strong>Category:</strong> {formData.category}
+    //         </p>
+    //         <p>
+    //           <strong>Description:</strong> {formData.description}
+    //         </p>
+    //       </div>
+    //     </div>
 
-        <div>
-          <h3 className="mb-2 text-lg font-semibold">Contact Information</h3>
-          <div className="p-4 rounded-md bg-gray-50">
-            <p>
-              <strong>Email:</strong> {formData.email}
-            </p>
-            <p>
-              <strong>Phone:</strong> {formData.phone}
-            </p>
-            <p>
-              <strong>Website:</strong> {formData.website}
-            </p>
-          </div>
-        </div>
+    //     <div>
+    //       <h3 className="mb-2 text-lg font-semibold">Contact Information</h3>
+    //       <div className="p-4 rounded-md bg-gray-50">
+    //         <p>
+    //           <strong>Email:</strong> {formData.email}
+    //         </p>
+    //         <p>
+    //           <strong>Phone:</strong> {formData.phone}
+    //         </p>
+    //         <p>
+    //           <strong>Website:</strong> {formData.website}
+    //         </p>
+    //       </div>
+    //     </div>
 
-        <div>
-          <h3 className="mb-2 text-lg font-semibold">Location</h3>
-          <div className="p-4 rounded-md bg-gray-50">
-            <p>
-              <strong>Address:</strong> {formData.address}
-            </p>
-            <p>
-              <strong>City:</strong> {formData.city}
-            </p>
-            <p>
-              <strong>State:</strong> {formData.state}
-            </p>
-            <p>
-              <strong>ZIP Code:</strong> {formData.zipCode}
-            </p>
-          </div>
-        </div>
+    //     <div>
+    //       <h3 className="mb-2 text-lg font-semibold">Location</h3>
+    //       <div className="p-4 rounded-md bg-gray-50">
+    //         <p>
+    //           <strong>Address:</strong> {formData.address}
+    //         </p>
+    //         <p>
+    //           <strong>City:</strong> {formData.city}
+    //         </p>
+    //         <p>
+    //           <strong>State:</strong> {formData.state}
+    //         </p>
+    //         <p>
+    //           <strong>ZIP Code:</strong> {formData.zipCode}
+    //         </p>
+    //       </div>
+    //     </div>
 
-        <div className="flex justify-center">
-          <button
-            type="submit"
-            className="px-8 py-3 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
-          >
-            Submit Listing
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+    //     <div className="flex justify-center">
+    //       <button
+    //         type="submit"
+    //         className="px-8 py-3 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
+    //       >
+    //         Submit Listing
+    //       </button>
+    //     </div>
+    //   </div>
+    // </div>;
+    return (
+      <>
+        {formData && Object.keys(formData).length > 0 && (
+          <StoreDetailPage data={formData} />
+        )}
+      </>
+    );
+  };
 
   const renderCurrentStep = () => {
     switch (currentStep) {
@@ -703,6 +714,8 @@ const ListBusinessPage = () => {
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
       setCurrentStep(steps[currentIndex + 1]);
+    } else {
+      handleSubmit();
     }
   };
 
@@ -713,6 +726,38 @@ const ListBusinessPage = () => {
       setCurrentStep(steps[currentIndex - 1]);
     }
   };
+
+  // const handleSubmit = () => {
+  //   console.log(businessHours);
+  //   // Format businessHours into [day, “HH:MMAM - HH:MMPM”] or ["Closed"/"open"]
+  //   // const formattedHours = formData.businessHours.map(
+  //   //   ({ day, open, close }) => {
+  //   //     if (open && close) {
+  //   //       const fmt = (t) => {
+  //   //         const [h, m] = t.split(":").map(Number);
+  //   //         const suffix = h >= 12 ? "PM" : "AM";
+  //   //         const hh = ((h + 11) % 12) + 1;
+  //   //         return `${String(hh).padStart(2, "0")}:${String(m).padStart(
+  //   //           2,
+  //   //           "0"
+  //   //         )}${suffix}`;
+  //   //       };
+  //   //       return [day, `${fmt(open)} - ${fmt(close)}`];
+  //   //     }
+  //   //     // handle cases like “Closed” or "open"
+  //   //     return [day, open?.toLowerCase() === "open" ? "open" : "Closed"];
+  //   //   }
+  //   // );
+
+  //   const payload = {
+  //     ...formData,
+  //     businessHours: formattedHours,
+  //   };
+
+  //   // Now send payload to your backend
+  //   console.log("Submitting payload →", payload);
+  //   // e.g. api.post("/submit", payload)
+  // };
 
   return (
     <div className="pt-20">
@@ -726,10 +771,10 @@ const ListBusinessPage = () => {
       </div>
 
       <div className="container px-4 py-16 mx-auto">
-        <div className="max-w-3xl mx-auto">
+        <div className="mx-auto ">
           {renderStepIndicator()}
 
-          <div className="p-8 bg-white rounded-lg shadow-sm">
+          <div className="p-8 bg-white rounded-lg ">
             {renderCurrentStep()}
 
             <div className="flex justify-between mt-8">

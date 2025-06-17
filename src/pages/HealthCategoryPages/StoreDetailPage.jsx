@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
 import { healthCategoryData } from "../../data/HealthAndMedical/healthCategoryData";
 import { Mail, Phone } from "lucide-react";
+
 import {
   FaStar,
   FaRegStar,
@@ -11,15 +12,28 @@ import {
   FaShareAlt,
 } from "react-icons/fa";
 
-const StoreDetailPage = () => {
+const StoreDetailPage = ({ data }) => {
+  const isFormPreview = location.pathname.includes(
+    "/Reacts/list-business/form"
+  );
+
   const { slug, storeId } = useParams();
 
-  //construct the store in such by using loops or something in such a way it stores the details of targeted category data
-  const store = healthCategoryData.find((s) => String(s.id) === storeId);
+  // const store = healthCategoryData.find((s) => String(s.id) === storeId);
   const [activeTab, setActiveTab] = useState("Overview");
   const [filter, setFilter] = useState("Relevant");
-  // console.log(store);
 
+  const store = useMemo(() => {
+    if (data) {
+      return data;
+    } else {
+      return healthCategoryData.find((s) => String(s.id) === storeId);
+    }
+  }, [data, storeId]);
+
+  console.log(store);
+
+  if (!store) return <div>Loading...</div>;
   function formatAddressPretty(address) {
     return address
       .trim()
@@ -32,18 +46,20 @@ const StoreDetailPage = () => {
     // Combine date + time (e.g., "February 13, 2025 11:32 AM")
     return new Date(`${r.date} ${r.time}`).getTime();
   };
+  if (!isFormPreview) {
+    const sorted = React.useMemo(() => {
+      const copy = [...store.reviews];
+      // const copy = null;
 
-  const sorted = React.useMemo(() => {
-    const copy = [...store.reviews];
-
-    if (filter === "Latest") {
-      return copy.sort((a, b) => getTimestamp(b) - getTimestamp(a));
-    }
-    if (filter === "High to Low") {
-      return copy.sort((a, b) => b.rating - a.rating);
-    }
-    return copy; // Relevant or default else
-  }, [filter, store.reviews]);
+      if (filter === "Latest") {
+        return copy.sort((a, b) => getTimestamp(b) - getTimestamp(a));
+      }
+      if (filter === "High to Low") {
+        return copy.sort((a, b) => b.rating - a.rating);
+      }
+      return copy; // Relevant or default else
+    }, [filter, store.reviews]);
+  }
 
   const formattedLoc = formatAddressPretty(store.address);
   const iframeSrc = `https://www.google.com/maps?q=${formattedLoc}&output=embed`;
@@ -73,6 +89,9 @@ const StoreDetailPage = () => {
     "Reviews",
   ];
 
+  console.log(store);
+  // console.log(store.Banner);
+
   return (
     <>
       <div className="pt-24 bg-gray-50">
@@ -81,21 +100,25 @@ const StoreDetailPage = () => {
           {/* Background Image */}
           <div
             className="relative px-4 py-40 text-white bg-center bg-cover md:px-16"
-            style={{ backgroundImage: `url(${store.photos[0]})` }}
+            style={{
+              backgroundImage: `url(${store.photos?.[0] || store.Banner})`,
+            }}
           ></div>
 
           {/* Circle Doctor Profile Image */}
-          <div className="absolute flex flex-col items-center left-3 top-60 md:w-1/3 md:mt-0">
+          <div className="relative flex flex-col items-center left-3 -top-40 md:w-1/3 md:mt-0">
             <img
-              src={store.image}
-              alt={store.name}
+              src={store.image || store.profilePhoto}
+              alt={store.name || store.ownerName}
               className="object-cover border-4 border-white rounded-full shadow-lg w-72 h-72"
             />
           </div>
           {/* Header Info */}
-          <div className="container flex flex-col py-6 mx-auto mt-32 ml-28 md:flex-row md:items-center md:justify-between">
+          <div className="container flex flex-col py-6 mx-auto -mt-40 ml-28 md:flex-row md:items-center md:justify-between">
             <div className="ml-16 ">
-              <h2 className="text-3xl font-bold">{store.name}</h2>
+              <h2 className="text-3xl font-bold">
+                {store.name || store.ownerName}
+              </h2>
               <div className="flex items-center mt-2 space-x-2">
                 <span className="px-2 py-1 text-white bg-green-600 rounded">
                   {store.rating} ★
@@ -175,7 +198,7 @@ const StoreDetailPage = () => {
                           Summary
                         </h3>
                         <p className="w-full ml-4 text-justify">
-                          {store.summary}
+                          {store.summary || store.description}
                         </p>
                       </div>
 
@@ -207,13 +230,14 @@ const StoreDetailPage = () => {
                       </div>
 
                       {/* 5. Awards */}
-                      {store.awards.length > 0 && (
+                      {(store?.awards?.length > 0 ||
+                        store?.Certifications?.length > 0) && (
                         <div>
                           <h3 className="text-lg font-semibold text-gray-800">
                             Awards & Recognitions
                           </h3>
                           <ul className="list-disc list-inside">
-                            {store.awards.map((award, idx) => (
+                            {store?.awards?.map((award, idx) => (
                               <li className="ml-5" key={idx}>
                                 {award}
                               </li>
@@ -283,7 +307,7 @@ const StoreDetailPage = () => {
 
                       <div className="grid grid-cols-2 py-1">
                         <div className="font-medium text-gray-700">Award</div>
-                        {store.awards.length > 0 && (
+                        {store?.awards?.length > 0 && (
                           <div>
                             <ul className="p-0 m-0 list-none list-inside">
                               {store.awards.map((award, idx) => (
@@ -350,7 +374,7 @@ const StoreDetailPage = () => {
                         <div className="font-medium text-gray-700">
                           Customer Reviews
                         </div>
-                        <div>{store.reviews?.length || 0}</div>
+                        <div>{store?.reviews?.length || 0}</div>
                       </div>
 
                       <div className="grid grid-cols-2 py-3">
@@ -399,135 +423,174 @@ const StoreDetailPage = () => {
                 <section className="w-5/6 p-6 space-y-6 bg-white rounded ">
                   <h2 className="ml-10 text-2xl font-semibold ">Photos</h2>
                   <div>
-                    <div className="grid grid-cols-4 gap-2 my-4 ml-18 ">
-                      {store.photos.map((url, idx) => (
-                        <img
-                          key={idx}
-                          src={url}
-                          className="object-cover w-full h-48 rounded-md"
-                        />
-                      ))}
+                    <div className="grid grid-cols-4 gap-2 my-4 ml-18">
+                      {(store.photos?.length
+                        ? store.photos
+                        : store.gallery?.length
+                        ? store.gallery
+                        : []
+                      ).map((item, idx) => {
+                        // Convert object to URL string instantly:
+                        const src =
+                          typeof item === "string" ? item : item.preview ?? "";
+
+                        return (
+                          <img
+                            key={idx}
+                            src={src}
+                            alt={`preview-${idx}`}
+                            className="object-cover w-48 rounded-md aspect-square"
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 </section>
               )}
-
-              {activeTab === "Reviews" && (
-                <section className="w-4/5 max-w-4xl p-6 space-y-6 bg-white rounded ">
-                  <h2 className="ml-10 text-2xl font-semibold ">
-                    User Reviews
-                  </h2>
-                  {/* Filter Tabs */}
-                  <div className="flex mb-4 space-x-2 ml-18">
-                    {["Relevant", "Latest", "High to Low"].map((tab) => (
-                      <button
-                        key={tab}
-                        onClick={() => setFilter(tab)}
-                        className={`px-4 py-2 rounded ${
-                          filter === tab
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                      >
-                        {tab}
-                      </button>
-                    ))}
-                  </div>
-                  {/* Reviews List */}
-                  {sorted.map((r) => (
-                    <div
-                      key={r.id}
-                      className="pb-6 ml-24 space-y-4 border-b last:border-0"
-                    >
-                      {/* Header: avatar, name, count, date, rating */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <img
-                            src={r.image}
-                            alt={r.name}
-                            className="object-cover w-16 h-16 mr-4 bg-gray-200 rounded-full"
-                          />
-                          <div>
-                            <div className="flex items-center space-x-2">
-                              <h3 className="text-lg font-medium">{r.name}</h3>
-                              {r.reviewsCount && (
-                                <span className="text-sm text-gray-500">
-                                  {r.reviewsCount} reviews
-                                </span>
+              {!isFormPreview && (
+                <section>
+                  {activeTab === "Reviews" && (
+                    <section className="w-4/5 max-w-4xl p-6 space-y-6 bg-white rounded ">
+                      <h2 className="ml-10 text-2xl font-semibold ">
+                        User Reviews
+                      </h2>
+                      {/* Filter Tabs */}
+                      <div className="flex mb-4 space-x-2 ml-18">
+                        {["Relevant", "Latest", "High to Low"].map((tab) => (
+                          <button
+                            key={tab}
+                            onClick={() => setFilter(tab)}
+                            className={`px-4 py-2 rounded ${
+                              filter === tab
+                                ? "bg-blue-500 text-white"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                          >
+                            {tab}
+                          </button>
+                        ))}
+                      </div>
+                      {/* Reviews List */}
+                      {sorted?.map((r) => (
+                        <div
+                          key={r.id}
+                          className="pb-6 ml-24 space-y-4 border-b last:border-0"
+                        >
+                          {/* Header: avatar, name, count, date, rating */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              <img
+                                src={r.image}
+                                alt={r.name}
+                                className="object-cover w-16 h-16 mr-4 bg-gray-200 rounded-full"
+                              />
+                              <div>
+                                <div className="flex items-center space-x-2">
+                                  <h3 className="text-lg font-medium">
+                                    {r.name}
+                                  </h3>
+                                  {r.reviewsCount && (
+                                    <span className="text-sm text-gray-500">
+                                      {r.reviewsCount} reviews
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-500">
+                                  {new Date(r.date).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                            {/* Rating */}
+                            <div className="flex items-center space-x-1">
+                              {[1, 2, 3, 4, 5].map((i) =>
+                                i <= Math.round(r.rating) ? (
+                                  <FaStar
+                                    key={i}
+                                    className="w-5 h-5 text-green-500"
+                                  />
+                                ) : (
+                                  <FaRegStar
+                                    key={i}
+                                    className="w-5 h-5 text-gray-300"
+                                  />
+                                )
                               )}
                             </div>
-                            <p className="text-sm text-gray-500">
-                              {new Date(r.date).toLocaleDateString()}
-                            </p>
+                          </div>
+
+                          {/* Tags (if any) */}
+                          {r.tags?.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {r.tags.map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="flex items-center px-3 py-1 space-x-1 text-sm text-gray-700 bg-gray-100 rounded-full"
+                                >
+                                  <FaThumbsUp /> <span>{tag}</span>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Review Text */}
+                          <p className="text-gray-700">{r.text}</p>
+
+                          {/* Actions */}
+                          <div className="flex mt-4 space-x-6 text-gray-600">
+                            <button className="flex items-center space-x-1 hover:text-blue-600">
+                              <FaThumbsUp /> <span>Helpful</span>
+                            </button>
+                            <button className="flex items-center space-x-1 hover:text-gray-800">
+                              <FaCommentAlt /> <span>Comment</span>
+                            </button>
+                            <button className="flex items-center space-x-1 hover:text-gray-800">
+                              <FaShareAlt /> <span>Share</span>
+                            </button>
                           </div>
                         </div>
-                        {/* Rating */}
-                        <div className="flex items-center space-x-1">
-                          {[1, 2, 3, 4, 5].map((i) =>
-                            i <= Math.round(r.rating) ? (
-                              <FaStar
-                                key={i}
-                                className="w-5 h-5 text-green-500"
-                              />
-                            ) : (
-                              <FaRegStar
-                                key={i}
-                                className="w-5 h-5 text-gray-300"
-                              />
-                            )
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Tags (if any) */}
-                      {r.tags?.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {r.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="flex items-center px-3 py-1 space-x-1 text-sm text-gray-700 bg-gray-100 rounded-full"
-                            >
-                              <FaThumbsUp /> <span>{tag}</span>
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Review Text */}
-                      <p className="text-gray-700">{r.text}</p>
-
-                      {/* Actions */}
-                      <div className="flex mt-4 space-x-6 text-gray-600">
-                        <button className="flex items-center space-x-1 hover:text-blue-600">
-                          <FaThumbsUp /> <span>Helpful</span>
-                        </button>
-                        <button className="flex items-center space-x-1 hover:text-gray-800">
-                          <FaCommentAlt /> <span>Comment</span>
-                        </button>
-                        <button className="flex items-center space-x-1 hover:text-gray-800">
-                          <FaShareAlt /> <span>Share</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                      ))}
+                    </section>
+                  )}
                 </section>
               )}
             </div>
           </section>
           {/* Store detail section  */}
           <section className="container w-1/3 max-w-4xl p-6 pt-24 mx-auto bg-white rounded-lg ">
-            {/* Business Hours */}
-            <div className="mb-6">
-              <h3 className="mb-2 text-lg font-semibold text-red-500">
+            {/* Business Hours     */}
+            {/* important code  */}
+            <div className="p-1 mb-4 bg-white rounded-md ">
+              <h2 className="mb-4 text-lg font-semibold text-red-600">
                 Business Hours
-              </h3>
-              <ul className="space-y-1 text-sm text-gray-700">
-                {store.businessHours.map(([day, time]) => (
-                  <li key={day} className="flex justify-between pb-1 border-b">
-                    <span>{day}</span>
-                    <span>{time}</span>
-                  </li>
-                ))}
+              </h2>
+              <ul className="text-sm text-gray-700 divide-y divide-gray-200">
+                {store.businessHours.map(({ day, open, close }) => {
+                  let timeDisplay = "Closed";
+
+                  if (open && close) {
+                    const formatTime = (timeStr) => {
+                      const [hour, minute] = timeStr.split(":");
+                      const h = parseInt(hour);
+                      const ampm = h >= 12 ? "PM" : "AM";
+                      const formattedHour = h % 12 || 12;
+                      return `${String(formattedHour).padStart(
+                        2,
+                        "0"
+                      )}:${minute}${ampm}`;
+                    };
+
+                    timeDisplay = `${formatTime(open)} - ${formatTime(close)}`;
+                  } else if (open || close) {
+                    timeDisplay = "Open";
+                  }
+
+                  return (
+                    <li key={day} className="flex justify-between py-1">
+                      <span className="capitalize">{day}</span>
+                      <span>{timeDisplay}</span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 

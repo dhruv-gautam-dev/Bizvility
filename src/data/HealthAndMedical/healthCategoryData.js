@@ -45,15 +45,15 @@ export const healthCategoryData = [
       "https://www.hawaiipacifichealth.org/media/19340/hidden-nutritional-pitfalls-of-health-foods-v2-web.jpg",
       "https://www.cvshealth.com/content/dam/enterprise/cvs-enterprise/images/ingestion/2019-17/cvs-health-discover-cvs-press-release-image-1_0.png"
     ],
-    businessHours:[
-            ['Monday', '09:00AM - 05:00PM'],
-            ['Tuesday', '09:00AM - 05:00PM'],
-            ['Wednesday', '09:00AM - 05:00PM'],
-            ['Thursday', '09:00AM - 05:00PM'],
-            ['Friday', '09:00AM - 05:00PM'],
-            ['Saturday', 'Closed'],
-            ['Sunday', 'Closed']
-          ],
+    businessHours: [
+  { day: "Monday", open: "09:00", close: "17:00" },        // 09:00AM - 05:00PM
+  { day: "Tuesday", open: "10:30", close: "18:45" },       // 10:30AM - 06:45PM
+  { day: "Wednesday", open: "", close: "" },               // Closed
+  { day: "Thursday", open: "08:15", close: "15:00" },      // 08:15AM - 03:00PM
+  { day: "Friday", open: "09:00", close: "17:00" },        // 09:00AM - 05:00PM
+  { day: "Saturday", open: "10:00", close: "" },           // Open
+  { day: "Sunday", open: "", close: "" }                   // Closed
+],
     reviews :[
               {
                 id: 1,
@@ -409,15 +409,15 @@ export const healthCategoryData = [
       "https://www.hawaiipacifichealth.org/media/19340/hidden-nutritional-pitfalls-of-health-foods-v2-web.jpg",
       "https://www.hawaiipacifichealth.org/media/19340/hidden-nutritional-pitfalls-of-health-foods-v2-web.jpg"
     ],
-    businessHours:[
-            ['Monday', '09:00AM - 05:00PM'],
-            ['Tuesday', '09:00AM - 05:00PM'],
-            ['Wednesday', '09:00AM - 05:00PM'],
-            ['Thursday', '09:00AM - 05:00PM'],
-            ['Friday', '09:00AM - 05:00PM'],
-            ['Saturday', 'Closed'],
-            ['Sunday', 'open']
-          ],
+    businessHours: [
+    { day: "Monday",    open: "09:00", close: "17:00" },
+    { day: "Tuesday",   open: "10:30", close: "18:45" },
+    { day: "Wednesday", open: "",      close: "" },       // Closed
+    { day: "Thursday",  open: "08:15", close: "15:00" },
+    { day: "Friday",    open: "09:00", close: "17:00" },
+    { day: "Saturday",  open: "open",  close: "" },       // Interpreted as "open"
+    { day: "Sunday",    open: "",      close: "" },       // Closed
+  ],
     reviews :[
               {
                 id: 1,

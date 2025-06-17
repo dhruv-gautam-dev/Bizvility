@@ -1,14 +1,13 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
 import CategoryData from "../data/Categories";
-console.log(CategoryData);
 import { MapPin, Phone, Globe, Clock, Star } from "lucide-react";
 import { healthCategoryData } from "../data/HealthAndMedical/healthCategoryData";
 
-console.log(healthCategoryData);
+// console.log(healthCategoryData);
 
 const CategoryDetailPage = () => {
-  const { slug } = useParams();
+  const { slug, storeId } = useParams();
 
   //construct the category in such by using loops or something in such a way it stores the details of targeted category data
   const category = CategoryData.find((cat) => cat.slug === slug);
@@ -53,10 +52,12 @@ const CategoryDetailPage = () => {
                   <Link
                     to={`/categories/${slug}/store/${biz.id}`}
                     key={biz.id}
+                    // state={{ store: biz }}
                     className="block gap-3 p-4 pb-6 border-b border-gray-200 rounded-sm hover:bg-gray-50 last:border-0 last:pb-0"
                   >
                     <div
                       key={biz.id}
+                      // store={store}
                       className="pb-6 border-b border-gray-200 rounded-lg last:border-0 last:pb-0"
                     >
                       <div className="flex items-start">
