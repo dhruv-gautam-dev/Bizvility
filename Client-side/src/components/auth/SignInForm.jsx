@@ -24,7 +24,7 @@ const SignInForm = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5500/bizivility/users/login",
+        "http://localhost:5000/api/auth/login",
         { email, password },
         {
           headers: {
@@ -34,15 +34,15 @@ const SignInForm = () => {
           timeout: 10000, // Increased timeout to 10s
         }
       );
+      console.log(response);
 
       // Display backend success message
       toast.success(response.data.message || "Login successful");
-
       // Store JWT token in localStorage
-      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("token", response.data.accessToken);
 
       // Log user details for debugging
-      console.log("Sign in successful:", response.data.user);
+      console.log("Sign in successful:", response.data);
 
       // Reset form
       setFormData({ email: "", password: "", rememberMe: false });

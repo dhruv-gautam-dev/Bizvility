@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import {
   Phone,
   Mail,
@@ -10,12 +11,8 @@ import {
   UserIcon,
   Badge,
   CalendarDays,
-  Video,
   VideoIcon,
-  Instagram,
   Briefcase,
-  Hash,
-  Users,
   Link2,
   UserCheck,
   Key,
@@ -74,6 +71,61 @@ const ListBusinessPage = () => {
     // socialMedia: [{ fbUrl: "" }, { instaUrl: "" }],
   });
   console.log(formData);
+
+  const handleSubmit = async () => {
+    try {
+      const form = new FormData();
+
+      // Append all fields except arrays/objects that need special handling
+      Object.entries(formData).forEach(([key, value]) => {
+        if (
+          key === "gallery" ||
+          key === "Certifications" ||
+          key === "businessHours" ||
+          key === "socialMedia"
+        ) {
+          // Skip, handle below
+          return;
+        }
+        if (key === "profilePhoto" || key === "Banner") {
+          // These are preview URLs, not files, so skip
+          return;
+        }
+        form.append(key, value);
+      });
+
+      // Append gallery images
+      formData.gallery.forEach((fileObj, idx) => {
+        if (fileObj.file) {
+          form.append("gallery", fileObj.file);
+        }
+      });
+
+      // Append certifications
+      formData.Certifications.forEach((fileObj, idx) => {
+        if (fileObj.file) {
+          form.append("Certifications", fileObj.file);
+        }
+      });
+
+      // Append business hours as JSON
+      form.append("businessHours", JSON.stringify(formData.businessHours));
+
+      // Append social media as JSON
+      form.append("socialMedia", JSON.stringify(formData.socialMedia));
+
+      // Example endpoint, replace with your backend URL
+      await axios.post("http://localhost:5000/api/auth/register", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      alert("Business listed successfully!");
+      navigate("/success"); // or wherever you want to redirect
+    } catch (error) {
+      alert("Failed to submit. Please try again.");
+      console.error(error);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -181,7 +233,7 @@ const ListBusinessPage = () => {
       </div>
     );
   };
-
+  //////////////////////// handle the onclick funtinion    onclicok on submit ubton n handklsjfoighiy
   const renderBasicInfoStep = () => (
     <div>
       <h2 className="mb-6 text-2xl font-bold">Basic Information</h2>

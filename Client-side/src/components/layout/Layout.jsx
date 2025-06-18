@@ -6,6 +6,7 @@ import Footer from "./Footer";
 const Layout = () => {
   const [scrolled, setScrolled] = useState(false);
   const { pathname } = useLocation();
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,7 +24,7 @@ const Layout = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar scrolled={scrolled} />
+      <Navbar user={user} scrolled={scrolled} />
       <div className="flex-grow">
         <Outlet />
       </div>
