@@ -8,9 +8,21 @@ import {
   Globe,
   Camera,
   UserIcon,
+  Badge,
+  CalendarDays,
+  Video,
+  VideoIcon,
+  Instagram,
+  Briefcase,
+  Hash,
+  Users,
+  Link2,
+  UserCheck,
+  Key,
 } from "lucide-react";
-import { data, useNavigate } from "react-router-dom";
+import { data, Link, useNavigate } from "react-router-dom";
 import StoreDetailPage from "./HealthCategoryPages/StoreDetailPage";
+import { FaFacebook, FaInstagram } from "react-icons/fa";
 
 const ListBusinessPage = () => {
   const [currentStep, setCurrentStep] = useState("basic");
@@ -19,9 +31,16 @@ const ListBusinessPage = () => {
   const [formData, setFormData] = useState({
     // Basic Info
     ownerName: "",
+    experience: "",
     businessName: "",
     category: "",
     description: "",
+    specialty: "",
+    yearofEstablishment: "",
+    appointmentLink: "",
+    affiliation: "",
+    registrationNumber: "",
+
     // Contact
     email: "",
     phone: "",
@@ -42,34 +61,41 @@ const ListBusinessPage = () => {
       { day: "Sunday", open: "", close: "" },
     ],
 
-    // mondayOpen: "",
-    // mondayClose: "",
-    // tuesdayOpen: "",
-    // tuesdayClose: "",
-    // wednesdayOpen: "",
-    // wednesdayClose: "",
-    // thursdayOpen: "",
-    // thursdayClose: "",
-    // fridayOpen: "",
-    // fridayClose: "",
-    // saturdayOpen: "",
-    // saturdayClose: "",
-    // sundayOpen: "",
-    // sundayClose: "",
     // Media
     gallery: [],
     profilePhoto: null,
     Banner: null,
     Certifications: [],
+    videoUrl: "",
+    socialMedia: {
+      facebook: "",
+      instagram: "",
+    },
+    // socialMedia: [{ fbUrl: "" }, { instaUrl: "" }],
   });
   console.log(formData);
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    if (name === "facebook" || name === "instagram") {
+      // Handle nested socialMedia object
+      setFormData((prev) => ({
+        ...prev,
+        socialMedia: {
+          ...prev.socialMedia,
+          [name]: value,
+        },
+      }));
+    } else {
+      // Handle all other flat fields
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
+
   const handleBusinessHourChange = (index, field, value) => {
     setFormData((prev) => {
       const updatedHours = [...prev.businessHours];
@@ -182,6 +208,26 @@ const ListBusinessPage = () => {
         </div>
         <div>
           <label
+            htmlFor="experience"
+            className="block mb-1 text-sm font-medium text-gray-700"
+          >
+            Experience
+          </label>
+          <div className="relative">
+            <Briefcase className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+            <input
+              type="text"
+              id="experience"
+              name="experience"
+              required
+              className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.experience}
+              onChange={handleInputChange}
+            />
+          </div>
+        </div>
+        <div>
+          <label
             htmlFor="businessName"
             className="block mb-1 text-sm font-medium text-gray-700"
           >
@@ -223,6 +269,111 @@ const ListBusinessPage = () => {
             <option value="restaurant">Restaurant</option>
             <option value="Beauty & Spa">Beauty & Spa</option>
           </select>
+          {formData.category === "healthcare" && (
+            <div>
+              <div className="mt-3">
+                <label
+                  htmlFor="appointmentLink"
+                  className="block mb-1 text-sm font-medium text-gray-700"
+                >
+                  Appointment Link
+                </label>
+                <div className="relative">
+                  <Link2 className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+                  <input
+                    type="text"
+                    id="appointmentLink"
+                    name="appointmentLink"
+                    required
+                    className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={formData.appointmentLink}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              <div className="mt-3">
+                <label
+                  htmlFor="affiliationLink"
+                  className="block mb-1 text-sm font-medium text-gray-700"
+                >
+                  Affiliation
+                </label>
+                <div className="relative">
+                  <UserCheck className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+                  <input
+                    type="text"
+                    id="affiliation"
+                    name="affiliation"
+                    required
+                    className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={formData.affiliation}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              <div className="mt-3">
+                <label
+                  htmlFor="registrationNumber"
+                  className="block mb-1 text-sm font-medium text-gray-700"
+                >
+                  Registration Number
+                </label>
+                <div className="relative">
+                  <Key className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+                  <input
+                    type="text"
+                    id="registrationNumber"
+                    name="registrationNumber"
+                    required
+                    className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={formData.registrationNumber}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label
+            htmlFor="specialty"
+            className="block mb-1 text-sm font-medium text-gray-700"
+          >
+            Specialty *
+          </label>
+          <div className="relative">
+            <Badge className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+            <input
+              type="text"
+              id="specialty"
+              name="specialty"
+              required
+              className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.specialty}
+              onChange={handleInputChange}
+            />
+          </div>
+        </div>
+        <div>
+          <label
+            htmlFor="yearofEstablishment"
+            className="block mb-1 text-sm font-medium text-gray-700"
+          >
+            Year of Establishment *
+          </label>
+          <div className="relative">
+            <CalendarDays className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+            <input
+              type="text"
+              id="yearofEstablishment"
+              name="yearofEstablishment"
+              required
+              className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.yearofEstablishment}
+              onChange={handleInputChange}
+            />
+          </div>
         </div>
 
         <div>
@@ -596,7 +747,6 @@ const ListBusinessPage = () => {
             </div>
           </div>
         </div>
-
         {formData.gallery.length > 0 && (
           <div>
             <h3 className="mb-2 text-sm font-medium text-gray-700">
@@ -615,6 +765,72 @@ const ListBusinessPage = () => {
             </div>
           </div>
         )}
+
+        {/* video URL */}
+        <div>
+          <label
+            htmlFor="videoUrl"
+            className="block mb-1 text-sm font-medium text-gray-700"
+          >
+            Video Url
+          </label>
+          <div className="relative">
+            <VideoIcon className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+            <input
+              type="text"
+              id="videoUrl"
+              name="videoUrl"
+              required
+              className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.videoUrl}
+              onChange={handleInputChange}
+            />
+          </div>
+        </div>
+
+        {/* Facebook */}
+        <div>
+          <label
+            htmlFor="facebook"
+            className="block mb-1 text-sm font-medium text-gray-700"
+          >
+            Facebook
+          </label>
+          <div className="relative">
+            <FaFacebook className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+            <input
+              type="text"
+              id="facebook"
+              name="facebook"
+              required
+              className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.socialMedia.facebook}
+              onChange={handleInputChange}
+            />
+          </div>
+        </div>
+
+        {/* instagram */}
+        <div>
+          <label
+            htmlFor="instagram"
+            className="block mb-1 text-sm font-medium text-gray-700"
+          >
+            instagram
+          </label>
+          <div className="relative">
+            <FaFacebook className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+            <input
+              type="text"
+              id="instagram"
+              name="instagram"
+              required
+              className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.socialMedia.instagram}
+              onChange={handleInputChange}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

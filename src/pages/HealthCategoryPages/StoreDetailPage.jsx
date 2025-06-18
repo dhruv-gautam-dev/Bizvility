@@ -121,7 +121,7 @@ const StoreDetailPage = ({ data }) => {
               </h2>
               <div className="flex items-center mt-2 space-x-2">
                 <span className="px-2 py-1 text-white bg-green-600 rounded">
-                  {store.rating} ★
+                  {store.rating || 0} ★
                 </span>
                 <span className="text-gray-600">
                   {store.reviewsCount} Ratings
@@ -137,8 +137,10 @@ const StoreDetailPage = ({ data }) => {
                 <MapPin className="w-5 h-5" />
                 <span>{store.address}</span>
                 <span>• Open until {store.openUntil}</span>
-                <span>• {store.years} Years in Business</span>
-                <span>• Membership from ₹{store.price}</span>
+                <span>
+                  • {store.years || store.experience} Years in Business
+                </span>
+                <span>• Membership from ₹{store.price || "0"}</span>
               </div>
             </div>
             <div className="flex mt-4 space-x-2 md:mt-0">
@@ -215,7 +217,7 @@ const StoreDetailPage = ({ data }) => {
                         <h3 className="text-lg font-semibold text-gray-800">
                           Year of Establishment
                         </h3>
-                        <p className="ml-4">{store.years}</p>
+                        <p className="ml-4">{store.yearofEstablishment}</p>
                       </div>
 
                       {/* 4. Experience */}
@@ -275,7 +277,11 @@ const StoreDetailPage = ({ data }) => {
                         <div className="font-medium text-gray-700">
                           Register Number
                         </div>
-                        <div>{store.registerNumber || "Not Available"}</div>
+                        <div>
+                          {store.registerNumber ||
+                            store.registrationNumber ||
+                            "Not Available"}
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 py-3">
@@ -355,9 +361,9 @@ const StoreDetailPage = ({ data }) => {
                           Video URL
                         </div>
                         <div>
-                          {store.videoURL ? (
+                          {store.videoUrl ? (
                             <a
-                              href={store.videoURL}
+                              href={store.videoUrl}
                               className="text-blue-600 underline"
                               target="_blank"
                               rel="noopener noreferrer"
@@ -382,7 +388,8 @@ const StoreDetailPage = ({ data }) => {
                           Social Media
                         </div>
                         <div className="flex space-x-4">
-                          {store.socialMedia?.facebook && (
+                          {(store.socialMedia?.facebook ||
+                            store.socialMedia.fbUrl) && (
                             <a
                               href={store.socialMedia.facebook}
                               target="_blank"
@@ -652,10 +659,6 @@ const StoreDetailPage = ({ data }) => {
                 </div>
 
                 <div>
-                  <strong>Walkin:</strong> {store.walkin || "Not Available"}
-                </div>
-
-                <div>
                   <strong>Appointment Link:</strong>{" "}
                   {store.appointmentLink ? (
                     <a
@@ -686,8 +689,8 @@ const StoreDetailPage = ({ data }) => {
                 </div>
 
                 <div>
-                  <strong>Speciality:</strong>{" "}
-                  {store.speciality || "Not Available"}
+                  <strong>Specialty:</strong>{" "}
+                  {store.specialty || "Not Available"}
                 </div>
 
                 <div>
