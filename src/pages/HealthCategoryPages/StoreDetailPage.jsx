@@ -31,6 +31,22 @@ const StoreDetailPage = ({ data }) => {
     }
   }, [data, storeId]);
 
+  const reviews = useMemo(() => {
+    if (!store || !store.reviews) return [];
+    const reviewsCopy = [...store.reviews];
+    switch (filter) {
+      case "Latest":
+        return reviewsCopy.sort((a, b) => new Date(b.date) - new Date(a.date));
+      case "High to Low":
+        return reviewsCopy.sort((a, b) => b.rating - a.rating);
+      case "Relevant":
+      default:
+        return reviewsCopy.sort(
+          (a, b) => (b.likes || 0) + b.rating - ((a.likes || 0) + a.rating) // custom relevance
+        );
+    }
+  }, [store, filter]);
+
   console.log(store);
 
   if (!store) return <div>Loading...</div>;
@@ -478,7 +494,7 @@ const StoreDetailPage = ({ data }) => {
                         ))}
                       </div>
                       {/* Reviews List */}
-                      {sorted?.map((r) => (
+                      {reviews?.map((r) => (
                         <div
                           key={r.id}
                           className="pb-6 ml-24 space-y-4 border-b last:border-0"
