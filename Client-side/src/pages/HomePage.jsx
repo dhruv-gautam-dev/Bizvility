@@ -7,9 +7,6 @@ import Testimonials from "../components/sections/Testimonials.jsx";
 import CallToAction from "../components/sections/CallToAction.jsx";
 
 const HomePage = () => {
-  // const [user, setUser] = useState(null);
-  // `user` is null before login, becomes an object with e.g. { name, avatarUrl } after login
-
   return (
     <main>
       <Hero />

@@ -9,7 +9,7 @@ function SearchForm() {
 
   return (
     <form
-      className="flex items-center justify-between w-4/5 px-2 py-2 mx-auto bg-white rounded-lg shadow-md"
+      className="flex items-center justify-between w-4/5 px-2 py-2 mx-auto bg-white rounded-lg shadow-sm"
       onSubmit={(e) => e.preventDefault()}
     >
       <div className="flex items-center flex-1 mr-2">

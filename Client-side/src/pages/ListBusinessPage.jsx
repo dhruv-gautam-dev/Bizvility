@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { data, Link, useNavigate } from "react-router-dom";
 import StoreDetailPage from "./HealthCategoryPages/StoreDetailPage";
-import { FaFacebook, FaInstagram } from "react-icons/fa";
+import { FaFacebook } from "react-icons/fa";
 
 const ListBusinessPage = () => {
   const [currentStep, setCurrentStep] = useState("basic");
@@ -49,13 +49,13 @@ const ListBusinessPage = () => {
     zipCode: "",
     // Hours  // it should inside an array
     businessHours: [
-      { day: "Monday", open: "", close: "" },
-      { day: "Tuesday", open: "", close: "" },
-      { day: "Wednesday", open: "", close: "" },
-      { day: "Thursday", open: "", close: "" },
-      { day: "Friday", open: "", close: "" },
-      { day: "Saturday", open: "", close: "" },
-      { day: "Sunday", open: "", close: "" },
+      { day: "Monday", open: "09:00", close: "18:00" },
+      { day: "Tuesday", open: "09:00", close: "18:00" },
+      { day: "Wednesday", open: "09:00", close: "18:00" },
+      { day: "Thursday", open: "09:00", close: "18:00" },
+      { day: "Friday", open: "09:00", close: "18:00" },
+      { day: "Saturday", open: "09:00", close: "18:00" },
+      { day: "Sunday", open: "09:00", close: "18:00" },
     ],
 
     // Media
@@ -68,7 +68,6 @@ const ListBusinessPage = () => {
       facebook: "",
       instagram: "",
     },
-    // socialMedia: [{ fbUrl: "" }, { instaUrl: "" }],
   });
   console.log(formData);
 
@@ -233,7 +232,6 @@ const ListBusinessPage = () => {
       </div>
     );
   };
-  //////////////////////// handle the onclick funtinion    onclicok on submit ubton n handklsjfoighiy
   const renderBasicInfoStep = () => (
     <div>
       <h2 className="mb-6 text-2xl font-bold">Basic Information</h2>

@@ -15,6 +15,7 @@ const Navbar = ({ scrolled, user }) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const navigate = useNavigate();
+
   // console.log(localStorage);
   user = localStorage.token;
   console.log(user);
@@ -22,10 +23,11 @@ const Navbar = ({ scrolled, user }) => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     // Optionally call API to log out on server
-    navigate("/signin");
+    navigate("//");
     console.log(localStorage);
     window.location.reload(); // reset app state
   };
+
   useEffect(() => {
     const onClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -56,7 +58,6 @@ const Navbar = ({ scrolled, user }) => {
           </Link>
 
           {/* Desktop Navigation */}
-
           <nav className="items-center hidden space-x-8 lg:flex">
             {!isHome && <SearchForm />}
             <Link
@@ -116,7 +117,7 @@ const Navbar = ({ scrolled, user }) => {
                   {open && (
                     <div
                       className={`
-                absolute right-0 mt-2 w-48 rounded-md
+                absolute right-0 mt-3 w-48 rounded-md
                 bg-white/30 backdrop-blur-sm
                 border border-white/40 shadow-lg
               `}
