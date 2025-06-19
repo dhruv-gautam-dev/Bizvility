@@ -23,8 +23,7 @@ const EmailVerification = () => {
 
     try {
       const response = await axios.post(
-        // 'http://localhost:5000/bizivility/users/verify-otp',
-        `http://localhost:5000/api/auth/verify-email-otp`, // Correct API route for OTP verification
+        `http://localhost:5000/api/auth/verify-forgot-otp`, // Correct API route for OTP verification
         { email, otp: verificationCode },
         {
           headers: {
@@ -35,7 +34,10 @@ const EmailVerification = () => {
 
       toast.success(response.data.message || "Email verified successfully!");
       setTimeout(() => {
-        navigate("/signin"); // Redirect to sign-in page after successful verification
+        console.log(email);
+        navigate("/forgot-password", {
+          state: { email },
+        }); // Redirect to sign-in page after successful verification
       }, 2000);
     } catch (error) {
       toast.error(
@@ -45,36 +47,77 @@ const EmailVerification = () => {
   };
 
   // Resend OTP
-  const handleResendCode = async () => {
-    setIsResending(true);
+  const handleResendCode = async (e) => {
+    e.preventDefault();
+
+    // const { email, password } = formData;
+
     try {
+      console.log(email);
       const response = await axios.post(
-        "http://localhost:5500/bizivility/users/generate-otp", // Correct API route for generating OTP
-        { email },
+        "http://localhost:5000/api/auth/verifyForgotOTP",
+        { email: email },
         {
           headers: {
             "Content-Type": "application/json",
+            Accept: "application/json",
           },
+          timeout: 10000, // Increased timeout to 10s
         }
       );
-
-      toast.success(response.data.message || "Verification code resent");
+      console.log(response);
     } catch (error) {
-      if (error.code === "ECONNABORTED") {
-        toast.error("Request timed out. Please try again.");
-      } else if (!error.response) {
-        toast.error("Network error. Please check your connection.");
-      } else {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Failed to resend code.";
-        toast.error(errorMessage);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Something went wrong.";
+      console.log(errorMessage);
+
+      if (errorMessage === "User already verified") {
+        setIsEmailVerified(false);
+        console.log(formData);
+        try {
+          navigate("/forgot-password");
+          console.log(response);
+        } catch (error) {}
+        return;
       }
-    } finally {
-      setIsResending(false);
     }
+
+    navigate("/verify-email", {
+      state: { email },
+    });
   };
+  // const handleResendCode = async () => {
+  //   setIsResending(true);
+  //   try {
+  //     const response = await axios.post(
+  //       "http://localhost:5500/bizivility/users/generate-otp", // Correct API route for generating OTP
+  //       { email },
+  //       {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
+
+  //     toast.success(response.data.message || "Verification code resent");
+  //   } catch (error) {
+  //     if (error.code === "ECONNABORTED") {
+  //       toast.error("Request timed out. Please try again.");
+  //     } else if (!error.response) {
+  //       toast.error("Network error. Please check your connection.");
+  //     } else {
+  //       const errorMessage =
+  //         error.response?.data?.message ||
+  //         error.response?.data?.error ||
+  //         "Failed to resend code.";
+  //       toast.error(errorMessage);
+  //     }
+  //   } finally {
+  //     setIsResending(false);
+  //   }
+  // };
 
   return (
     <div className="flex flex-col justify-center min-h-screen py-12 bg-gray-50 sm:px-6 lg:px-8">
@@ -123,7 +166,7 @@ const EmailVerification = () => {
                 type="submit"
                 className="flex items-center justify-center w-full gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Verify Email
+                Verify OTP
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

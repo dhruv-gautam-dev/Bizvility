@@ -192,27 +192,61 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   });
 });
 
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  if (!email || !newPassword) {
+    res.status(400);
+    throw new Error('Email and new password are required');
+  }
+
+  if (newPassword.length < 12) {
+    res.status(400);
+    throw new Error('Password must be at least 12 characters long');
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  if (!user.isResetOTPVerified) {
+    res.status(403);
+    throw new Error('OTP not verified. Cannot reset password.');
+  }
+
+  // ✅ Encrypt the password manually
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+  user.password = hashedPassword;
+  user.isResetOTPVerified = undefined;
+  user.resetPasswordOTP = undefined;
+  user.resetPasswordExpires = undefined;
+
+  await user.save();
+
+  res.json({ message: 'Password has been updated successfully' });
+});
+
+
+
 // @desc    Verify OTP and reset password
 // @route   POST /api/auth/verify-forgot-otp
 // /api/auth/verify-forgot-otp
 export const verifyForgotOTP = asyncHandler(async (req, res) => {
-  const { resetToken, otp, newPassword } = req.body;
+  const { email, otp } = req.body;
 
-  if (!resetToken || !otp || !newPassword) {
+  if (!email || !otp) {
     res.status(400);
-    throw new Error('All fields (resetToken, otp, newPassword) are required');
+    throw new Error('Email and OTP are required');
   }
 
-  // 🔐 Verify JWT and extract user ID
-  let decoded;
-  try {
-    decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
-  } catch (err) {
-    res.status(401);
-    throw new Error('Invalid or expired reset token');
-  }
+  const user = await User.findOne({ email });
 
-  const user = await User.findById(decoded.id);
   if (!user) {
     res.status(404);
     throw new Error('User not found');
@@ -227,13 +261,11 @@ export const verifyForgotOTP = asyncHandler(async (req, res) => {
     throw new Error('Invalid or expired OTP');
   }
 
-  user.password = newPassword;
-  user.resetPasswordOTP = undefined;
-  user.resetPasswordExpires = undefined;
-
+  // ✅ Mark OTP as verified (optional flag)
+  user.isResetOTPVerified = true;
   await user.save();
 
-  res.json({ message: 'Password reset successful' });
+  res.json({ message: 'OTP verified. You may now reset your password.' });
 });
 
 export const logout = asyncHandler(async (req, res) => {

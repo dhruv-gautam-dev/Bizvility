@@ -7,7 +7,8 @@ import {
   forgotPassword,
   verifyEmailOTP,
   verifyForgotOTP,
-  resendOTP
+  resendOTP,
+  resetPassword
 } from '../controllers/authController.js';
 import { protect } from '../middlewares/auth.js';
 
@@ -25,7 +26,7 @@ router.post('/forgot-password', forgotPassword);
 router.post('/verify-email-otp', verifyEmailOTP);
 router.post('/verify-forgot-otp', verifyForgotOTP);
 router.post('/resend-otp', resendOTP);
-
+router.post('/reset-password', resetPassword);
 // @desc    Get current user profile
 // @route   GET /api/auth/me
 // @access  Private
