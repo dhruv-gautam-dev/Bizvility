@@ -1,0 +1,19 @@
+import express from 'express';
+import { createBusiness, updateBusiness } from '../controllers/businessController.js';
+import upload from '../middlewares/upload.js';
+import { protect } from '../middlewares/auth.js';
+
+const router = express.Router();
+
+// Correct fields config (certificate is single)
+const mediaFields = upload.fields([
+  { name: 'profileImage', maxCount: 1 },
+  { name: 'coverImage', maxCount: 1 },
+  { name: 'certificateImages', maxCount: 5 }, // ✅ fixed field name
+  { name: 'galleryImages', maxCount: 10 }
+]);
+
+router.post('/business', protect, mediaFields, createBusiness);
+router.put('/business/:id', protect, mediaFields, updateBusiness);
+
+export default router;

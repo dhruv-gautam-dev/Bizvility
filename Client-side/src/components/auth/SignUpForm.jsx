@@ -17,10 +17,6 @@ const SignUpForm = () => {
     fullName: "",
     email: "",
     phone: "",
-    city: "",
-    state: "",
-    pincode: "",
-    country: "",
     password: "",
     confirmPassword: "",
     acceptTerms: false,
@@ -47,11 +43,11 @@ const SignUpForm = () => {
       toast.error("Passwords do not match.");
       return;
     }
-
+    const emailToVerify = formData.email;
     try {
       // Step 1: Register the user
       const response = await axios.post(
-        "http://localhost:5500/bizivility/users/register",
+        "http://localhost:5000/api/auth/register",
         formData,
         {
           headers: {
@@ -61,7 +57,7 @@ const SignUpForm = () => {
           timeout: 5000,
         }
       );
-
+      // const emailToVerify = formData.email;
       toast.success(
         response.data.message ||
           "Registration successful. You can now verify your account."
@@ -69,39 +65,40 @@ const SignUpForm = () => {
 
       // Store temporary token
       localStorage.setItem("token", response.data.token);
+      localStorage.setItem("email", emailToVerify);
+      console.log(localStorage);
       // console.log(token)
 
       // ✅ Step 2: Generate OTP using the user's email
-      await axios.post(
-        "http://localhost:5500/bizivility/users/generate-otp",
-        { email: formData.email },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            // 'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          timeout: 5000,
-        }
-      );
+      // await axios.post(
+      //   "http://localhost:5000/api/auth/resend-otp",
+      //   { email: emailToVerify },
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       // 'Authorization': `Bearer ${localStorage.getItem('token')}`
+      //     },
+      //     timeout: 5000,
+      //   }
+      // );
 
-      toast.success("OTP has been sent to your email.");
+      // toast.success("OTP has been sent to your email.");
 
       // Step 3: Clear form and navigate to verification page
       setFormData({
         fullName: "",
         email: "",
-        phone: "",
-        city: "",
-        state: "",
-        pincode: "",
         userName: "",
         password: "",
         confirmPassword: "",
         acceptTerms: false,
       });
       console.log(formData);
+      console.log("Navigating with email:", emailToVerify);
+      localStorage.setItem("email", emailToVerify);
+      console.log(localStorage);
 
-      navigate("/verify-email", { state: { email: formData.email } });
+      navigate("/verify-email", { state: { email: emailToVerify } });
     } catch (error) {
       if (error.code === "ECONNABORTED") {
         toast.error("Request timed out. Please try again.");
@@ -109,6 +106,25 @@ const SignUpForm = () => {
         toast.error(
           "Network error. Please check your connection or backend server."
         );
+      } else if (
+        error.response?.data?.message ==
+        "You already registered. Please verify your email or request a new OTP"
+      ) {
+        // navigate("/verify-email", { state: { email: emailToVerify } });
+        await axios.post(
+          "http://localhost:5000/api/auth/resend-otp",
+          { email: emailToVerify },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              // 'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            timeout: 5000,
+          }
+        );
+
+        toast.success("OTP has been sent to your email.");
+        navigate("/verify-email");
       } else {
         toast.error(
           error.response?.data?.message ||
@@ -132,7 +148,7 @@ const SignUpForm = () => {
         <p className="mt-2 text-sm text-center text-gray-600">
           Already have an account?{" "}
           <Link
-            to="/signin"
+            to="/verify-email"
             className="font-medium text-blue-600 hover:text-blue-500"
           >
             Sign in
@@ -147,12 +163,6 @@ const SignUpForm = () => {
               {
                 id: "fullName",
                 label: "Full Name",
-                icon: <User className="w-5 h-5 text-gray-400" />,
-                type: "text",
-              },
-              {
-                id: "userName",
-                label: "userName",
                 icon: <User className="w-5 h-5 text-gray-400" />,
                 type: "text",
               },
@@ -205,37 +215,6 @@ const SignUpForm = () => {
                 </div>
               </div>
             ))}
-
-            {/* City and State Fields */}
-            {/* <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              {["city", "state"].map((field) => (
-                <div key={field}>
-                  <label
-                    htmlFor={field}
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    {field.charAt(0).toUpperCase() + field.slice(1)}
-                  </label>
-                  <div className="relative mt-1 rounded-md shadow-sm">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <MapPin className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <input
-                      id={field}
-                      name={field}
-                      type="text"
-                      required
-                      value={formData[field]}
-                      onChange={handleChange}
-                      className="block w-full py-2 pl-10 pr-3 leading-5 placeholder-gray-500 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      placeholder={
-                        field.charAt(0).toUpperCase() + field.slice(1)
-                      }
-                    />
-                  </div>
-                </div>
-              ))}
-            </div> */}
 
             {/* Accept Terms */}
             <div className="flex items-center">

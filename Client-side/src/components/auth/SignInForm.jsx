@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Mail, Lock, LogIn } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
+import EmailVerification from "./EmailVerification";
+// import OtpStep from "./OtpStep";
+// const [mode, setMode] = useState("signin"); // modes: "signin", "otp", "reset"
 
 const SignInForm = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +13,8 @@ const SignInForm = () => {
     password: "",
     rememberMe: false,
   });
+  const [isEmailVerified, setIsEmailVerified] = useState(true); // initially true
+  // const [showForgot, setShowForgot] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -36,12 +41,9 @@ const SignInForm = () => {
       );
       console.log(response);
 
-      // Display backend success message
       toast.success(response.data.message || "Login successful");
-      // Store JWT token in localStorage
       localStorage.setItem("token", response.data.accessToken);
 
-      // Log user details for debugging
       console.log("Sign in successful:", response.data);
 
       // Reset form
@@ -50,6 +52,33 @@ const SignInForm = () => {
       // Redirect to home page
       navigate("/");
     } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Something went wrong.";
+      console.log(errorMessage);
+
+      if (errorMessage === "Please verify your email first") {
+        setIsEmailVerified(false);
+        console.log(formData);
+        try {
+          const response = await axios.post(
+            "http://localhost:5000/api/auth/resend-otp",
+            { email: formData.email },
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              timeout: 10000, // Increased timeout to 10s
+            }
+          );
+          console.log(response);
+        } catch (error) {}
+        return;
+        console.log(isEmailVerified);
+      }
+
       if (error.code === "ECONNABORTED") {
         toast.error("Request timed out. Please try again.");
         console.error("Timeout error:", error.message);
@@ -59,10 +88,6 @@ const SignInForm = () => {
         );
         console.error("Network error:", error.message);
       } else {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Something went wrong.";
         toast.error(errorMessage);
         console.error("Backend error:", {
           status: error.response?.status,
@@ -72,6 +97,12 @@ const SignInForm = () => {
       }
     }
   };
+  useEffect(() => {
+    if (!isEmailVerified) {
+      console.log(formData);
+      navigate("/verify-email", { state: { email: formData.email } });
+    }
+  }, [isEmailVerified, navigate]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -155,6 +186,9 @@ const SignInForm = () => {
                 />
               </div>
             </div>
+            {/* {isEmailVerified && <EmailVerification />}
+             */}
+            {/* {isEmailVerified && navigate("/verify-email")} */}
 
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -178,6 +212,7 @@ const SignInForm = () => {
                 <Link
                   to="/forgot-password"
                   className="font-medium text-blue-600 hover:text-blue-500"
+                  // onClick={EmailVerification}
                 >
                   Forgot your password?
                 </Link>

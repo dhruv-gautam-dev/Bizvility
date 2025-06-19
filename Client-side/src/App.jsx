@@ -38,6 +38,7 @@ import Users from "./pages/superAdmin/Users.jsx";
 import Analytics from "./pages/superAdmin/Analytics.jsx";
 import Settings from "./pages/superAdmin/Settings.jsx";
 import StoreDetailPage from "./pages/HealthCategoryPages/StoreDetailPage.jsx";
+import ForgotPassword from "./components/auth/ForgotPassword.jsx";
 // import ProfileSettings from './pages/superAdmin/Profile.jsx';
 
 function App() {
@@ -47,6 +48,8 @@ function App() {
         {/* Auth routes (no layout) */}
         <Route path="/signin" element={<SignInForm />} />
         <Route path="/signup" element={<SignUpForm />} />
+        <Route path="/verify-email" element={<EmailVerification />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-email" element={<EmailVerification />} />
 
         {/* Public Site (Layout) */}
