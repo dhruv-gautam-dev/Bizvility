@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout.jsx";
 import AdminLayout from "./components/superAdmin/AdminLayout.jsx";
+import UserLayout from "./components/User/UserLayout.jsx";
 
 // Public Pages
 import HomePage from "./pages/HomePage.jsx";
@@ -29,6 +30,20 @@ import FAQPage from "./pages/FAQPage.jsx";
 import JobApplicationPage from "./pages/JobApplicationPage.jsx";
 import BusinessListingPage from "./pages/BusinessListingPage.jsx";
 import ListBusinessPage from "./pages/ListBusinessPage.jsx";
+
+// User Pages
+import UserDashboard from "./pages/User/Dashboard.jsx";
+import UserProfile from "./pages/User/Profile.jsx";
+
+import UserMyListings from "./pages/User/MyListings.jsx";
+// import UserAnalytics from "./pages/User/Analytics.jsx";
+
+// import UserDashboard from "./pages/User/Dashboard.jsx";
+// import UserProfile from "./pages/User/Profile.jsx";
+import UserListings from "./pages/User/MyListings.jsx";
+import UserAnalytics from "./pages/User/Analytics.jsx";
+import UserReviews from "./pages/User/MyReviews.jsx";
+import UserInvoice from "./pages/User/Invoices.jsx";
 
 // SuperAdmin Pages
 import Dashboard from "./pages/superAdmin/Dashboard.jsx";
@@ -94,6 +109,16 @@ function App() {
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/settings" element={<Settings />} />
           {/* <Route path="/profile" element={<ProfileSettings/>} /> */}
+        </Route>
+
+        {/* User Dashboard (UserLayout) */}
+        <Route element={<UserLayout />}>
+          <Route path="/user-dashboard" element={<UserDashboard />} />
+          <Route path="/user-profile" element={<UserProfile />} />
+          <Route path="/user-my-listings" element={<UserListings />} />
+          <Route path="/user-analytics" element={<UserAnalytics />} />
+          <Route path="/user-my-reviews" element={<UserReviews />} />
+          <Route path="/user-invoices" element={<UserInvoice />} />
         </Route>
       </Routes>
     </Router>

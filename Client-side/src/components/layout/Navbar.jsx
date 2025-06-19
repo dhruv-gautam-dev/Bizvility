@@ -20,6 +20,10 @@ const Navbar = ({ scrolled, user }) => {
   user = localStorage.token;
   console.log(user);
 
+  const handleMyDashboard = () => {
+    navigate("/user-dashboard");
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     // Optionally call API to log out on server
@@ -100,7 +104,7 @@ const Navbar = ({ scrolled, user }) => {
             </button>
             <Link
               to="/list-business"
-              className="px-4 py-2 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
+              className="px-4 py-2 text-white transition-colors bg-blue-600 rounded-md w-38 hover:bg-blue-700"
             >
               List Business
             </Link>
@@ -122,7 +126,10 @@ const Navbar = ({ scrolled, user }) => {
                 border border-white/40 shadow-lg
               `}
                     >
-                      <button className="w-full px-4 py-2 text-left hover:bg-white/20">
+                      <button
+                        className="w-full px-4 py-2 text-left hover:bg-white/20"
+                        onClick={handleMyDashboard}
+                      >
                         My Dashboard
                       </button>
                       <button className="w-full px-4 py-2 text-left hover:bg-white/20">
