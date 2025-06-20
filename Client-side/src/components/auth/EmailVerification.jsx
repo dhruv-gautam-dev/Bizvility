@@ -9,8 +9,10 @@ const EmailVerification = () => {
   const [isResending, setIsResending] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  // const email = location.state?.email;
-  const { email, flow } = location.state || {};
+  const email = location.state?.email;
+  const flow = location.state?.flow;
+
+  // const { email, flow } = location.state || {};
   console.log(flow);
   console.log(email);
 
@@ -37,7 +39,7 @@ const EmailVerification = () => {
         toast.success(response.data.message || "Email verified successfully!");
         setTimeout(() => {
           console.log(email);
-          navigate("/forgot-password", {
+          navigate("/signin", {
             state: { email },
           }); // Redirect to sign-in page after successful verification
         }, 2000);
@@ -100,6 +102,16 @@ const EmailVerification = () => {
         error.response?.data?.error ||
         "Something went wrong.";
       console.log(errorMessage);
+
+      if (errorMessage === "OTP verified. You may now reset your password.") {
+        setIsEmailVerified(false);
+        console.log(formData);
+        try {
+          navigate("/forgot-password");
+          console.log(response);
+        } catch (error) {}
+        return;
+      }
 
       if (errorMessage === "User already verified") {
         setIsEmailVerified(false);

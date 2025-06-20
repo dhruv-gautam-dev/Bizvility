@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import sendEmail from '../utils/emailSender.js';
-
+import bcrypt from 'bcrypt';
 // Helper: Generate JWT
 const generateToken = (id, expiresIn) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn });
@@ -107,6 +107,7 @@ export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
+  console.log(user);
 
   if (!user || !(await user.matchPassword(password))) {
     res.status(401);
@@ -241,9 +242,9 @@ export const forgotPassword = asyncHandler(async (req, res) => {
 export const resetPassword = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  if (!password) {
+  if (!email || !password) {
     res.status(400);
-    throw new Error('New password is required');
+    throw new Error('Email and password are required');
   }
 
   if (password.length < 12) {
@@ -251,27 +252,25 @@ export const resetPassword = asyncHandler(async (req, res) => {
     throw new Error('Password must be at least 12 characters long');
   }
 
-  // Assuming email is stored in req.user.email or from OTP verification
-  const user = await User.findOne({ isResetOTPVerified: true });
+  const user = await User.findOne({ email });
 
   if (!user) {
     res.status(404);
-    throw new Error('User not found or OTP not verified');
+    throw new Error('User not found');
   }
 
-  // ✅ Hash password manually
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
+  user.password = password; // plain text (gets hashed by pre-save)
+  user.markModified('password'); // 🔥 Force Mongoose to re-hash password
 
-  user.password = hashedPassword;
-  user.isResetOTPVerified = undefined; // clear after successful update
   user.resetPasswordOTP = undefined;
   user.resetPasswordExpires = undefined;
+  user.isResetOTPVerified = undefined;
 
   await user.save();
 
   res.json({ message: 'Password has been updated successfully' });
 });
+
 
 
 export const verifyForgotOTP = asyncHandler(async (req, res) => {

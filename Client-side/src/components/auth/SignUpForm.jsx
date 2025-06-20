@@ -70,21 +70,6 @@ const SignUpForm = () => {
       console.log(localStorage);
       // console.log(token)
 
-      // ✅ Step 2: Generate OTP using the user's email
-      // await axios.post(
-      //   "http://localhost:5000/api/auth/resend-otp",
-      //   { email: emailToVerify },
-      //   {
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       // 'Authorization': `Bearer ${localStorage.getItem('token')}`
-      //     },
-      //     timeout: 5000,
-      //   }
-      // );
-
-      // toast.success("OTP has been sent to your email.");
-
       // Step 3: Clear form and navigate to verification page
       setFormData({
         fullName: "",
@@ -99,7 +84,9 @@ const SignUpForm = () => {
       localStorage.setItem("email", emailToVerify);
       console.log(localStorage);
 
-      navigate("/verify-email", { state: { email: emailToVerify } });
+      navigate("/verify-email", {
+        state: { email: emailToVerify, flow: "signup" },
+      });
     } catch (error) {
       if (error.code === "ECONNABORTED") {
         toast.error("Request timed out. Please try again.");
@@ -110,23 +97,10 @@ const SignUpForm = () => {
       } else if (
         error.response?.data?.message == "Email is already registered"
       ) {
-        // // navigate("/verify-email", { state: { email: emailToVerify } });
-        // await axios.post(
-        //   "http://localhost:5000/api/auth/resend-otp",
-        //   { email: emailToVerify },
-        //   {
-        //     headers: {
-        //       "Content-Type": "application/json",
-        //       // 'Authorization': `Bearer ${localStorage.getItem('token')}`
-        //     },
-        //     timeout: 5000,
-        //   }
-        // );
-
         toast.success(
           "Email is already registered, Please login or Reset Password "
         );
-        navigate("/signin");
+        navigate("/signup");
       } else if (
         error.response?.data?.message ==
         "You already registered. Please verify your email or request a new OTP"
