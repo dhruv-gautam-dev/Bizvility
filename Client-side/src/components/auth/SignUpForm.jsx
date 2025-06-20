@@ -46,6 +46,7 @@ const SignUpForm = () => {
     const emailToVerify = formData.email;
     try {
       // Step 1: Register the user
+      console.log(formData);
       const response = await axios.post(
         "http://localhost:5000/api/auth/register",
         formData,
@@ -107,6 +108,26 @@ const SignUpForm = () => {
           "Network error. Please check your connection or backend server."
         );
       } else if (
+        error.response?.data?.message == "Email is already registered"
+      ) {
+        // // navigate("/verify-email", { state: { email: emailToVerify } });
+        // await axios.post(
+        //   "http://localhost:5000/api/auth/resend-otp",
+        //   { email: emailToVerify },
+        //   {
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //       // 'Authorization': `Bearer ${localStorage.getItem('token')}`
+        //     },
+        //     timeout: 5000,
+        //   }
+        // );
+
+        toast.success(
+          "Email is already registered, Please login or Reset Password "
+        );
+        navigate("/signin");
+      } else if (
         error.response?.data?.message ==
         "You already registered. Please verify your email or request a new OTP"
       ) {
@@ -124,7 +145,10 @@ const SignUpForm = () => {
         );
 
         toast.success("OTP has been sent to your email.");
-        navigate("/verify-email");
+        console.log(emailToVerify);
+        navigate("/verify-email", {
+          state: { email: emailToVerify, flow: "signup" },
+        });
       } else {
         toast.error(
           error.response?.data?.message ||
@@ -148,7 +172,7 @@ const SignUpForm = () => {
         <p className="mt-2 text-sm text-center text-gray-600">
           Already have an account?{" "}
           <Link
-            to="/verify-email"
+            to="/signin"
             className="font-medium text-blue-600 hover:text-blue-500"
           >
             Sign in

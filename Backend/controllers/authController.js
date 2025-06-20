@@ -193,37 +193,78 @@ export const forgotPassword = asyncHandler(async (req, res) => {
 });
 
 
-export const resetPassword = asyncHandler(async (req, res) => {
-  const { email, newPassword } = req.body;
+// export const resetPassword = asyncHandler(async (req, res) => {
+//   const { email, newPassword } = req.body;
 
-  if (!email || !newPassword) {
+//   if (!email || !newPassword) {
+//     res.status(400);
+//     throw new Error('Email and new password are required');
+//   }
+
+//   if (newPassword.length < 12) {
+//     res.status(400);
+//     throw new Error('Password must be at least 12 characters long');
+//   }
+
+//   const user = await User.findOne({ email });
+
+//   if (!user) {
+//     res.status(404);
+//     throw new Error('User not found');
+//   }
+
+//   if (!user.isResetOTPVerified) {
+//     res.status(403);
+//     throw new Error('OTP not verified. Cannot reset password.');
+//   }
+
+//   // ✅ Encrypt the password manually
+//   const salt = await bcrypt.genSalt(10);
+//   const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+//   user.password = hashedPassword;
+//   user.isResetOTPVerified = undefined;
+//   user.resetPasswordOTP = undefined;
+//   user.resetPasswordExpires = undefined;
+
+//   await user.save();
+
+//   res.json({ message: 'Password has been updated successfully' });
+// });
+
+
+
+// @desc    Verify OTP and reset password
+// @route   POST /api/auth/verify-forgot-otp
+// /api/auth/verify-forgot-otp
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!password) {
     res.status(400);
-    throw new Error('Email and new password are required');
+    throw new Error('New password is required');
   }
 
-  if (newPassword.length < 12) {
+  if (password.length < 12) {
     res.status(400);
     throw new Error('Password must be at least 12 characters long');
   }
 
-  const user = await User.findOne({ email });
+  // Assuming email is stored in req.user.email or from OTP verification
+  const user = await User.findOne({ isResetOTPVerified: true });
 
   if (!user) {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error('User not found or OTP not verified');
   }
 
-  if (!user.isResetOTPVerified) {
-    res.status(403);
-    throw new Error('OTP not verified. Cannot reset password.');
-  }
-
-  // ✅ Encrypt the password manually
+  // ✅ Hash password manually
   const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(newPassword, salt);
+  const hashedPassword = await bcrypt.hash(password, salt);
 
   user.password = hashedPassword;
-  user.isResetOTPVerified = undefined;
+  user.isResetOTPVerified = undefined; // clear after successful update
   user.resetPasswordOTP = undefined;
   user.resetPasswordExpires = undefined;
 
@@ -233,10 +274,6 @@ export const resetPassword = asyncHandler(async (req, res) => {
 });
 
 
-
-// @desc    Verify OTP and reset password
-// @route   POST /api/auth/verify-forgot-otp
-// /api/auth/verify-forgot-otp
 export const verifyForgotOTP = asyncHandler(async (req, res) => {
   const { email, otp } = req.body;
 

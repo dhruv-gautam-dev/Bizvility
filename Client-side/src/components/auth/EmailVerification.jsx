@@ -9,7 +9,9 @@ const EmailVerification = () => {
   const [isResending, setIsResending] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const email = location.state?.email;
+  // const email = location.state?.email;
+  const { email, flow } = location.state || {};
+  console.log(flow);
   console.log(email);
 
   // Submit OTP for verification
@@ -21,28 +23,53 @@ const EmailVerification = () => {
       return;
     }
 
-    try {
-      const response = await axios.post(
-        `http://localhost:5000/api/auth/verify-forgot-otp`, // Correct API route for OTP verification
-        { email, otp: verificationCode },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      toast.success(response.data.message || "Email verified successfully!");
-      setTimeout(() => {
-        console.log(email);
-        navigate("/forgot-password", {
-          state: { email },
-        }); // Redirect to sign-in page after successful verification
-      }, 2000);
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Verification failed. Try again."
-      );
+    if (flow === "signup") {
+      try {
+        const response = await axios.post(
+          `http://localhost:5000/api/auth/verify-email-otp`, // Correct API route for OTP verification
+          { email, otp: verificationCode },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        toast.success(response.data.message || "Email verified successfully!");
+        setTimeout(() => {
+          console.log(email);
+          navigate("/forgot-password", {
+            state: { email },
+          }); // Redirect to sign-in page after successful verification
+        }, 2000);
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message || "Verification failed. Try again."
+        );
+      }
+    } else {
+      // call verify-forgot-otp
+      try {
+        const response = await axios.post(
+          `http://localhost:5000/api/auth/verify-forgot-otp`, // Correct API route for OTP verification
+          { email, otp: verificationCode },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        toast.success(response.data.message || "Email verified successfully!");
+        setTimeout(() => {
+          console.log(email);
+          navigate("/forgot-password", {
+            state: { email },
+          }); // Redirect to sign-in page after successful verification
+        }, 2000);
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message || "Verification failed. Try again."
+        );
+      }
     }
   };
 
@@ -53,6 +80,7 @@ const EmailVerification = () => {
     // const { email, password } = formData;
 
     try {
+      // handle conditionaly if flow is signup the perticualr api calll else
       console.log(email);
       const response = await axios.post(
         "http://localhost:5000/api/auth/verifyForgotOTP",

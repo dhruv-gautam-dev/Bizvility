@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 const ForgotPassword = () => {
   const location = useLocation();
@@ -30,7 +31,7 @@ const ForgotPassword = () => {
         {
           email: formData.email,
           password: formData.password,
-          confirmPassword: formData,
+          // confirmPassword: formData.confirmPassword,
         },
         {
           headers: {
@@ -40,6 +41,7 @@ const ForgotPassword = () => {
       );
 
       toast.success(response.data.message || "Password saved successfully!");
+      navigate("/signin");
       // setTimeout(() => {
       //   console.log(email);
       //   navigate("/forgot-password", {
@@ -132,7 +134,7 @@ const ForgotPassword = () => {
 
           <p
             className="mt-2 text-sm text-center text-blue-600 cursor-pointer"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/signin")}
           >
             Back to sign in
           </p>
