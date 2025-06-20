@@ -26,28 +26,31 @@ const ListBusinessPage = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    // Basic Info
+    businessName: "",
     ownerName: "",
     experience: "",
-    businessName: "",
-    category: "",
     description: "",
-    specialty: "",
-    yearofEstablishment: "",
-    appointmentLink: "",
-    affiliation: "",
-    registrationNumber: "",
 
-    // Contact
-    email: "",
+    location: {
+      address: "",
+      pincode: "",
+      city: "",
+      state: "",
+    },
+
     phone: "",
+    email: "",
     website: "",
-    // Location
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    // Hours  // it should inside an array
+    category: "",
+
+    socialLinks: {
+      facebook: "",
+      instagram: "",
+      twitter: "",
+      youtube: "",
+      linkedin: "",
+    },
+
     businessHours: [
       { day: "Monday", open: "09:00", close: "18:00" },
       { day: "Tuesday", open: "09:00", close: "18:00" },
@@ -58,17 +61,68 @@ const ListBusinessPage = () => {
       { day: "Sunday", open: "09:00", close: "18:00" },
     ],
 
-    // Media
-    gallery: [],
-    profilePhoto: null,
-    Banner: null,
-    Certifications: [],
-    videoUrl: "",
-    socialMedia: {
-      facebook: "",
-      instagram: "",
+    profileImage: null, // single file path or URL
+    coverImage: null, // single file path or URL
+    certificateImages: [],
+    galleryImages: [],
+
+    categoryData: {
+      specialty: "",
+      registerNumber: "",
+      YearOfEstablishment: "",
+      appointmentLink: "",
+      affiliation: "",
+      AC: true,
+      Parking: true,
+      extraFields: { videoUrl: "" },
     },
   });
+
+  // const [formData, setFormData] = useState({
+  //   // Basic Info
+  //   // user: "",
+  //   ownerName: "",
+  //   experience: "",
+  //   businessName: "",
+  //   category: "",
+  //   description: "",
+  //   specialty: "",
+  //   yearofEstablishment: "",
+  //   appointmentLink: "",
+  //   affiliation: "",
+  //   registrationNumber: "",
+
+  //   // Contact
+  //   email: "",
+  //   phone: "",
+  //   website: "",
+  //   // Location
+  //   address: "",
+  //   city: "",
+  //   state: "",
+  //   zipCode: "",
+  //   // Hours  // it should inside an array
+  //   businessHours: [
+  //     { day: "Monday", open: "09:00", close: "18:00" },
+  //     { day: "Tuesday", open: "09:00", close: "18:00" },
+  //     { day: "Wednesday", open: "09:00", close: "18:00" },
+  //     { day: "Thursday", open: "09:00", close: "18:00" },
+  //     { day: "Friday", open: "09:00", close: "18:00" },
+  //     { day: "Saturday", open: "09:00", close: "18:00" },
+  //     { day: "Sunday", open: "09:00", close: "18:00" },
+  //   ],
+
+  //   // Media
+  //   gallery: [],
+  //   profilePhoto: null,
+  //   Banner: null,
+  //   Certifications: [],
+  //   videoUrl: "",
+  //   socialMedia: {
+  //     facebook: "",
+  //     instagram: "",
+  //   },
+  // });
   console.log(formData);
 
   const handleSubmit = async () => {
@@ -135,25 +189,203 @@ const ListBusinessPage = () => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const form = new FormData();
+  //     const token = localStorage.getItem("token");
+  //     const userLS = JSON.parse(localStorage.getItem("user"));
+  //     console.log(userLS);
+  //     console.log(form);
 
-    if (name === "facebook" || name === "instagram") {
-      // Handle nested socialMedia object
-      setFormData((prev) => ({
-        ...prev,
-        socialMedia: {
-          ...prev.socialMedia,
-          [name]: value,
-        },
-      }));
-    } else {
-      // Handle all other flat fields
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+  //     if (!userLS?.data?._id) {
+  //       alert("User not authenticated. Please log in again.");
+  //       return;
+  //     }
+
+  //     Object.entries(formData).forEach(([key, value]) => {
+  //       if (
+  //         key === "gallery" ||
+  //         key === "Certifications" ||
+  //         key === "businessHours" ||
+  //         key === "socialMedia"
+  //       ) {
+  //         return;
+  //       }
+  //       if (key === "profilePhoto" || key === "Banner") {
+  //         // These are preview URLs, not files, so skip
+  //         return;
+  //       }
+  //       form.append(key, value);
+  //     });
+
+  //     // Append gallery images
+  //     formData.gallery.forEach((fileObj, idx) => {
+  //       if (fileObj.file) {
+  //         form.append("gallery", fileObj.file);
+  //       }
+  //     });
+
+  //     // Append certifications
+  //     formData.Certifications.forEach((fileObj, idx) => {
+  //       if (fileObj.file) {
+  //         form.append("Certifications", fileObj.file);
+  //       }
+  //     });
+
+  //     // Append business hours as JSON
+  //     form.append("businessHours", JSON.stringify(formData.businessHours));
+  //     // form.append("businessHours", JSON.stringify(formData.businessHours));
+
+  //     // Append social media as JSON
+  //     form.append("socialMedia", JSON.stringify(formData.socialMedia));
+
+  //     // append token to form data
+  //     // form.append("token", JSON.stringify(token));
+  //     console.log(`Bearer ${token}`);
+
+  //     // Example endpoint, replace with your backend URL
+  //     await axios.post("http://localhost:5000/api/business/business", form, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+
+  //     alert("Business listed successfully!");
+  //     navigate("/success"); // or wherever you want to redirect
+
+  //     console.log(form);
+  //   } catch (error) {
+  //     alert("Failed to submit. Please try again.");
+  //     console.error(error);
+  //   }
+  // };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const form = new FormData();
+  //     const token = localStorage.getItem("token");
+  //     const userLS = JSON.parse(localStorage.getItem("user"));
+  //     console.log(userLS);
+  //     console.log(form);
+
+  //     if (!userLS?.data?._id) {
+  //       alert("User not authenticated. Please log in again.");
+  //       return;
+  //     }
+  //     const userId = userLS.data._id;
+  //     console.log(userId);
+
+  //     form.append("owner", userId);
+  //     form.append("name", formData.businessName);
+  //     form.append("ownerName", formData.ownerName);
+  //     form.append("phone", formData.phone);
+  //     form.append("website", formData.website);
+  //     form.append("email", formData.email);
+  //     form.append("category", formData.category);
+
+  //     const location = {
+  //       address: formData.address,
+  //       city: formData.city,
+  //       state: formData.state,
+  //       pincode: formData.zipCode,
+  //     };
+  //     form.append("location", JSON.stringify(location));
+  //     form.append("socialLinks", JSON.stringify(formData.socialMedia));
+
+  //     const bh = {};
+  //     formData.businessHours.forEach((d) => {
+  //       bh[d.day.toLowerCase()] = `${d.open}-${d.close}`;
+  //     });
+  //     form.append("businessHours", JSON.stringify(bh));
+
+  //     const categoryData = {
+  //       speciality: formData.specialty,
+  //       registerNumber: formData.registrationNumber,
+  //       YearOfEstablishment: new Date(formData.yearofEstablishment),
+  //       appointmentLink: formData.appointmentLink,
+  //       affiliation: formData.affiliation,
+  //       AC: true,
+  //       Parking: true,
+  //       extraFields: { videoUrl: formData.videoUrl || "" },
+  //     };
+  //     form.append("categoryData", JSON.stringify(categoryData));
+
+  //     if (files.profileImage) form.append("profileImage", files.profileImage);
+  //     if (files.coverImage) form.append("coverImage", files.coverImage);
+  //     formData.Certifications.forEach(
+  //       (f) => f.file && form.append("certificateImages", f.file)
+  //     );
+  //     formData.gallery.forEach(
+  //       (f) => f.file && form.append("galleryImages", f.file)
+  //     );
+
+  //     await axios.post("http://localhost:5000/api/business/business", form, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+
+  //     alert("Business listed successfully!");
+  //     navigate("/success");
+  //   } catch (error) {
+  //     console.error(
+  //       "❌ Submission failed:",
+  //       error.response?.data || error.message
+  //     );
+  //     alert("Failed to submit. Please try again.");
+  //   }
+  // };
+
+  // const nestedKeys = [
+  //   "facebook",
+  //   "instagram",
+  //   "twitter",
+  //   "youtube",
+  //   "linkedin",
+  // ];
+
+  const handleInputChange = (e, index = null, nestedArrayKey = null) => {
+    const { name, value, type, files } = e.target;
+
+    setFormData((prev) => {
+      // existing nested cases...
+      if (nestedArrayKey && typeof index === "number") {
+        // ...
+      } else if (prev.location && name in prev.location) {
+        return {
+          ...prev,
+          location: { ...prev.location, [name]: value },
+        };
+      } else if (prev.socialLinks[name] !== undefined) {
+        // ...
+      } else if (prev.categoryData && prev.categoryData[name] !== undefined) {
+        return {
+          ...prev,
+          categoryData: { ...prev.categoryData, [name]: value },
+        };
+      } else if (
+        prev.categoryData?.extraFields &&
+        name in prev.categoryData.extraFields
+      ) {
+        return {
+          ...prev,
+          categoryData: {
+            ...prev.categoryData,
+            extraFields: {
+              ...prev.categoryData.extraFields,
+              [name]: value,
+            },
+          },
+        };
+      } else if (type === "file") {
+        // ...
+      } else {
+        // flat fields
+        return { ...prev, [name]: value };
+      }
+    });
   };
 
   const handleBusinessHourChange = (index, field, value) => {
@@ -328,7 +560,7 @@ const ListBusinessPage = () => {
             <option value="Restaurant">Restaurant</option>
             <option value="Beauty">Beauty & Spa</option>
           </select>
-          {formData.category === "healthcare" && (
+          {formData.category === "Health" && (
             <div>
               <div className="mt-3">
                 <label
@@ -345,7 +577,7 @@ const ListBusinessPage = () => {
                     name="appointmentLink"
                     required
                     className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={formData.appointmentLink}
+                    value={formData.categoryData.appointmentLink || ""}
                     onChange={handleInputChange}
                   />
                 </div>
@@ -365,7 +597,7 @@ const ListBusinessPage = () => {
                     name="affiliation"
                     required
                     className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={formData.affiliation}
+                    value={formData.categoryData.affiliation}
                     onChange={handleInputChange}
                   />
                 </div>
@@ -385,7 +617,7 @@ const ListBusinessPage = () => {
                     name="registrationNumber"
                     required
                     className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={formData.registrationNumber}
+                    value={formData.categoryData.registrationNumber}
                     onChange={handleInputChange}
                   />
                 </div>
@@ -409,14 +641,14 @@ const ListBusinessPage = () => {
               name="specialty"
               required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.specialty}
+              value={formData.categoryData.specialty}
               onChange={handleInputChange}
             />
           </div>
         </div>
         <div>
           <label
-            htmlFor="yearofEstablishment"
+            htmlFor="YearOfEstablishment"
             className="block mb-1 text-sm font-medium text-gray-700"
           >
             Year of Establishment *
@@ -426,10 +658,10 @@ const ListBusinessPage = () => {
             <input
               type="text"
               id="yearofEstablishment"
-              name="yearofEstablishment"
+              name="YearOfEstablishment"
               required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.yearofEstablishment}
+              value={formData.categoryData.YearOfEstablishment}
               onChange={handleInputChange}
             />
           </div>
@@ -544,7 +776,7 @@ const ListBusinessPage = () => {
               name="address"
               required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.address}
+              value={formData?.location?.address || ""}
               onChange={handleInputChange}
             />
           </div>
@@ -564,7 +796,7 @@ const ListBusinessPage = () => {
               name="city"
               required
               className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.city}
+              value={formData?.location?.city}
               onChange={handleInputChange}
             />
           </div>
@@ -582,7 +814,7 @@ const ListBusinessPage = () => {
               name="state"
               required
               className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.state}
+              value={formData?.location?.state}
               onChange={handleInputChange}
             />
           </div>
@@ -590,18 +822,18 @@ const ListBusinessPage = () => {
 
         <div>
           <label
-            htmlFor="zipCode"
+            htmlFor="pincode"
             className="block mb-1 text-sm font-medium text-gray-700"
           >
             ZIP Code *
           </label>
           <input
             type="text"
-            id="zipCode"
-            name="zipCode"
+            id="pincode"
+            name="pincode"
             required
             className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={formData.zipCode}
+            value={formData?.location?.pincode}
             onChange={handleInputChange}
           />
         </div>
@@ -728,13 +960,13 @@ const ListBusinessPage = () => {
               <Camera className="w-12 h-12 mx-auto text-gray-400" />
               <div className="flex text-sm text-gray-600">
                 <label
-                  htmlFor="Certifications"
+                  htmlFor="certificateImages"
                   className="relative font-medium text-blue-600 bg-white rounded-md cursor-pointer hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                 >
                   <span>Upload Certifications</span>
                   <input
-                    id="Certifications"
-                    name="Certifications"
+                    id="certificateImages"
+                    name="certificateImages"
                     type="file"
                     className="sr-only"
                     multiple
@@ -748,7 +980,7 @@ const ListBusinessPage = () => {
             </div>
           </div>
         </div>
-        {formData.Certifications.length > 0 && (
+        {formData.certificateImages.length > 0 && (
           <div>
             <h3 className="mb-2 text-sm font-medium text-gray-700">
               Selected Certifications
@@ -786,13 +1018,13 @@ const ListBusinessPage = () => {
               <Camera className="w-12 h-12 mx-auto text-gray-400" />
               <div className="flex text-sm text-gray-600">
                 <label
-                  htmlFor="gallery"
+                  htmlFor="galleryImages"
                   className="relative font-medium text-blue-600 bg-white rounded-md cursor-pointer hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                 >
                   <span>Upload photos</span>
                   <input
-                    id="gallery"
-                    name="gallery"
+                    id="galleryImages"
+                    name="galleryImages"
                     type="file"
                     className="sr-only"
                     multiple
@@ -806,13 +1038,13 @@ const ListBusinessPage = () => {
             </div>
           </div>
         </div>
-        {formData.gallery.length > 0 && (
+        {formData.galleryImages.length > 0 && (
           <div>
             <h3 className="mb-2 text-sm font-medium text-gray-700">
               Selected Photos
             </h3>
             <div className="flex gap-4 h-45">
-              {formData.gallery.map((photo, index) => (
+              {formData.galleryImages.map((photo, index) => (
                 <div key={index} className="relative">
                   <img
                     src={photo.preview}
@@ -841,7 +1073,7 @@ const ListBusinessPage = () => {
               name="videoUrl"
               required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.videoUrl}
+              value={formData.categoryData.extraFields.videoUrl}
               onChange={handleInputChange}
             />
           </div>
@@ -863,7 +1095,7 @@ const ListBusinessPage = () => {
               name="facebook"
               required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.socialMedia.facebook}
+              value={formData.socialLinks.facebook}
               onChange={handleInputChange}
             />
           </div>
@@ -885,7 +1117,7 @@ const ListBusinessPage = () => {
               name="instagram"
               required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.socialMedia.instagram}
+              value={formData.socialLinks.instagram}
               onChange={handleInputChange}
             />
           </div>

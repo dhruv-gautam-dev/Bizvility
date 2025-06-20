@@ -15,7 +15,7 @@ const mediaFields = upload.fields([
 
 router.post('/business', protect, mediaFields, createBusiness);
 router.put('/business/:id', protect, mediaFields, updateBusiness);
-router.get('/business/:id', protect, getBusinessById);
+router.get('/business/:id', protect, getBusinessById); // store detail page 
 
 export default router;
 // routeBusiness

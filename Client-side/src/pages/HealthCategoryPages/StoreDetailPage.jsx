@@ -77,7 +77,7 @@ const StoreDetailPage = ({ data }) => {
     }, [filter, store.reviews]);
   }
 
-  const formattedLoc = formatAddressPretty(store.address);
+  const formattedLoc = formatAddressPretty(store.location.address);
   const iframeSrc = `https://www.google.com/maps?q=${formattedLoc}&output=embed`;
 
   if (!store) {

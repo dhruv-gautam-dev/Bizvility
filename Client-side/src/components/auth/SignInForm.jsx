@@ -178,7 +178,11 @@ const SignInForm = () => {
           timeout: 10000, // Increased timeout to 10s
         }
       );
-      console.log(response);
+      console.log(response.data);
+      localStorage.setItem("user", JSON.stringify(response));
+      localStorage.setItem("userId", JSON.stringify(response.data._id));
+
+      console.log(response.data._id);
 
       toast.success(response.data.message || "Login successful");
       localStorage.setItem("token", response.data.accessToken);
