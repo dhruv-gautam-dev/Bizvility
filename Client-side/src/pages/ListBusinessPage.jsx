@@ -74,8 +74,9 @@ const ListBusinessPage = () => {
   const handleSubmit = async () => {
     try {
       const form = new FormData();
+      const token = localStorage.getItem("token");
+      console.log(form);
 
-      // Append all fields except arrays/objects that need special handling
       Object.entries(formData).forEach(([key, value]) => {
         if (
           key === "gallery" ||
@@ -83,7 +84,6 @@ const ListBusinessPage = () => {
           key === "businessHours" ||
           key === "socialMedia"
         ) {
-          // Skip, handle below
           return;
         }
         if (key === "profilePhoto" || key === "Banner") {
@@ -109,17 +109,26 @@ const ListBusinessPage = () => {
 
       // Append business hours as JSON
       form.append("businessHours", JSON.stringify(formData.businessHours));
+      // form.append("businessHours", JSON.stringify(formData.businessHours));
 
       // Append social media as JSON
       form.append("socialMedia", JSON.stringify(formData.socialMedia));
 
+      // append token to form data
+      // form.append("token", JSON.stringify(token));
+      console.log(`Bearer ${token}`);
+
       // Example endpoint, replace with your backend URL
-      await axios.post("http://localhost:5000/api/auth/register", form, {
-        headers: { "Content-Type": "multipart/form-data" },
+      await axios.post("http://localhost:5000/api/business/business", form, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       alert("Business listed successfully!");
       navigate("/success"); // or wherever you want to redirect
+
+      console.log(form);
     } catch (error) {
       alert("Failed to submit. Please try again.");
       console.error(error);
@@ -315,9 +324,9 @@ const ListBusinessPage = () => {
             <option value="">Select a category</option>
             {/* <option value="retail">Retail</option> */}
             {/* <option value="service">Service</option> */}
-            <option value="healthcare">Healthcare</option>
-            <option value="restaurant">Restaurant</option>
-            <option value="Beauty & Spa">Beauty & Spa</option>
+            <option value="Health">Healthcare</option>
+            <option value="Restaurant">Restaurant</option>
+            <option value="Beauty">Beauty & Spa</option>
           </select>
           {formData.category === "healthcare" && (
             <div>

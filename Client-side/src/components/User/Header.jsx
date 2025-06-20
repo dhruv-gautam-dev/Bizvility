@@ -118,6 +118,15 @@ export default function UserHeader() {
     setIsNotificationPopupOpen(false);
     setIsNotificationSidebarOpen(true);
   };
+  const handleLogout = async () => {
+    // localStorage.removeItem("token");
+    localStorage.clear();
+
+    // Optionally call API to log out on server
+    navigate("//");
+    console.log(localStorage);
+    window.location.reload(); // reset app state
+  };
 
   const handleProfileAction = (action) => {
     setIsDropdownOpen(false);
@@ -130,10 +139,12 @@ export default function UserHeader() {
         navigate("/list-business");
         break;
       case "signout":
-        if (window.confirm("Are you sure you want to sign out?")) {
-          alert("Signing out...");
-          // Implement sign out logic here
-        }
+        handleLogout();
+
+        // if (window.confirm("Are you sure you want to sign out?")) {
+        //   // alert("Signing out...");
+        //   // Implement sign out logic here
+        // }
         break;
       default:
         console.log("Profile action:", action);

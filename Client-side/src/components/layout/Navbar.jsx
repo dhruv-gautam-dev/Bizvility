@@ -3,6 +3,8 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Compass, Heart } from "lucide-react";
 import BizvilityLogo from "../imgs/bizvility-dark-logo.png";
 import SearchForm from "./SearchForm";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 const Navbar = ({ scrolled, user }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -24,8 +26,10 @@ const Navbar = ({ scrolled, user }) => {
     navigate("/user-dashboard");
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
+  const handleLogout = async () => {
+    // localStorage.removeItem("token");
+    localStorage.clear();
+
     // Optionally call API to log out on server
     navigate("//");
     console.log(localStorage);
