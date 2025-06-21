@@ -64,98 +64,6 @@ const SignInForm = () => {
     });
   };
 
-  // try {
-  //   console.log(formData.email);
-  //   const response = await axios.post(
-  //     "http://localhost:5000/api/auth/verify-forgot-otp",
-  //     { email: formData.email },
-  //     {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Accept: "application/json",
-  //       },
-  //       timeout: 10000, // Increased timeout to 10s
-  //     }
-  //   );
-  //   console.log(response);
-  // } catch (error) {
-  //   const errorMessage =
-  //     error.response?.data?.message ||
-  //     error.response?.data?.error ||
-  //     "Something went wrong.";
-  //   console.log(errorMessage);
-
-  //   if (errorMessage === "User already verified") {
-  //     setIsEmailVerified(false);
-  //     console.log(formData);
-  //     try {
-  //       navigate("/forgot-password");
-  //       console.log(response);
-  //     } catch (error) {}
-  //     return;
-  //   }
-  // }
-
-  //   try {
-  //     setIsEmailVerified(false);
-  //     console.log(formData);
-  //     try {
-  //       const response = await axios.post(
-  //         "http://localhost:5000/api/auth/resend-otp",
-  //         { email: formData.email },
-  //         {
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Accept: "application/json",
-  //           },
-  //           timeout: 10000, // Increased timeout to 10s
-  //         }
-  //       );
-  //       console.log(response);
-  //     } catch (error) {}
-  //     return;
-  //     console.log(isEmailVerified);
-
-  //     console.log(response);
-
-  //     // Redirect to home page
-  //   } catch (error) {
-  //     const errorMessage =
-  //       error.response?.data?.message ||
-  //       error.response?.data?.error ||
-  //       "Something went wrong.";
-  //     console.log(errorMessage);
-
-  //     if (errorMessage === "User already verified") {
-  //       setIsEmailVerified(false);
-  //       console.log(formData);
-  //       try {
-  //         navigate("/forgot-password");
-  //         console.log(response);
-  //       } catch (error) {}
-  //       return;
-  //       console.log(isEmailVerified);
-  //     }
-
-  //     if (error.code === "ECONNABORTED") {
-  //       toast.error("Request timed out. Please try again.");
-  //       console.error("Timeout error:", error.message);
-  //     } else if (!error.response) {
-  //       toast.error(
-  //         "Network error. Please check your connection or backend server."
-  //       );
-  //       console.error("Network error:", error.message);
-  //     } else {
-  //       toast.error(errorMessage);
-  //       console.error("Backend error:", {
-  //         status: error.response?.status,
-  //         message: errorMessage,
-  //         data: error.response?.data,
-  //       });
-  //     }
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -186,13 +94,14 @@ const SignInForm = () => {
 
       toast.success(response.data.message || "Login successful");
       localStorage.setItem("token", response.data.accessToken);
+      localStorage.setItem(
+        "refreshToken",
+        JSON.stringify(response.data.refreshToken)
+      );
 
       console.log("Sign in successful:", response.data);
 
-      // Reset form
       setFormData({ email: "", password: "", rememberMe: false });
-
-      // Redirect to home page
       navigate("/");
     } catch (error) {
       const errorMessage =
@@ -213,13 +122,12 @@ const SignInForm = () => {
                 "Content-Type": "application/json",
                 Accept: "application/json",
               },
-              timeout: 10000, // Increased timeout to 10s
+              timeout: 10000,
             }
           );
           console.log(response);
         } catch (error) {}
         return;
-        console.log(isEmailVerified);
       }
 
       if (error.code === "ECONNABORTED") {
@@ -329,9 +237,6 @@ const SignInForm = () => {
                 />
               </div>
             </div>
-            {/* {isEmailVerified && <EmailVerification />}
-             */}
-            {/* {isEmailVerified && navigate("/verify-email")} */}
 
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -354,7 +259,6 @@ const SignInForm = () => {
               <div className="text-sm">
                 <Link
                   to="/verify-email"
-                  // to="/forgot-password"
                   className="font-medium text-blue-600 hover:text-blue-500"
                   onClick={handleForgotPassword}
                 >

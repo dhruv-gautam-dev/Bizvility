@@ -18,4 +18,3 @@ router.put('/business/:id', protect, mediaFields, updateBusiness);
 router.get('/business/:id', protect, getBusinessById); // store detail page 
 
 export default router;
-// routeBusiness

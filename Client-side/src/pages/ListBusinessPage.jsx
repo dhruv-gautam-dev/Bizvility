@@ -61,8 +61,8 @@ const ListBusinessPage = () => {
       { day: "Sunday", open: "09:00", close: "18:00" },
     ],
 
-    profilePhoto: null, // single file path or URL
-    Banner: null, // single file path or URL
+    profilePhoto: null,
+    Banner: null,
     certificateImages: [],
     galleryImages: [],
 
@@ -79,12 +79,89 @@ const ListBusinessPage = () => {
   });
 
   console.log(formData);
+  // const handleSubmit = async () => {
+  //   try {
+  //     const form = new FormData();
+
+  //     form.append("name", formData.businessName);
+  //     form.append("ownerName", formData.ownerName);
+  //     form.append("experience", formData.experience);
+  //     form.append("description", formData.description);
+  //     form.append("phone", formData.phone);
+  //     form.append("email", formData.email);
+  //     form.append("website", formData.website);
+  //     form.append("category", formData.category);
+
+  //     const ownerId = localStorage.getItem("userId");
+  //     form.append("owner", ownerId);
+  //     Object.entries(formData.location).forEach(([key, value]) => {
+  //       form.append(`location[${key}]`, value);
+  //     });
+
+  //     Object.entries(formData.socialLinks).forEach(([key, value]) => {
+  //       form.append(`socialLinks[${key}]`, value);
+  //     });
+
+  //     Object.entries(formData.categoryData).forEach(([key, value]) => {
+  //       if (key === "extraFields") {
+  //         Object.entries(value).forEach(([subKey, subValue]) => {
+  //           form.append(`categoryData[extraFields][${subKey}]`, subValue);
+  //         });
+  //       } else {
+  //         form.append(`categoryData[${key}]`, value);
+  //       }
+  //     });
+
+  //     formData.businessHours.forEach((item, index) => {
+  //       form.append(`businessHours[${index}][day]`, item.day);
+  //       form.append(`businessHours[${index}][open]`, item.open);
+  //       form.append(`businessHours[${index}][close]`, item.close);
+  //     });
+
+  //     if (formData.profilePhoto?.file) {
+  //       form.append("profilePhoto", formData.profilePhoto.file);
+  //     }
+
+  //     if (formData.Banner?.file) {
+  //       form.append("Banner", formData.Banner.file);
+  //     }
+
+  //     formData.certificateImages.forEach((item, index) => {
+  //       form.append("certificateImages", item.file);
+  //     });
+
+  //     formData.galleryImages.forEach((item, index) => {
+  //       form.append("galleryImages", item.file);
+  //     });
+
+  //     const token = localStorage.getItem("token");
+  //     console.log(token);
+
+  //     const response = await axios.post(
+  //       "http://localhost:5000/api/business/business",
+  //       form,
+  //       {
+  //         headers: {
+  //           "Content-Type": "multipart/form-data",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     console.log("Business created:", response.data);
+  //     // You can show toast or navigate here
+  //   } catch (error) {
+  //     console.error("Error submitting business form:", error);
+  //     // You can show error toast here
+  //   }
+  // };
+
   const handleSubmit = async () => {
     try {
       const form = new FormData();
 
-      // 1. Flat fields
-      form.append("businessName", formData.businessName);
+      // ✅ Flat fields (corrected)
+      form.append("name", formData.businessName); // ⬅️ Backend expects 'name'
       form.append("ownerName", formData.ownerName);
       form.append("experience", formData.experience);
       form.append("description", formData.description);
@@ -93,57 +170,35 @@ const ListBusinessPage = () => {
       form.append("website", formData.website);
       form.append("category", formData.category);
 
-      // 2. Location fields
-      Object.entries(formData.location).forEach(([key, value]) => {
-        form.append(`location[${key}]`, value);
-      });
+      // ⚠️ Hardcoded owner ID (replace with real user ID in production)
+      const ownerId = localStorage.getItem("userId"); // or however you're tracking user
+      form.append("owner", ownerId);
 
-      // 3. Social Links
-      Object.entries(formData.socialLinks).forEach(([key, value]) => {
-        form.append(`socialLinks[${key}]`, value);
-      });
+      // ✅ Complex objects as JSON strings
+      form.append("location", JSON.stringify(formData.location));
+      form.append("socialLinks", JSON.stringify(formData.socialLinks));
+      form.append("businessHours", JSON.stringify(formData.businessHours));
+      form.append("categoryData", JSON.stringify(formData.categoryData));
 
-      // 4. Category Data (flat + extraFields)
-      Object.entries(formData.categoryData).forEach(([key, value]) => {
-        if (key === "extraFields") {
-          Object.entries(value).forEach(([subKey, subValue]) => {
-            form.append(`categoryData[extraFields][${subKey}]`, subValue);
-          });
-        } else {
-          form.append(`categoryData[${key}]`, value);
-        }
-      });
-
-      // 5. Business Hours (array of objects)
-      formData.businessHours.forEach((item, index) => {
-        form.append(`businessHours[${index}][day]`, item.day);
-        form.append(`businessHours[${index}][open]`, item.open);
-        form.append(`businessHours[${index}][close]`, item.close);
-      });
-
-      // 6. Profile Photo (single file)
+      // ✅ Files
       if (formData.profilePhoto?.file) {
-        form.append("profilePhoto", formData.profilePhoto.file);
+        form.append("profileImage", formData.profilePhoto.file); // ⬅️ updated field name
       }
 
-      // 7. Banner (single file)
       if (formData.Banner?.file) {
-        form.append("Banner", formData.Banner.file);
+        form.append("coverImage", formData.Banner.file); // ⬅️ updated field name
       }
 
-      // 8. Certificate Images (array of files)
-      formData.certificateImages.forEach((item, index) => {
+      formData.certificateImages.forEach((item) => {
         form.append("certificateImages", item.file);
       });
 
-      // 9. Gallery Images (array of files)
-      formData.galleryImages.forEach((item, index) => {
+      formData.galleryImages.forEach((item) => {
         form.append("galleryImages", item.file);
       });
 
-      // 10. Send to API
+      // ✅ API call
       const token = localStorage.getItem("token");
-      console.log(token);
 
       const response = await axios.post(
         "http://localhost:5000/api/business/business",
@@ -157,10 +212,11 @@ const ListBusinessPage = () => {
       );
 
       console.log("Business created:", response.data);
-      // You can show toast or navigate here
     } catch (error) {
-      console.error("Error submitting business form:", error);
-      // You can show error toast here
+      console.error(
+        "Error submitting business form:",
+        error.response?.data || error
+      );
     }
   };
 
@@ -198,7 +254,7 @@ const ListBusinessPage = () => {
 
         return {
           ...prev,
-          [name]: [...(prev[name] || []), ...filePreviews], // certificateImages becomes array of {file, preview}
+          [name]: [...(prev[name] || []), ...filePreviews],
         };
       } else if (
         prev.categoryData?.extraFields &&
