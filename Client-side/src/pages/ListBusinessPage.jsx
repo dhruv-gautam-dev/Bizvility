@@ -61,8 +61,8 @@ const ListBusinessPage = () => {
       { day: "Sunday", open: "09:00", close: "18:00" },
     ],
 
-    profileImage: null, // single file path or URL
-    coverImage: null, // single file path or URL
+    profilePhoto: null, // single file path or URL
+    Banner: null, // single file path or URL
     certificateImages: [],
     galleryImages: [],
 
@@ -78,273 +78,91 @@ const ListBusinessPage = () => {
     },
   });
 
-  // const [formData, setFormData] = useState({
-  //   // Basic Info
-  //   // user: "",
-  //   ownerName: "",
-  //   experience: "",
-  //   businessName: "",
-  //   category: "",
-  //   description: "",
-  //   specialty: "",
-  //   yearofEstablishment: "",
-  //   appointmentLink: "",
-  //   affiliation: "",
-  //   registrationNumber: "",
-
-  //   // Contact
-  //   email: "",
-  //   phone: "",
-  //   website: "",
-  //   // Location
-  //   address: "",
-  //   city: "",
-  //   state: "",
-  //   zipCode: "",
-  //   // Hours  // it should inside an array
-  //   businessHours: [
-  //     { day: "Monday", open: "09:00", close: "18:00" },
-  //     { day: "Tuesday", open: "09:00", close: "18:00" },
-  //     { day: "Wednesday", open: "09:00", close: "18:00" },
-  //     { day: "Thursday", open: "09:00", close: "18:00" },
-  //     { day: "Friday", open: "09:00", close: "18:00" },
-  //     { day: "Saturday", open: "09:00", close: "18:00" },
-  //     { day: "Sunday", open: "09:00", close: "18:00" },
-  //   ],
-
-  //   // Media
-  //   gallery: [],
-  //   profilePhoto: null,
-  //   Banner: null,
-  //   Certifications: [],
-  //   videoUrl: "",
-  //   socialMedia: {
-  //     facebook: "",
-  //     instagram: "",
-  //   },
-  // });
   console.log(formData);
-
   const handleSubmit = async () => {
     try {
       const form = new FormData();
+
+      // 1. Flat fields
+      form.append("businessName", formData.businessName);
+      form.append("ownerName", formData.ownerName);
+      form.append("experience", formData.experience);
+      form.append("description", formData.description);
+      form.append("phone", formData.phone);
+      form.append("email", formData.email);
+      form.append("website", formData.website);
+      form.append("category", formData.category);
+
+      // 2. Location fields
+      Object.entries(formData.location).forEach(([key, value]) => {
+        form.append(`location[${key}]`, value);
+      });
+
+      // 3. Social Links
+      Object.entries(formData.socialLinks).forEach(([key, value]) => {
+        form.append(`socialLinks[${key}]`, value);
+      });
+
+      // 4. Category Data (flat + extraFields)
+      Object.entries(formData.categoryData).forEach(([key, value]) => {
+        if (key === "extraFields") {
+          Object.entries(value).forEach(([subKey, subValue]) => {
+            form.append(`categoryData[extraFields][${subKey}]`, subValue);
+          });
+        } else {
+          form.append(`categoryData[${key}]`, value);
+        }
+      });
+
+      // 5. Business Hours (array of objects)
+      formData.businessHours.forEach((item, index) => {
+        form.append(`businessHours[${index}][day]`, item.day);
+        form.append(`businessHours[${index}][open]`, item.open);
+        form.append(`businessHours[${index}][close]`, item.close);
+      });
+
+      // 6. Profile Photo (single file)
+      if (formData.profilePhoto?.file) {
+        form.append("profilePhoto", formData.profilePhoto.file);
+      }
+
+      // 7. Banner (single file)
+      if (formData.Banner?.file) {
+        form.append("Banner", formData.Banner.file);
+      }
+
+      // 8. Certificate Images (array of files)
+      formData.certificateImages.forEach((item, index) => {
+        form.append("certificateImages", item.file);
+      });
+
+      // 9. Gallery Images (array of files)
+      formData.galleryImages.forEach((item, index) => {
+        form.append("galleryImages", item.file);
+      });
+
+      // 10. Send to API
       const token = localStorage.getItem("token");
-      console.log(form);
+      console.log(token);
 
-      Object.entries(formData).forEach(([key, value]) => {
-        if (
-          key === "gallery" ||
-          key === "Certifications" ||
-          key === "businessHours" ||
-          key === "socialMedia"
-        ) {
-          return;
+      const response = await axios.post(
+        "http://localhost:5000/api/business/business",
+        form,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         }
-        if (key === "profilePhoto" || key === "Banner") {
-          // These are preview URLs, not files, so skip
-          return;
-        }
-        form.append(key, value);
-      });
+      );
 
-      // Append gallery images
-      formData.gallery.forEach((fileObj, idx) => {
-        if (fileObj.file) {
-          form.append("gallery", fileObj.file);
-        }
-      });
-
-      // Append certifications
-      formData.Certifications.forEach((fileObj, idx) => {
-        if (fileObj.file) {
-          form.append("Certifications", fileObj.file);
-        }
-      });
-
-      // Append business hours as JSON
-      form.append("businessHours", JSON.stringify(formData.businessHours));
-      // form.append("businessHours", JSON.stringify(formData.businessHours));
-
-      // Append social media as JSON
-      form.append("socialMedia", JSON.stringify(formData.socialMedia));
-
-      // append token to form data
-      // form.append("token", JSON.stringify(token));
-      console.log(`Bearer ${token}`);
-
-      // Example endpoint, replace with your backend URL
-      await axios.post("http://localhost:5000/api/business/business", form, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      alert("Business listed successfully!");
-      navigate("/success"); // or wherever you want to redirect
-
-      console.log(form);
+      console.log("Business created:", response.data);
+      // You can show toast or navigate here
     } catch (error) {
-      alert("Failed to submit. Please try again.");
-      console.error(error);
+      console.error("Error submitting business form:", error);
+      // You can show error toast here
     }
   };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     const form = new FormData();
-  //     const token = localStorage.getItem("token");
-  //     const userLS = JSON.parse(localStorage.getItem("user"));
-  //     console.log(userLS);
-  //     console.log(form);
-
-  //     if (!userLS?.data?._id) {
-  //       alert("User not authenticated. Please log in again.");
-  //       return;
-  //     }
-
-  //     Object.entries(formData).forEach(([key, value]) => {
-  //       if (
-  //         key === "gallery" ||
-  //         key === "Certifications" ||
-  //         key === "businessHours" ||
-  //         key === "socialMedia"
-  //       ) {
-  //         return;
-  //       }
-  //       if (key === "profilePhoto" || key === "Banner") {
-  //         // These are preview URLs, not files, so skip
-  //         return;
-  //       }
-  //       form.append(key, value);
-  //     });
-
-  //     // Append gallery images
-  //     formData.gallery.forEach((fileObj, idx) => {
-  //       if (fileObj.file) {
-  //         form.append("gallery", fileObj.file);
-  //       }
-  //     });
-
-  //     // Append certifications
-  //     formData.Certifications.forEach((fileObj, idx) => {
-  //       if (fileObj.file) {
-  //         form.append("Certifications", fileObj.file);
-  //       }
-  //     });
-
-  //     // Append business hours as JSON
-  //     form.append("businessHours", JSON.stringify(formData.businessHours));
-  //     // form.append("businessHours", JSON.stringify(formData.businessHours));
-
-  //     // Append social media as JSON
-  //     form.append("socialMedia", JSON.stringify(formData.socialMedia));
-
-  //     // append token to form data
-  //     // form.append("token", JSON.stringify(token));
-  //     console.log(`Bearer ${token}`);
-
-  //     // Example endpoint, replace with your backend URL
-  //     await axios.post("http://localhost:5000/api/business/business", form, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-
-  //     alert("Business listed successfully!");
-  //     navigate("/success"); // or wherever you want to redirect
-
-  //     console.log(form);
-  //   } catch (error) {
-  //     alert("Failed to submit. Please try again.");
-  //     console.error(error);
-  //   }
-  // };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     const form = new FormData();
-  //     const token = localStorage.getItem("token");
-  //     const userLS = JSON.parse(localStorage.getItem("user"));
-  //     console.log(userLS);
-  //     console.log(form);
-
-  //     if (!userLS?.data?._id) {
-  //       alert("User not authenticated. Please log in again.");
-  //       return;
-  //     }
-  //     const userId = userLS.data._id;
-  //     console.log(userId);
-
-  //     form.append("owner", userId);
-  //     form.append("name", formData.businessName);
-  //     form.append("ownerName", formData.ownerName);
-  //     form.append("phone", formData.phone);
-  //     form.append("website", formData.website);
-  //     form.append("email", formData.email);
-  //     form.append("category", formData.category);
-
-  //     const location = {
-  //       address: formData.address,
-  //       city: formData.city,
-  //       state: formData.state,
-  //       pincode: formData.zipCode,
-  //     };
-  //     form.append("location", JSON.stringify(location));
-  //     form.append("socialLinks", JSON.stringify(formData.socialMedia));
-
-  //     const bh = {};
-  //     formData.businessHours.forEach((d) => {
-  //       bh[d.day.toLowerCase()] = `${d.open}-${d.close}`;
-  //     });
-  //     form.append("businessHours", JSON.stringify(bh));
-
-  //     const categoryData = {
-  //       speciality: formData.specialty,
-  //       registerNumber: formData.registrationNumber,
-  //       YearOfEstablishment: new Date(formData.yearofEstablishment),
-  //       appointmentLink: formData.appointmentLink,
-  //       affiliation: formData.affiliation,
-  //       AC: true,
-  //       Parking: true,
-  //       extraFields: { videoUrl: formData.videoUrl || "" },
-  //     };
-  //     form.append("categoryData", JSON.stringify(categoryData));
-
-  //     if (files.profileImage) form.append("profileImage", files.profileImage);
-  //     if (files.coverImage) form.append("coverImage", files.coverImage);
-  //     formData.Certifications.forEach(
-  //       (f) => f.file && form.append("certificateImages", f.file)
-  //     );
-  //     formData.gallery.forEach(
-  //       (f) => f.file && form.append("galleryImages", f.file)
-  //     );
-
-  //     await axios.post("http://localhost:5000/api/business/business", form, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-
-  //     alert("Business listed successfully!");
-  //     navigate("/success");
-  //   } catch (error) {
-  //     console.error(
-  //       "❌ Submission failed:",
-  //       error.response?.data || error.message
-  //     );
-  //     alert("Failed to submit. Please try again.");
-  //   }
-  // };
-
-  // const nestedKeys = [
-  //   "facebook",
-  //   "instagram",
-  //   "twitter",
-  //   "youtube",
-  //   "linkedin",
-  // ];
 
   const handleInputChange = (e, index = null, nestedArrayKey = null) => {
     const { name, value, type, files } = e.target;
@@ -359,11 +177,28 @@ const ListBusinessPage = () => {
           location: { ...prev.location, [name]: value },
         };
       } else if (prev.socialLinks[name] !== undefined) {
-        // ...
+        return {
+          ...prev,
+          socialLinks: {
+            ...prev.socialLinks,
+            [name]: value,
+          },
+        };
       } else if (prev.categoryData && prev.categoryData[name] !== undefined) {
         return {
           ...prev,
           categoryData: { ...prev.categoryData, [name]: value },
+        };
+      } else if (type === "file") {
+        const fileArray = Array.from(files); // convert FileList to Array
+        const filePreviews = fileArray.map((file) => ({
+          file,
+          preview: URL.createObjectURL(file),
+        }));
+
+        return {
+          ...prev,
+          [name]: [...(prev[name] || []), ...filePreviews], // certificateImages becomes array of {file, preview}
         };
       } else if (
         prev.categoryData?.extraFields &&
@@ -604,7 +439,7 @@ const ListBusinessPage = () => {
               </div>
               <div className="mt-3">
                 <label
-                  htmlFor="registrationNumber"
+                  htmlFor="registerNumber"
                   className="block mb-1 text-sm font-medium text-gray-700"
                 >
                   Registration Number
@@ -613,11 +448,11 @@ const ListBusinessPage = () => {
                   <Key className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
                   <input
                     type="text"
-                    id="registrationNumber"
-                    name="registrationNumber"
+                    id="registerNumber"
+                    name="registerNumber"
                     required
                     className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={formData.categoryData.registrationNumber}
+                    value={formData.categoryData.registerNumber}
                     onChange={handleInputChange}
                   />
                 </div>
@@ -971,7 +806,7 @@ const ListBusinessPage = () => {
                     className="sr-only"
                     multiple
                     accept="application/pdf"
-                    onChange={handleFileChange}
+                    onChange={handleInputChange}
                   />
                 </label>
                 <p className="pl-1">or drag and drop</p>
@@ -980,19 +815,19 @@ const ListBusinessPage = () => {
             </div>
           </div>
         </div>
-        {formData.certificateImages.length > 0 && (
+        {formData?.certificateImages?.length > 0 && (
           <div>
             <h3 className="mb-2 text-sm font-medium text-gray-700">
               Selected Certifications
             </h3>
             <ul className="space-y-2">
-              {formData.Certifications.map((file, index) => (
+              {formData.certificateImages.map((file, index) => (
                 <li
                   key={index}
                   className="flex items-center justify-between p-3 bg-gray-100 rounded-md"
                 >
                   <span className="w-2/3 text-sm font-medium text-gray-800 truncate">
-                    {file.name}
+                    {file.file.name}
                   </span>
                   <a
                     href={file.preview}
@@ -1029,7 +864,7 @@ const ListBusinessPage = () => {
                     className="sr-only"
                     multiple
                     accept="image/*"
-                    onChange={handleFileChange}
+                    onChange={handleInputChange}
                   />
                 </label>
                 <p className="pl-1">or drag and drop</p>
@@ -1038,7 +873,7 @@ const ListBusinessPage = () => {
             </div>
           </div>
         </div>
-        {formData.galleryImages.length > 0 && (
+        {formData?.galleryImages?.length > 0 && (
           <div>
             <h3 className="mb-2 text-sm font-medium text-gray-700">
               Selected Photos
@@ -1073,7 +908,7 @@ const ListBusinessPage = () => {
               name="videoUrl"
               required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.categoryData.extraFields.videoUrl}
+              value={formData?.categoryData?.extraFields?.videoUrl}
               onChange={handleInputChange}
             />
           </div>
@@ -1095,7 +930,7 @@ const ListBusinessPage = () => {
               name="facebook"
               required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.socialLinks.facebook}
+              value={formData?.socialLinks?.facebook}
               onChange={handleInputChange}
             />
           </div>
@@ -1117,7 +952,7 @@ const ListBusinessPage = () => {
               name="instagram"
               required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.socialLinks.instagram}
+              value={formData?.socialLinks?.instagram}
               onChange={handleInputChange}
             />
           </div>
@@ -1127,67 +962,6 @@ const ListBusinessPage = () => {
   );
 
   const renderReviewStep = () => {
-    // <div>
-    //   <h2 className="mb-6 text-2xl font-bold">Review Your Information</h2>
-    //   <div className="space-y-8">
-    //     <div>
-    //       <h3 className="mb-2 text-lg font-semibold">Basic Information</h3>
-    //       <div className="p-4 rounded-md bg-gray-50">
-    //         <p>
-    //           <strong>Business Name:</strong> {formData.businessName}
-    //         </p>
-    //         <p>
-    //           <strong>Category:</strong> {formData.category}
-    //         </p>
-    //         <p>
-    //           <strong>Description:</strong> {formData.description}
-    //         </p>
-    //       </div>
-    //     </div>
-
-    //     <div>
-    //       <h3 className="mb-2 text-lg font-semibold">Contact Information</h3>
-    //       <div className="p-4 rounded-md bg-gray-50">
-    //         <p>
-    //           <strong>Email:</strong> {formData.email}
-    //         </p>
-    //         <p>
-    //           <strong>Phone:</strong> {formData.phone}
-    //         </p>
-    //         <p>
-    //           <strong>Website:</strong> {formData.website}
-    //         </p>
-    //       </div>
-    //     </div>
-
-    //     <div>
-    //       <h3 className="mb-2 text-lg font-semibold">Location</h3>
-    //       <div className="p-4 rounded-md bg-gray-50">
-    //         <p>
-    //           <strong>Address:</strong> {formData.address}
-    //         </p>
-    //         <p>
-    //           <strong>City:</strong> {formData.city}
-    //         </p>
-    //         <p>
-    //           <strong>State:</strong> {formData.state}
-    //         </p>
-    //         <p>
-    //           <strong>ZIP Code:</strong> {formData.zipCode}
-    //         </p>
-    //       </div>
-    //     </div>
-
-    //     <div className="flex justify-center">
-    //       <button
-    //         type="submit"
-    //         className="px-8 py-3 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
-    //       >
-    //         Submit Listing
-    //       </button>
-    //     </div>
-    //   </div>
-    // </div>;
     return (
       <>
         {formData && Object.keys(formData).length > 0 && (
@@ -1233,38 +1007,6 @@ const ListBusinessPage = () => {
       setCurrentStep(steps[currentIndex - 1]);
     }
   };
-
-  // const handleSubmit = () => {
-  //   console.log(businessHours);
-  //   // Format businessHours into [day, “HH:MMAM - HH:MMPM”] or ["Closed"/"open"]
-  //   // const formattedHours = formData.businessHours.map(
-  //   //   ({ day, open, close }) => {
-  //   //     if (open && close) {
-  //   //       const fmt = (t) => {
-  //   //         const [h, m] = t.split(":").map(Number);
-  //   //         const suffix = h >= 12 ? "PM" : "AM";
-  //   //         const hh = ((h + 11) % 12) + 1;
-  //   //         return `${String(hh).padStart(2, "0")}:${String(m).padStart(
-  //   //           2,
-  //   //           "0"
-  //   //         )}${suffix}`;
-  //   //       };
-  //   //       return [day, `${fmt(open)} - ${fmt(close)}`];
-  //   //     }
-  //   //     // handle cases like “Closed” or "open"
-  //   //     return [day, open?.toLowerCase() === "open" ? "open" : "Closed"];
-  //   //   }
-  //   // );
-
-  //   const payload = {
-  //     ...formData,
-  //     businessHours: formattedHours,
-  //   };
-
-  //   // Now send payload to your backend
-  //   console.log("Submitting payload →", payload);
-  //   // e.g. api.post("/submit", payload)
-  // };
 
   return (
     <div className="pt-20">

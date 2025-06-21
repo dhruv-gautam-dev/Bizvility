@@ -50,13 +50,13 @@ const StoreDetailPage = ({ data }) => {
   console.log(store);
 
   if (!store) return <div>Loading...</div>;
-  function formatAddressPretty(address) {
-    return address
-      .trim()
-      .split(/\s*,\s*/)
-      .map((part) => part.trim())
-      .join(",+");
-  }
+  // function formatAddressPretty(address) {
+  //   return address
+  //     .trim()
+  //     .split(/\s*,\s*/)
+  //     .map((part) => part.trim())
+  //     .join(",+");
+  // }
 
   const getTimestamp = (r) => {
     // Combine date + time (e.g., "February 13, 2025 11:32 AM")
@@ -77,7 +77,13 @@ const StoreDetailPage = ({ data }) => {
     }, [filter, store.reviews]);
   }
 
-  const formattedLoc = formatAddressPretty(store.location.address);
+  // const formattedLoc = formatAddressPretty(store.location.address);
+
+  const formattedLoc = encodeURIComponent(
+    `${store.location.address}, ${store.location.city}, ${store.location.state} ${store.location.pincode}`
+  );
+  const address = `${store.location.address}, ${store.location.city}, ${store.location.state}`;
+
   const iframeSrc = `https://www.google.com/maps?q=${formattedLoc}&output=embed`;
 
   if (!store) {
@@ -151,7 +157,7 @@ const StoreDetailPage = ({ data }) => {
               </div>
               <div className="flex flex-wrap items-center mt-2 space-x-4 text-gray-600">
                 <MapPin className="w-5 h-5" />
-                <span>{store.address}</span>
+                <span>{store.address || address}</span>
                 <span>• Open until {store.openUntil}</span>
                 <span>
                   • {store.years || store.experience} Years in Business
@@ -225,7 +231,7 @@ const StoreDetailPage = ({ data }) => {
                         <h3 className="text-lg font-semibold text-gray-800">
                           Specialty
                         </h3>
-                        <p className="ml-4">{store.specialty}</p>
+                        <p className="ml-4">{store.categoryData.specialty}</p>
                       </div>
 
                       {/* 3. Year of Establishment */}
@@ -233,7 +239,9 @@ const StoreDetailPage = ({ data }) => {
                         <h3 className="text-lg font-semibold text-gray-800">
                           Year of Establishment
                         </h3>
-                        <p className="ml-4">{store.yearofEstablishment}</p>
+                        <p className="ml-4">
+                          {store.categoryData.YearOfEstablishment}
+                        </p>
                       </div>
 
                       {/* 4. Experience */}
@@ -294,7 +302,7 @@ const StoreDetailPage = ({ data }) => {
                           Register Number
                         </div>
                         <div>
-                          {store.registerNumber ||
+                          {store.categoryData.registerNumber ||
                             store.registrationNumber ||
                             "Not Available"}
                         </div>
@@ -305,9 +313,9 @@ const StoreDetailPage = ({ data }) => {
                           Appointment Link
                         </div>
                         <div>
-                          {store.appointmentLink ? (
+                          {store.categoryData.appointmentLink ? (
                             <a
-                              href={store.appointmentLink}
+                              href={store.categoryData.appointmentLink}
                               className="text-blue-600 underline"
                               target="_blank"
                               rel="noopener noreferrer"
@@ -344,14 +352,18 @@ const StoreDetailPage = ({ data }) => {
                         <div className="font-medium text-gray-700">
                           Affiliation
                         </div>
-                        <div>{store.affiliation || "Not Available"}</div>
+                        <div>
+                          {store.categoryData.affiliation || "Not Available"}
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 py-3">
                         <div className="font-medium text-gray-700">
                           Specialty
                         </div>
-                        <div>{store.specialty || "Not Available"}</div>
+                        <div>
+                          {store.categoryData.specialty || "Not Available"}
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 py-3">
@@ -377,9 +389,9 @@ const StoreDetailPage = ({ data }) => {
                           Video URL
                         </div>
                         <div>
-                          {store.videoUrl ? (
+                          {store.categoryData.extraFields.videoUrl ? (
                             <a
-                              href={store.videoUrl}
+                              href={store.categoryData.extraFields.videoUrl}
                               className="text-blue-600 underline"
                               target="_blank"
                               rel="noopener noreferrer"
@@ -405,9 +417,9 @@ const StoreDetailPage = ({ data }) => {
                         </div>
                         <div className="flex space-x-4">
                           {(store.socialMedia?.facebook ||
-                            store.socialMedia.fbUrl) && (
+                            store.socialLinks.facebook) && (
                             <a
-                              href={store.socialMedia.facebook}
+                              href={store.socialLinks.facebook}
                               target="_blank"
                               rel="noopener noreferrer"
                             >
@@ -418,9 +430,9 @@ const StoreDetailPage = ({ data }) => {
                               />
                             </a>
                           )}
-                          {store.socialMedia?.instagram && (
+                          {store.socialLinks?.instagram && (
                             <a
-                              href={store.socialMedia.instagram}
+                              href={store.socialLinks.instagram}
                               target="_blank"
                               rel="noopener noreferrer"
                             >
@@ -449,8 +461,8 @@ const StoreDetailPage = ({ data }) => {
                     <div className="grid grid-cols-4 gap-2 my-4 ml-18">
                       {(store.photos?.length
                         ? store.photos
-                        : store.gallery?.length
-                        ? store.gallery
+                        : store.galleryImages?.length
+                        ? store.galleryImages
                         : []
                       ).map((item, idx) => {
                         // Convert object to URL string instantly:
@@ -581,7 +593,6 @@ const StoreDetailPage = ({ data }) => {
           {/* Store detail section  */}
           <section className="container w-1/3 max-w-4xl p-6 pt-24 mx-auto bg-white rounded-lg ">
             {/* Business Hours     */}
-            {/* important code  */}
             <div className="p-1 mb-4 bg-white rounded-md ">
               <h2 className="mb-4 text-lg font-semibold text-red-600">
                 Business Hours
@@ -645,9 +656,7 @@ const StoreDetailPage = ({ data }) => {
             {/* Get Direction Button */}
             <div className="text-center">
               <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-                  store.address
-                )}`}
+                href={`https://www.google.com/maps/dir/?api=1&destination=${formattedLoc}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -671,14 +680,20 @@ const StoreDetailPage = ({ data }) => {
 
                 <div>
                   <strong>Register Number:</strong>{" "}
-                  {store.registerNumber || "Not Available"}
+                  {store.registerNumber ||
+                    store.categoryData.registerNumber ||
+                    "Not Available"}
                 </div>
 
                 <div>
                   <strong>Appointment Link:</strong>{" "}
-                  {store.appointmentLink ? (
+                  {store.appointmentLink ||
+                  store.categoryData.appointmentLink ? (
                     <a
-                      href={store.appointmentLink}
+                      href={
+                        store.appointmentLink ||
+                        store.categoryData.appointmentLink
+                      }
                       className="text-blue-600 underline"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -701,12 +716,16 @@ const StoreDetailPage = ({ data }) => {
 
                 <div>
                   <strong>Affiliation:</strong>{" "}
-                  {store.affiliation || "Not Available"}
+                  {store.affiliation ||
+                    store.categoryData.affiliation ||
+                    "Not Available"}
                 </div>
 
                 <div>
                   <strong>Specialty:</strong>{" "}
-                  {store.specialty || "Not Available"}
+                  {store.specialty ||
+                    store.categoryData.specialty ||
+                    "Not Available"}
                 </div>
 
                 <div>
@@ -727,9 +746,12 @@ const StoreDetailPage = ({ data }) => {
 
                 <div>
                   <strong>VideoURL:</strong>{" "}
-                  {store.videoURL ? (
+                  {store.videoURL || store.categoryData.extraFields.videoUrl ? (
                     <a
-                      href={store.videoURL}
+                      href={
+                        store.videoURL ||
+                        store.categoryData.extraFields.videoUrl
+                      }
                       className="text-blue-600 underline"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -749,32 +771,34 @@ const StoreDetailPage = ({ data }) => {
                 <div>
                   <strong>Social Media:</strong>
                   <div className="flex items-center mt-1 space-x-4">
-                    {store.socialMedia?.facebook && (
-                      <a
-                        href={store.socialMedia.facebook}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <img
-                          src="https://cdn-icons-png.flaticon.com/512/145/145802.png"
-                          alt="Facebook"
-                          className="w-5 h-5"
-                        />
-                      </a>
-                    )}
-                    {store.socialMedia?.instagram && (
-                      <a
-                        href={store.socialMedia.instagram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <img
-                          src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
-                          alt="Instagram"
-                          className="w-5 h-5"
-                        />
-                      </a>
-                    )}
+                    {store.socialMedia?.facebook ||
+                      (store.socialLinks.instagram && (
+                        <a
+                          href={store.socialLinks.facebook}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            src="https://cdn-icons-png.flaticon.com/512/145/145802.png"
+                            alt="Facebook"
+                            className="w-5 h-5"
+                          />
+                        </a>
+                      ))}
+                    {store.socialMedia?.instagram ||
+                      (store.socialLinks?.instagram && (
+                        <a
+                          href={store.socialLinks.instagram}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
+                            alt="Instagram"
+                            className="w-5 h-5"
+                          />
+                        </a>
+                      ))}
                   </div>
                 </div>
               </div>

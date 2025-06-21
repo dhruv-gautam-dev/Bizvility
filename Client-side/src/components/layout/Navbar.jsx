@@ -66,7 +66,7 @@ const Navbar = ({ scrolled, user }) => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="items-center hidden space-x-8 lg:flex">
+          <nav className="items-center hidden mr-4 space-x-8 lg:flex">
             {!isHome && <SearchForm />}
             <Link
               to="/"
@@ -102,10 +102,10 @@ const Navbar = ({ scrolled, user }) => {
 
           {/* Desktop CTA */}
           <div className="items-center hidden space-x-4 lg:flex">
-            <button className="flex items-center space-x-1 text-gray-700 transition-colors hover:text-blue-600">
+            {/* <button className="flex items-center space-x-1 text-gray-700 transition-colors hover:text-blue-600">
               <Heart className="w-5 h-5" />
               <span>Saved</span>
-            </button>
+            </button> */}
             <Link
               to="/list-business"
               className="px-4 py-2 text-white transition-colors bg-blue-600 rounded-md w-38 hover:bg-blue-700"
@@ -151,7 +151,7 @@ const Navbar = ({ scrolled, user }) => {
               ) : (
                 <Link
                   to="/signin"
-                  className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                  className="w-20 px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
                 >
                   Sign In
                 </Link>
@@ -207,10 +207,10 @@ const Navbar = ({ scrolled, user }) => {
               >
                 Contact
               </Link>
-              <button className="flex items-center space-x-1 text-gray-700 transition-colors hover:text-blue-600">
+              {/* <button className="flex items-center space-x-1 text-gray-700 transition-colors hover:text-blue-600">
                 <Heart className="w-5 h-5" />
                 <span>Saved</span>
-              </button>
+              </button> */}
               <div className="flex items-center pt-2 space-x-2">
                 <Link
                   to="/list-business"
