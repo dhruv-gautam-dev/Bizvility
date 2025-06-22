@@ -20,7 +20,7 @@ const Navbar = ({ scrolled, user }) => {
 
   // console.log(localStorage);
   user = localStorage.token;
-  console.log(user);
+  // console.log(user);
 
   const handleMyDashboard = () => {
     navigate("/user-dashboard");

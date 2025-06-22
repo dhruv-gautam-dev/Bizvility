@@ -1,9 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { MapPin } from "lucide-react";
-import { healthCategoryData } from "../../data/HealthAndMedical/healthCategoryData";
+import { MapPin, UserIcon } from "lucide-react";
+import { getBusinessById } from "../../data/HealthAndMedical/healthCategoryData";
 import { Mail, Phone } from "lucide-react";
-
+import { useLocation } from "react-router-dom";
 import {
   FaStar,
   FaRegStar,
@@ -13,23 +13,58 @@ import {
 } from "react-icons/fa";
 
 const StoreDetailPage = ({ data }) => {
+  console.log("StoreDetailPage rendered");
+  const location = useLocation();
+  const { slug, storeId } = useParams();
+  const token = localStorage.token;
+  console.log(storeId);
+  console.log(slug);
+  console.log(token);
+  const [store, setStore] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const isFormPreview = location.pathname.includes(
     "/Reacts/list-business/form"
   );
+  // const { storeId } = location.state || {};
+  // getBusinessById(storeId, token);
+  useEffect(() => {
+    console.log("storeId:", storeId, "token:", token);
+    if (!storeId || !token) {
+      console.log("Missing storeId or token, skipping fetch");
+      setError("Missing store ID or token");
+      setLoading(false);
+      return;
+    }
 
-  const { slug, storeId } = useParams();
+    const fetchStore = async () => {
+      try {
+        console.log("Fetching store with storeId:", storeId);
+        const data = await getBusinessById(storeId, token);
+        console.log("Fetched data:", data);
+        setStore(data.businesses || data.business);
+        setLoading(false);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setError("Failed to fetch store data");
+        setLoading(false);
+      }
+    };
+    fetchStore();
+  }, [storeId, token]);
 
   // const store = healthCategoryData.find((s) => String(s.id) === storeId);
   const [activeTab, setActiveTab] = useState("Overview");
   const [filter, setFilter] = useState("Relevant");
 
-  const store = useMemo(() => {
-    if (data) {
-      return data;
-    } else {
-      return healthCategoryData.find((s) => String(s.id) === storeId);
-    }
-  }, [data, storeId]);
+  // const store = useMemo(() => {
+  //   if (data) {
+  //     return data;
+  //   } else {
+  //     // return healthCategoryData.find((s) => String(s.id) === storeId);
+  //   }
+  // }, [data, storeId]);
 
   const reviews = useMemo(() => {
     if (!store || !store.reviews) return [];
@@ -123,14 +158,16 @@ const StoreDetailPage = ({ data }) => {
           <div
             className="relative px-4 py-40 text-white bg-center bg-cover md:px-16"
             style={{
-              backgroundImage: `url(${store.photos?.[0] || store.Banner})`,
+              backgroundImage: `url(${
+                store.photos?.[0] || store.Banner.preview || store.coverImage
+              })`,
             }}
           ></div>
 
           {/* Circle Doctor Profile Image */}
           <div className="relative flex flex-col items-center left-3 -top-40 md:w-1/3 md:mt-0">
             <img
-              src={store.image || store.profilePhoto}
+              src={store.profileImage || store.profilePhoto.preview}
               alt={store.name || store.ownerName}
               className="object-cover border-4 border-white rounded-full shadow-lg w-72 h-72"
             />
@@ -229,9 +266,9 @@ const StoreDetailPage = ({ data }) => {
                       {/* 2. Specialty */}
                       <div>
                         <h3 className="text-lg font-semibold text-gray-800">
-                          Specialty
+                          Speciality
                         </h3>
-                        <p className="ml-4">{store.categoryData.specialty}</p>
+                        <p className="ml-4">{store.categoryData.speciality}</p>
                       </div>
 
                       {/* 3. Year of Establishment */}
@@ -250,8 +287,8 @@ const StoreDetailPage = ({ data }) => {
                           Experience
                         </h3>
                         <p className="ml-4">
-                          {store.years} {store.years === 1 ? "year" : "years"}{" "}
-                          in practice
+                          {store.experience}{" "}
+                          {store.years === 1 ? "year" : "years"} in practice
                         </p>
                       </div>
 
@@ -362,7 +399,7 @@ const StoreDetailPage = ({ data }) => {
                           Specialty
                         </div>
                         <div>
-                          {store.categoryData.specialty || "Not Available"}
+                          {store.categoryData.speciality || "Not Available"}
                         </div>
                       </div>
 

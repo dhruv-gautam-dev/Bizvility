@@ -1,13 +1,34 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import CategoryData from "../data/Categories";
 import { MapPin, Phone, Globe, Clock, Star } from "lucide-react";
-import { healthCategoryData } from "../data/HealthAndMedical/healthCategoryData";
+import { getAllBusinesses } from "../data/HealthAndMedical/healthCategoryData";
 
 // console.log(healthCategoryData);
 
+// getAllBusinesses();
 const CategoryDetailPage = () => {
   const { slug, storeId } = useParams();
+  const [businesses, setBusinesses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const fetchBusinesses = async () => {
+      try {
+        const data = await getAllBusinesses(token); // 🔥 Accessing response.data directly
+        setBusinesses(data.businesses); // Set to state
+        console.log("Fetched businesses:", data); // Check what you actually receive
+        console.log(data._id);
+      } catch (err) {
+        console.error("Error loading businesses in Category Page:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBusinesses();
+  }, [token]);
 
   //construct the category in such by using loops or something in such a way it stores the details of targeted category data
   const category = CategoryData.find((cat) => cat.slug === slug);
@@ -48,29 +69,34 @@ const CategoryDetailPage = () => {
                 Popular in {category.name}
               </h2>
               <div className="grid grid-cols-2 ">
-                {healthCategoryData.map((biz) => (
+                {businesses.map((biz) => (
                   <Link
-                    to={`/categories/${slug}/store/${biz.id}`}
-                    key={biz.id}
-                    // state={{ store: biz }}
+                    to={`/categories/${slug}/store/${biz._id}`}
+                    key={biz._id}
+                    state={{ storeId: biz._id }}
                     className="block gap-3 p-4 pb-6 border-b border-gray-200 rounded-sm hover:bg-gray-50 last:border-0 last:pb-0"
                   >
                     <div
-                      key={biz.id}
+                      key={biz._id}
                       // store={store}
                       className="pb-6 border-b border-gray-200 rounded-lg last:border-0 last:pb-0"
                     >
                       <div className="flex items-start">
+                        {console.log(biz)}
+                        {console.log(biz.profileImage)}
+                        {/* const formattedLoc = encodeURIComponent( `$
+                        {store.location.address}, ${store.location.city}, $
+                        {store.location.state} ${store.location.pincode}` ); */}
                         <div>
                           <img
-                            src={biz.image}
+                            src={biz.profileImage}
                             alt={biz.alt}
                             className="object-cover w-24 h-24 rounded-lg"
                           />
                           <div className="flex items-center justify-center mt-2">
                             <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                             <span className="ml-1 text-gray-600">
-                              {biz.rating}
+                              {biz.rating || "5"}
                             </span>
                           </div>
                         </div>
@@ -81,8 +107,9 @@ const CategoryDetailPage = () => {
                             </h3>
                           </div>
                           <div className="flex items-center mt-2 text-sm text-gray-500">
+                            {}
                             <MapPin className="w-4 h-4 mr-1" />
-                            <span>{biz.address}</span>
+                            <span>{`${biz.location.address}, ${biz.location.city}, ${biz.location.state}`}</span>
                           </div>
                           <div className="flex items-center mt-1 text-sm text-gray-500">
                             <Phone className="w-4 h-4 mr-1" />
@@ -92,10 +119,10 @@ const CategoryDetailPage = () => {
                             <Globe className="w-4 h-4 mr-1" />
                             <span>{biz.website}</span>
                           </div>
-                          <div className="flex items-center mt-1 text-sm text-gray-500">
+                          {/* <div className="flex items-center mt-1 text-sm text-gray-500">
                             <Clock className="w-4 h-4 mr-1" />
                             <span>{biz.hours}</span>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                     </div>
