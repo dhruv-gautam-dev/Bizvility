@@ -119,7 +119,7 @@ export const login = asyncHandler(async (req, res) => {
     throw new Error('Please verify your email first');
   }
 
-  const accessToken = generateToken(user._id, '5m');
+  const accessToken = generateToken(user._id, '1d');
   const refreshToken = generateToken(user._id, '7d');
 
   user.refreshTokens.push(refreshToken);

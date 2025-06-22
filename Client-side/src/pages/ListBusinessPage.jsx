@@ -67,7 +67,7 @@ const ListBusinessPage = () => {
     galleryImages: [],
 
     categoryData: {
-      specialty: "",
+      speciality: "",
       registerNumber: "",
       YearOfEstablishment: "",
       appointmentLink: "",
@@ -171,7 +171,8 @@ const ListBusinessPage = () => {
       form.append("category", formData.category);
 
       // ⚠️ Hardcoded owner ID (replace with real user ID in production)
-      const ownerId = localStorage.getItem("userId"); // or however you're tracking user
+      const ownerId = localStorage.getItem("userId");
+      console.log(ownerId); // or however you're tracking user
       form.append("owner", ownerId);
 
       // ✅ Complex objects as JSON strings
@@ -182,11 +183,11 @@ const ListBusinessPage = () => {
 
       // ✅ Files
       if (formData.profilePhoto?.file) {
-        form.append("profileImage", formData.profilePhoto.file); // ⬅️ updated field name
+        form.append("profileImage", formData.profilePhoto.file);
       }
 
       if (formData.Banner?.file) {
-        form.append("coverImage", formData.Banner.file); // ⬅️ updated field name
+        form.append("coverImage", formData.Banner.file); // ✅ Correct file
       }
 
       formData.certificateImages.forEach((item) => {
@@ -194,12 +195,13 @@ const ListBusinessPage = () => {
       });
 
       formData.galleryImages.forEach((item) => {
-        form.append("galleryImages", item.file);
+        form.append("galleryImages", item?.file);
       });
 
       // ✅ API call
       const token = localStorage.getItem("token");
-
+      form.append("token", token);
+      console.log(formData);
       const response = await axios.post(
         "http://localhost:5000/api/business/business",
         form,
@@ -304,31 +306,33 @@ const ListBusinessPage = () => {
       const preview = URL.createObjectURL(file);
 
       setFormData((prev) => {
-        prev[name] && URL.revokeObjectURL(prev[name]);
+        if (prev[name]?.preview) URL.revokeObjectURL(prev[name].preview);
         return {
           ...prev,
-          [name]: preview,
+          [name]: { file, preview }, // ✅ Store both
         };
       });
-    } else if (name === "gallery" || name === "Certifications") {
+    } else if (name === "galleryImages" || name === "certificateImages") {
       const key = name;
       const newItems = fileArray
         .filter(
           (file) =>
             !formData[key]?.some(
               (existing) =>
-                existing.name === file.name && existing.size === file.size
+                existing.file?.name === file.name &&
+                existing.file?.size === file.size
             )
         )
         .map((file) => ({
-          name: file.name,
-          size: file.size,
+          // name: file.name,
+          // size: file.size,
+          file,
           preview: URL.createObjectURL(file),
         }));
 
       setFormData((prev) => ({
         ...prev,
-        [key]: [...prev[key], ...newItems],
+        [key]: [...(prev[key] || []), ...newItems],
       }));
     } else if (name === "businessHours") {
       handleBusinessHourChange();
@@ -519,20 +523,20 @@ const ListBusinessPage = () => {
 
         <div>
           <label
-            htmlFor="specialty"
+            htmlFor="speciality"
             className="block mb-1 text-sm font-medium text-gray-700"
           >
-            Specialty *
+            speciality *
           </label>
           <div className="relative">
             <Badge className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
             <input
               type="text"
-              id="specialty"
-              name="specialty"
+              id="speciality"
+              name="speciality"
               required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.categoryData.specialty}
+              value={formData.categoryData.speciality}
               onChange={handleInputChange}
             />
           </div>

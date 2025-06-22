@@ -1,4 +1,3 @@
-// upload.js inside midlwre
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -39,10 +38,11 @@ const storage = multer.diskStorage({
 });
 
 // ✅ File type validation
+// ✅ File type validation
 const fileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase();
 
-  const imageTypes = ['.jpg', '.jpeg', '.png', '.webp'];
+  const imageTypes = ['.jpg', '.jpeg', '.png', '.webp', '.avif']; // ✅ added .avif
   const pdfTypes = ['.pdf'];
 
   if (file.fieldname === 'certificateImages') {
@@ -58,6 +58,7 @@ const fileFilter = (req, file, cb) => {
   // Accept other files by default
   cb(null, true);
 };
+
 
 // ✅ Multer upload setup
 const upload = multer({ storage, fileFilter });
