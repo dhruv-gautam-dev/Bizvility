@@ -13,16 +13,17 @@ import {
 } from "react-icons/fa";
 
 const StoreDetailPage = ({ data }) => {
-  console.log("StoreDetailPage rendered");
+  // console.log("StoreDetailPage rendered");/
   const location = useLocation();
   const { slug, storeId } = useParams();
   const token = localStorage.token;
   console.log(storeId);
   console.log(slug);
   console.log(token);
-  const [store, setStore] = useState({});
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [healthStoreData, setHealthStoreData] = useState(null);
 
   const isFormPreview = location.pathname.includes(
     "/Reacts/list-business/form"
@@ -43,8 +44,9 @@ const StoreDetailPage = ({ data }) => {
         console.log("Fetching store with storeId:", storeId);
         const data = await getBusinessById(storeId, token);
         console.log("Fetched data:", data);
-        setStore(data.businesses || data.business);
         setLoading(false);
+        setHealthStoreData(data);
+        console.log(store);
       } catch (err) {
         console.error("Fetch error:", err);
         setError("Failed to fetch store data");
@@ -54,17 +56,26 @@ const StoreDetailPage = ({ data }) => {
     fetchStore();
   }, [storeId, token]);
 
+  console.log(healthStoreData);
+
+  // console.log(store);
   // const store = healthCategoryData.find((s) => String(s.id) === storeId);
   const [activeTab, setActiveTab] = useState("Overview");
   const [filter, setFilter] = useState("Relevant");
 
-  // const store = useMemo(() => {
-  //   if (data) {
-  //     return data;
-  //   } else {
-  //     // return healthCategoryData.find((s) => String(s.id) === storeId);
+  // useEffect(() => {
+  //   if (data != null) {
+  //     setStore(data);
   //   }
-  // }, [data, storeId]);
+  // }, [data]);
+
+  const store = useMemo(() => {
+    if (data) {
+      return data;
+    } else {
+      // return healthCategoryData.find((s) => String(s.id) === storeId);
+    }
+  }, [data, storeId]);
 
   const reviews = useMemo(() => {
     if (!store || !store.reviews) return [];
@@ -84,7 +95,7 @@ const StoreDetailPage = ({ data }) => {
 
   console.log(store);
 
-  if (!store) return <div>Loading...</div>;
+  if (!healthStoreData) return <div>Loading...</div>;
   // function formatAddressPretty(address) {
   //   return address
   //     .trim()
@@ -97,7 +108,9 @@ const StoreDetailPage = ({ data }) => {
     // Combine date + time (e.g., "February 13, 2025 11:32 AM")
     return new Date(`${r.date} ${r.time}`).getTime();
   };
-  if (!isFormPreview) {
+
+  if (isFormPreview) {
+    setStore(data);
     const sorted = React.useMemo(() => {
       const copy = [...store.reviews];
       // const copy = null;
@@ -115,13 +128,21 @@ const StoreDetailPage = ({ data }) => {
   // const formattedLoc = formatAddressPretty(store.location.address);
 
   const formattedLoc = encodeURIComponent(
-    `${store.location.address}, ${store.location.city}, ${store.location.state} ${store.location.pincode}`
+    `${
+      store?.location?.address || healthStoreData?.business?.location?.address
+    }, ${store?.location?.city || healthStoreData?.business?.location?.city}, ${
+      store?.location?.state || healthStoreData?.business?.location?.state
+    }`
   );
-  const address = `${store.location.address}, ${store.location.city}, ${store.location.state}`;
+  const address = `${
+    store?.location?.address || healthStoreData?.business?.location?.address
+  }, ${store?.location?.city || healthStoreData?.business?.location?.city}, ${
+    store?.location?.state || healthStoreData?.business?.location?.state
+  }`;
 
   const iframeSrc = `https://www.google.com/maps?q=${formattedLoc}&output=embed`;
 
-  if (!store) {
+  if (!healthStoreData) {
     return (
       <div className="flex items-center justify-center min-h-screen pt-20 bg-gray-50">
         <div className="text-center">
@@ -159,7 +180,10 @@ const StoreDetailPage = ({ data }) => {
             className="relative px-4 py-40 text-white bg-center bg-cover md:px-16"
             style={{
               backgroundImage: `url(${
-                store.photos?.[0] || store.Banner.preview || store.coverImage
+                store?.photos?.[0] ||
+                store?.Banner?.preview ||
+                store?.coverImage ||
+                healthStoreData.business.coverImage
               })`,
             }}
           ></div>
@@ -167,8 +191,16 @@ const StoreDetailPage = ({ data }) => {
           {/* Circle Doctor Profile Image */}
           <div className="relative flex flex-col items-center left-3 -top-40 md:w-1/3 md:mt-0">
             <img
-              src={store.profileImage || store.profilePhoto.preview}
-              alt={store.name || store.ownerName}
+              src={
+                store?.profileImage ||
+                store?.profilePhoto?.preview ||
+                healthStoreData.business.profileImage
+              }
+              alt={
+                store?.name ||
+                store?.ownerName ||
+                healthStoreData.business.ownerName
+              }
               className="object-cover border-4 border-white rounded-full shadow-lg w-72 h-72"
             />
           </div>
@@ -176,44 +208,60 @@ const StoreDetailPage = ({ data }) => {
           <div className="container flex flex-col py-6 mx-auto -mt-40 ml-28 md:flex-row md:items-center md:justify-between">
             <div className="ml-16 ">
               <h2 className="text-3xl font-bold">
-                {store.name || store.ownerName}
+                {store?.name ||
+                  store?.ownerName ||
+                  healthStoreData?.business?.ownerName}
               </h2>
               <div className="flex items-center mt-2 space-x-2">
                 <span className="px-2 py-1 text-white bg-green-600 rounded">
-                  {store.rating || 0} ★
+                  {store?.rating || 0 || healthStoreData?.business?.rating} ★
                 </span>
                 <span className="text-gray-600">
-                  {store.reviewsCount} Ratings
+                  {store?.reviewsCount ||
+                    healthStoreData?.business?.numberOfReviews}{" "}
+                  Ratings
                 </span>
-                {store.verified && (
-                  <span className="text-blue-600">Verified</span>
-                )}
-                {store.claimed && (
-                  <span className="text-gray-600">Claimed</span>
-                )}
+                {store?.verified ||
+                  (healthStoreData?.business?.varified && (
+                    <span className="text-blue-600">Verified</span>
+                  ))}
+                {store?.claimed ||
+                  (healthStoreData?.business?.claimed && (
+                    <span className="text-gray-600">Claimed</span>
+                  ))}
               </div>
               <div className="flex flex-wrap items-center mt-2 space-x-4 text-gray-600">
                 <MapPin className="w-5 h-5" />
-                <span>{store.address || address}</span>
-                <span>• Open until {store.openUntil}</span>
+                <span>{store?.address || address}</span>
+                <span>• Open until {store?.openUntil}</span>
                 <span>
-                  • {store.years || store.experience} Years in Business
+                  •{" "}
+                  {store?.years ||
+                    store?.experience ||
+                    healthStoreData?.business?.experience}{" "}
+                  Years in Business
                 </span>
-                <span>• Membership from ₹{store.price || "0"}</span>
+                <span>• Membership from ₹{store?.price || "0"}</span>
               </div>
             </div>
             <div className="flex mt-4 space-x-2 md:mt-0">
               <a
-                href={`tel:${store.phone}`}
+                href={
+                  `tel:${store?.phone}` ||
+                  `tel:${healthStoreData?.business?.phone}`
+                }
                 className="flex items-center px-4 py-2 text-white bg-green-600 rounded"
               >
-                📞 {store.phone}
+                📞 {store?.phone || healthStoreData?.business?.phone}
               </a>
               <button className="px-4 py-2 text-white bg-blue-600 rounded">
                 Enquire Now
               </button>
               <a
-                href={`https://wa.me/${store.phone}`}
+                href={
+                  `https://wa.me/${store?.phone}` ||
+                  `https://wa.me/${healthStoreData?.business?.phone}`
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2 text-white bg-green-500 rounded"
@@ -259,7 +307,9 @@ const StoreDetailPage = ({ data }) => {
                           Summary
                         </h3>
                         <p className="w-full ml-4 text-justify">
-                          {store.summary || store.description}
+                          {store?.summary ||
+                            store?.description ||
+                            healthStoreData?.business?.description}
                         </p>
                       </div>
 
@@ -268,7 +318,9 @@ const StoreDetailPage = ({ data }) => {
                         <h3 className="text-lg font-semibold text-gray-800">
                           Speciality
                         </h3>
-                        <p className="ml-4">{store.categoryData.speciality}</p>
+                        <p className="ml-4">
+                          {store?.categoryData?.speciality}
+                        </p>
                       </div>
 
                       {/* 3. Year of Establishment */}
@@ -277,7 +329,7 @@ const StoreDetailPage = ({ data }) => {
                           Year of Establishment
                         </h3>
                         <p className="ml-4">
-                          {store.categoryData.YearOfEstablishment}
+                          {store?.categoryData?.YearOfEstablishment}
                         </p>
                       </div>
 
@@ -287,8 +339,8 @@ const StoreDetailPage = ({ data }) => {
                           Experience
                         </h3>
                         <p className="ml-4">
-                          {store.experience}{" "}
-                          {store.years === 1 ? "year" : "years"} in practice
+                          {store?.experience}{" "}
+                          {store?.years === 1 ? "year" : "years"} in practice
                         </p>
                       </div>
 
@@ -326,12 +378,20 @@ const StoreDetailPage = ({ data }) => {
                       {/* Row Item */}
                       <div className="grid grid-cols-2 py-3">
                         <div className="font-medium text-gray-700">Phone</div>
-                        <div>{store.phone || "Not Available"}</div>
+                        <div>
+                          {store?.phone ||
+                            healthStoreData?.business?.phone ||
+                            "Not Available"}
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 py-3">
                         <div className="font-medium text-gray-700">Email</div>
-                        <div>{store.email || "Not Available"}</div>
+                        <div>
+                          {store?.email ||
+                            healthStoreData?.business?.email ||
+                            "Not Available"}
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 py-3">
@@ -635,7 +695,7 @@ const StoreDetailPage = ({ data }) => {
                 Business Hours
               </h2>
               <ul className="text-sm text-gray-700 divide-y divide-gray-200">
-                {store.businessHours.map(({ day, open, close }) => {
+                {store?.businessHours?.map(({ day, open, close }) => {
                   let timeDisplay = "Closed";
 
                   if (open && close) {
@@ -668,7 +728,7 @@ const StoreDetailPage = ({ data }) => {
             {/* Embedded Google Map */}
             <div className="mb-4">
               <h3 className="mb-2 text-lg font-semibold">Address</h3>
-              <p className="mb-2 text-sm text-gray-600">{store.address}</p>
+              <p className="mb-2 text-sm text-gray-600">{address}</p>
 
               {/* <iframe
                 title="Google Map"
@@ -680,7 +740,7 @@ const StoreDetailPage = ({ data }) => {
               <div className="w-full aspect-video">
                 <iframe
                   className="w-full h-full"
-                  title={`Map for ${store.address}`}
+                  title={`Map for ${formattedLoc}`}
                   src={iframeSrc}
                   frameBorder="0"
                   style={{ border: 0 }}
@@ -707,29 +767,40 @@ const StoreDetailPage = ({ data }) => {
               <div className="p-4 space-y-4 bg-white rounded-lg text-md ">
                 <div className="flex items-center space-x-2">
                   <Phone className="w-4 h-4" />
-                  <span>{store.phone || "Not Available"}</span>
+                  <span>
+                    {store?.phone ||
+                      healthStoreData?.business?.phone ||
+                      "Not Available"}
+                  </span>
                 </div>
 
                 <div className="flex items-center space-x-2">
                   <Mail className="w-4 h-4" />
-                  <span>{store.email || "Not Available"}</span>
+                  <span>
+                    {store?.email ||
+                      healthStoreData?.business?.email ||
+                      "Not Available"}
+                  </span>
                 </div>
 
                 <div>
                   <strong>Register Number:</strong>{" "}
-                  {store.registerNumber ||
-                    store.categoryData.registerNumber ||
+                  {store?.registerNumber ||
+                    store?.categoryData?.registerNumber ||
+                    healthStoreData?.business?.registerNumber ||
                     "Not Available"}
                 </div>
 
                 <div>
                   <strong>Appointment Link:</strong>{" "}
-                  {store.appointmentLink ||
-                  store.categoryData.appointmentLink ? (
+                  {store?.appointmentLink ||
+                  store?.categoryData.appointmentLink ||
+                  healthStoreData?.business?.appointmentLink ? (
                     <a
                       href={
-                        store.appointmentLink ||
-                        store.categoryData.appointmentLink
+                        store?.appointmentLink ||
+                        store?.categoryData.appointmentLink ||
+                        healthStoreData?.business?.appointmentLink
                       }
                       className="text-blue-600 underline"
                       target="_blank"
@@ -744,37 +815,46 @@ const StoreDetailPage = ({ data }) => {
 
                 <div>
                   <strong>Experience:</strong>{" "}
-                  {store.experience || "Not Available"}
+                  {store?.experience ||
+                    healthStoreData?.business?.experience ||
+                    "Not Available"}
                 </div>
 
                 <div>
-                  <strong>Award:</strong> {store.award || "Not Available"}
+                  <strong>Award:</strong>{" "}
+                  {store?.award ||
+                    healthStoreData?.business?.extraFields?.awards ||
+                    "Not Available"}
                 </div>
 
                 <div>
                   <strong>Affiliation:</strong>{" "}
-                  {store.affiliation ||
-                    store.categoryData.affiliation ||
+                  {store?.affiliation ||
+                    store?.categoryData?.affiliation ||
+                    healthStoreData?.business?.extraFields?.affiliation ||
                     "Not Available"}
                 </div>
 
                 <div>
                   <strong>Specialty:</strong>{" "}
-                  {store.specialty ||
-                    store.categoryData.specialty ||
+                  {store?.specialty ||
+                    store?.categoryData?.specialty ||
+                    healthStoreData?.business?.categoryData?.speciality ||
                     "Not Available"}
                 </div>
 
                 <div>
                   <strong>Website:</strong>{" "}
-                  {store.website ? (
+                  {store?.website || healthStoreData?.business?.website ? (
                     <a
-                      href={store.website}
+                      href={
+                        store?.website || healthStoreData?.business?.website
+                      }
                       className="text-blue-600 underline"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {store.website}
+                      {store?.website || healthStoreData?.business?.website}
                     </a>
                   ) : (
                     "Not Available"
@@ -783,11 +863,13 @@ const StoreDetailPage = ({ data }) => {
 
                 <div>
                   <strong>VideoURL:</strong>{" "}
-                  {store.videoURL || store.categoryData.extraFields.videoUrl ? (
+                  {store?.categoryData?.extraFields.videoUrl ||
+                  healthStoreData?.business?.extraFields?.videoUrl ? (
                     <a
                       href={
-                        store.videoURL ||
-                        store.categoryData.extraFields.videoUrl
+                        store?.videoURL ||
+                        store?.categoryData?.extraFields?.videoUrl ||
+                        healthStoreData?.business?.extraFields?.videoUrl
                       }
                       className="text-blue-600 underline"
                       target="_blank"
@@ -802,16 +884,22 @@ const StoreDetailPage = ({ data }) => {
 
                 <div>
                   <strong>Customer Reviews:</strong>{" "}
-                  {store.reviews?.length || 0}
+                  {store?.reviews?.length ||
+                    healthStoreData?.business?.numberOfReviews ||
+                    0}
                 </div>
 
                 <div>
                   <strong>Social Media:</strong>
                   <div className="flex items-center mt-1 space-x-4">
-                    {store.socialMedia?.facebook ||
-                      (store.socialLinks.instagram && (
+                    {healthStoreData?.business?.socialLinks?.facebook ||
+                      store.socialLinks.instagram ||
+                      (healthStoreData?.business?.socialLinks?.facebook && (
                         <a
-                          href={store.socialLinks.facebook}
+                          href={
+                            store.socialLinks.facebook ||
+                            healthStoreData?.business?.socialLinks.facebook
+                          }
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -822,8 +910,8 @@ const StoreDetailPage = ({ data }) => {
                           />
                         </a>
                       ))}
-                    {store.socialMedia?.instagram ||
-                      (store.socialLinks?.instagram && (
+                    {healthStoreData?.business?.socialLinks?.instagram ||
+                      (store?.socialLinks?.instagram && (
                         <a
                           href={store.socialLinks.instagram}
                           target="_blank"

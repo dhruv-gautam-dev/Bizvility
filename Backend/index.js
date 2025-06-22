@@ -8,6 +8,7 @@ import businessRoutes from './routes/businessRoute.js';
 import userRoutes from './routes/userRoute.js';
 import superAdminRoute from './routes/superAdminRoute.js';
 import cors from "cors"
+import path from 'path'
 
 dotenv.config();
 const app = express();
@@ -30,6 +31,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/business', businessRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/superadmin', superAdminRoute);
+// ✅ Serve static files from 'uploads' folder
+app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));
 
 // Error handling
 app.use(errorHandler);

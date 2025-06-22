@@ -98,66 +98,26 @@ export const createBusiness = async (req, res) => {
       description
     } = req.body;
 
-    console.log("Incoming category:", category);
-console.log("Available models:", Object.keys(categoryModels));
-
-
-    // ✅ 1. Resolve category model from category
+    // 🧠 Get model
     const categoryModel = category;
     const CategoryModel = categoryModels[categoryModel];
     if (!CategoryModel) {
       return res.status(400).json({ message: 'Invalid category model' });
     }
 
-    // ✅ 2. Parse all JSON string fields
-    let parsedLocation = {};
-    let parsedSocialLinks = {};
-    let parsedBusinessHours = [];
-    let parsedCategoryData = {};
+    // ✅ Parse complex fields
+    const parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
+    const parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
+    const parsedBusinessHours = typeof businessHours === 'string' ? JSON.parse(businessHours) : businessHours;
+    const parsedCategoryData = req.body.categoryData ? JSON.parse(req.body.categoryData) : {};
 
-    try {
-      parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
-    } catch (err) {
-      return res.status(400).json({ message: 'Invalid JSON in location' });
-    }
-
-    try {
-      parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
-    } catch (err) {
-      return res.status(400).json({ message: 'Invalid JSON in socialLinks' });
-    }
-
-    try {
-      parsedBusinessHours = typeof businessHours === 'string' ? JSON.parse(businessHours) : businessHours;
-    } catch (err) {
-      return res.status(400).json({ message: 'Invalid JSON in businessHours' });
-    }
-
-    try {
-      parsedCategoryData = req.body.categoryData ? JSON.parse(req.body.categoryData) : {};
-    } catch (err) {
-      return res.status(400).json({ message: 'Invalid JSON in categoryData' });
-    }
-
-    // ✅ 3. Save categoryRef document
-    const categoryDoc = new CategoryModel(parsedCategoryData);
-    const savedCategoryData = await categoryDoc.save();
-
-    // ✅ 4. Handle file uploads
+    // ✅ Handle file uploads
     const files = req.files || {};
-
     const profileImage = files.profileImage?.[0]?.path || null;
     const coverImage = files.coverImage?.[0]?.path || null;
+    const certificateImages = files.certificateImages?.map(file => file.path).slice(0, 5) || [];
+    const galleryImages = files.galleryImages?.map(file => file.path).slice(0, 10) || [];
 
-    const certificateImages = files.certificateImages
-      ? files.certificateImages.map((file) => file.path).slice(0, 5)
-      : [];
-
-    const galleryImages = files.galleryImages
-      ? files.galleryImages.map((file) => file.path).slice(0, 10)
-      : [];
-
-    // ✅ 5. Format business hours array to match schema
     const formattedBusinessHours = Array.isArray(parsedBusinessHours)
       ? parsedBusinessHours.map((entry) => ({
           day: entry.day,
@@ -166,7 +126,7 @@ console.log("Available models:", Object.keys(categoryModels));
         }))
       : [];
 
-    // ✅ 6. Create Business document
+    // ✅ Step 1: Create Business without categoryRef
     const business = new Business({
       name,
       ownerName,
@@ -184,24 +144,38 @@ console.log("Available models:", Object.keys(categoryModels));
       certificateImages,
       galleryImages,
       category,
-      categoryModel,
-      categoryRef: savedCategoryData._id
+      categoryModel
     });
 
     const savedBusiness = await business.save();
+    console.log("✅ Business saved with ID:", savedBusiness._id);
+
+    // ✅ Step 2: Create category model with business reference
+    const categoryDoc = new CategoryModel({
+      ...parsedCategoryData,
+      business: savedBusiness._id
+    });
+    const savedCategoryData = await categoryDoc.save();
+    console.log("✅ Category saved:", savedCategoryData);
+
+    // ✅ Step 3: Update business with categoryRef
+    savedBusiness.categoryRef = savedCategoryData._id;
+    const finalBusiness = await savedBusiness.save();
 
     res.status(201).json({
       message: 'Business created successfully',
-      business: savedBusiness
+      business: finalBusiness
     });
+
   } catch (error) {
-    console.error('Error creating business:', error);
+    console.error('❌ Error creating business:', error);
     res.status(500).json({
       message: 'Server Error',
       error: error.message
     });
   }
 };
+
 
 export const updateBusiness = async (req, res) => {
   try {
@@ -319,6 +293,66 @@ export const updateBusiness = async (req, res) => {
     });
   }
 };
+
+//get the business by id
+export const getBusinessById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 🔍 Step 1: Fetch main business info
+    const business = await Business.findById(id).lean(); // plain JS object
+    if (!business) {
+      console.log('❌ Business not found with id:', id);
+      return res.status(404).json({ message: 'Business not found' });
+    }
+
+    console.log('✅ Fetched business:', business);
+
+    // 🧠 Step 2: Resolve category model and ref
+    const CategoryModel = categoryModels[business.categoryModel];
+    let categoryData = {};
+
+    if (!CategoryModel) {
+      console.warn(`⚠️ No model found for category: ${business.categoryModel}`);
+    } else if (!business.categoryRef) {
+      console.warn(`⚠️ categoryRef is missing in business document`);
+    } else {
+      console.log('✅ Using category model:', business.categoryModel);
+      console.log('Looking for categoryRef:', business.categoryRef);
+
+      const categoryDoc = await CategoryModel.findById(business.categoryRef).lean();
+      if (!categoryDoc) {
+        console.warn(`⚠️ No category document found with ID: ${business.categoryRef}`);
+      } else {
+        const { _id, __v, ...rest } = categoryDoc;
+        categoryData = rest;
+        console.log('✅ Fetched category document:', categoryData);
+      }
+    }
+
+    // 🧩 Step 3: Merge and return
+    const fullData = {
+      ...business,
+      categoryData
+    };
+
+    console.log('✅ Final response object:', fullData);
+
+    res.status(200).json({
+      message: 'Business fetched successfully',
+      business: fullData
+    });
+
+  } catch (error) {
+    console.error('❌ Error fetching business:', error);
+    res.status(500).json({
+      message: 'Server error while fetching business data',
+      error: error.message
+    });
+  }
+};
+
+
 //get all businesses
 export const getAllBusinesses = async (req, res) => {
   try {
@@ -353,47 +387,6 @@ export const getAllBusinesses = async (req, res) => {
     console.error('Error fetching businesses:', error);
     res.status(500).json({
       message: 'Server error while fetching businesses',
-      error: error.message
-    });
-  }
-};
-
-//get the business by id
-export const getBusinessById = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // 🔍 Get business with categoryRef ID
-    const business = await Business.findById(id).lean(); // lean = plain object for merging
-    if (!business) {
-      return res.status(404).json({ message: 'Business not found' });
-    }
-
-    const CategoryModel = categoryModels[business.categoryModel];
-    let categoryDetails = {};
-
-    // 🧠 If categoryRef exists, fetch full category-specific data
-    if (CategoryModel && business.categoryRef) {
-      const categoryDoc = await CategoryModel.findById(business.categoryRef).lean();
-      if (categoryDoc) {
-        categoryDetails = categoryDoc;
-      }
-    }
-
-    // 🧩 Merge business data + category data into one object
-    const fullData = {
-      ...business,
-      categoryDetails // or rename to 'categoryData' if preferred
-    };
-
-    res.status(200).json({
-      message: 'Business fetched successfully',
-      business: fullData
-    });
-  } catch (error) {
-    console.error('Error fetching business:', error);
-    res.status(500).json({
-      message: 'Server error while fetching business data',
       error: error.message
     });
   }

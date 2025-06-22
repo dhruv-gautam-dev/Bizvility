@@ -22,10 +22,15 @@ const healthMedicalSchema = new mongoose.Schema({
   Parking: Boolean,
   LabAvailable: Boolean,
   Pharmacy: Boolean,
-  extraFields: {
+  extraFields: {  //videoURL
     type: Map,
     of: mongoose.Schema.Types.Mixed,
     default: {}
+  },
+   business: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Business',
+    required: true
   }
 });
 
