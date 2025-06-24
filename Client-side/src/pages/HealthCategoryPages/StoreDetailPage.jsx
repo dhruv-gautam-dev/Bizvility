@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { MapPin, UserIcon } from "lucide-react";
+import { useParams, useLocation, Link } from "react-router-dom";
+import { MapPin, UserIcon, Mail, Phone } from "lucide-react";
 import { getBusinessById } from "../../data/HealthAndMedical/healthCategoryData";
-import { Mail, Phone } from "lucide-react";
-import { useLocation } from "react-router-dom";
 import {
   FaStar,
   FaRegStar,
@@ -13,153 +11,97 @@ import {
 } from "react-icons/fa";
 
 const StoreDetailPage = ({ data }) => {
-  // console.log("StoreDetailPage rendered");/
   const location = useLocation();
   const { slug, storeId } = useParams();
   const token = localStorage.token;
-  console.log("storeId " + storeId);
-  console.log("slug " + slug);
-  console.log("token " + token);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [healthStoreData, setHealthStoreData] = useState(null);
+  const [activeTab, setActiveTab] = useState("Overview");
+  const [filter, setFilter] = useState("Relevant");
+  const imageUrl = import.meta.env.VITE_Image_URL;
 
   const isFormPreview = location.pathname.includes(
     "/Reacts/list-business/form"
   );
-  // const { storeId } = location.state || {};
-  // getBusinessById(storeId, token);
-  // getBusinessById(storeId, token);
 
-  if (!isFormPreview) {
-    useEffect(() => {
-      console.log("storeId:", storeId, "token:", token);
+  useEffect(() => {
+    console.log("Initial render useEffect running");
+  }, []);
+
+  useEffect(() => {
+    const fetchStore = async () => {
       if (!storeId || !token) {
-        console.log("Missing storeId or token, skipping fetch");
         setError("Missing store ID or token");
         setLoading(false);
         return;
       }
 
-      const fetchStore = async () => {
-        try {
-          console.log("Fetching store with storeId:", storeId);
-          const data = await getBusinessById(storeId, token);
-          console.log("Fetched data:", data);
-          setLoading(false);
-          setHealthStoreData(data);
-          console.log(store);
-        } catch (err) {
-          console.error("Fetch error:", err);
-          setError("Failed to fetch store data");
-          setLoading(false);
-        }
-      };
-      fetchStore();
-      console.log("healthStore data " + healthStoreData);
-    }, [storeId, token]);
-  }
+      try {
+        const res = await getBusinessById(storeId, token);
+        setHealthStoreData(res);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setError("Failed to fetch store data");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // console.log(store);
-  // const store = healthCategoryData.find((s) => String(s.id) === storeId);
-  const [activeTab, setActiveTab] = useState("Overview");
-  const [filter, setFilter] = useState("Relevant");
+    if (!data) fetchStore();
+    else setLoading(false);
+  }, [storeId, token, data]);
 
-  // useEffect(() => {
-  //   if (data != null) {
-  //     setStore(data);
-  //   }
-  // }, [data]);
-
+  // ✅ Memoized store logic with safe fallback
   const store = useMemo(() => {
-    if (data) {
-      return data;
-    } else {
-      // return healthCategoryData.find((s) => String(s.id) === storeId);
-    }
-  }, [data, storeId]);
+    return data || healthStoreData?.business || null;
+  }, [data, healthStoreData]);
+
+  const getTimestamp = (r) => new Date(`${r.date} ${r.time}`).getTime();
 
   const reviews = useMemo(() => {
-    if (!store || !store.reviews) return [];
-    const reviewsCopy = [...store.reviews];
+    if (!store?.reviews) return [];
+
+    const copy = [...store.reviews];
     switch (filter) {
       case "Latest":
-        return reviewsCopy.sort((a, b) => new Date(b.date) - new Date(a.date));
+        return copy.sort((a, b) => getTimestamp(b) - getTimestamp(a));
       case "High to Low":
-        return reviewsCopy.sort((a, b) => b.rating - a.rating);
-      case "Relevant":
+        return copy.sort((a, b) => b.rating - a.rating);
       default:
-        return reviewsCopy.sort(
-          (a, b) => (b.likes || 0) + b.rating - ((a.likes || 0) + a.rating) // custom relevance
+        return copy.sort(
+          (a, b) => (b.likes || 0) + b.rating - ((a.likes || 0) + a.rating)
         );
     }
   }, [store, filter]);
 
-  console.log("store " + store);
+  const sorted = useMemo(() => {
+    if (!isFormPreview || !store?.reviews) return [];
+    const copy = [...store.reviews];
 
-  // if (healthStoreData) return <div>Loading...</div>;
-  // function formatAddressPretty(address) {
-  //   return address
-  //     .trim()
-  //     .split(/\s*,\s*/)
-  //     .map((part) => part.trim())
-  //     .join(",+");
-  // }
-
-  const getTimestamp = (r) => {
-    // Combine date + time (e.g., "February 13, 2025 11:32 AM")
-    return new Date(`${r.date} ${r.time}`).getTime();
-  };
-
-  if (isFormPreview) {
-    setStore(data);
-    const sorted = React.useMemo(() => {
-      const copy = [...store.reviews];
-      // const copy = null;
-
-      if (filter === "Latest") {
-        return copy.sort((a, b) => getTimestamp(b) - getTimestamp(a));
-      }
-      if (filter === "High to Low") {
-        return copy.sort((a, b) => b.rating - a.rating);
-      }
-      return copy; // Relevant or default else
-    }, [filter, store.reviews]);
-  }
-
-  // const formattedLoc = formatAddressPretty(store.location.address);
+    if (filter === "Latest")
+      return copy.sort((a, b) => getTimestamp(b) - getTimestamp(a));
+    if (filter === "High to Low")
+      return copy.sort((a, b) => b.rating - a.rating);
+    return copy;
+  }, [filter, store?.reviews, isFormPreview]);
 
   const formattedLoc = encodeURIComponent(
-    `${
-      store?.location?.address || healthStoreData?.business?.location?.address
-    }, ${store?.location?.city || healthStoreData?.business?.location?.city}, ${
-      store?.location?.state || healthStoreData?.business?.location?.state
+    `${store?.location?.address || ""}, ${store?.location?.city || ""}, ${
+      store?.location?.state || ""
     }`
   );
-  const address = `${
-    store?.location?.address || healthStoreData?.business?.location?.address
-  }, ${store?.location?.city || healthStoreData?.business?.location?.city}, ${
-    store?.location?.state || healthStoreData?.business?.location?.state
-  }`;
 
+  const address = `${store?.location?.address || ""}, ${
+    store?.location?.city || ""
+  }, ${store?.location?.state || ""}`;
   const iframeSrc = `https://www.google.com/maps?q=${formattedLoc}&output=embed`;
 
-  // if (!healthStoreData) {
-  //   return (
-  //     <div className="flex items-center justify-center min-h-screen pt-20 bg-gray-50">
-  //       <div className="text-center">
-  //         <h1 className="text-2xl font-bold">Store not found</h1>
-  //         <Link
-  //           to={`/categories/${slug}`}
-  //           className="inline-block mt-4 text-blue-600"
-  //         >
-  //           ← Back to {slug}
-  //         </Link>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  // ✅ Render logic
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-600">Error: {error}</div>;
+  if (!store) return <div>No store data found</div>;
 
   const tabList = [
     "Overview",
@@ -170,8 +112,6 @@ const StoreDetailPage = ({ data }) => {
     "Reviews",
   ];
 
-  // console.log(store.Banner);
-
   return (
     <>
       <div className="pt-24 bg-gray-50">
@@ -179,29 +119,44 @@ const StoreDetailPage = ({ data }) => {
         <section>
           {/* Background Image */}
           <div
-            className="relative px-4 py-40 text-white bg-center bg-cover md:px-16"
-            style={{
-              backgroundImage: `url(${
-                store?.photos?.[0] ||
+          // className="relative px-4 py-40 text-white bg-center bg-cover md:px-16"
+          // style={{
+          //   backgroundImage: `url(${
+          //     store?.Banner?.preview ||
+          //     `${imageUrl}/${healthStoreData?.business.coverImage}`
+
+          //     // store?.photos?.[0] ||
+          //     // store?.Banner?.preview ||
+          //     // store?.coverImage ||
+          //     // healthStoreData?.business?.coverImage
+          //   })`,
+          // }}
+          >
+            <img
+              src={
                 store?.Banner?.preview ||
-                store?.coverImage ||
-                healthStoreData?.business?.coverImage
-              })`,
-            }}
-          ></div>
+                `${imageUrl}/${healthStoreData?.business.coverImage}`
+              }
+              alt={
+                store?.name ||
+                store?.ownerName ||
+                healthStoreData?.business.ownerName
+              }
+              className="object-cover w-full border-4 border-white w-72 h-96"
+            />
+          </div>
 
           {/* Circle Doctor Profile Image */}
           <div className="relative flex flex-col items-center left-3 -top-40 md:w-1/3 md:mt-0">
             <img
               src={
-                store?.profileImage ||
                 store?.profilePhoto?.preview ||
-                healthStoreData.business.profileImage
+                `${imageUrl}/${healthStoreData?.business.profileImage}`
               }
               alt={
                 store?.name ||
                 store?.ownerName ||
-                healthStoreData.business.ownerName
+                healthStoreData?.business.ownerName
               }
               className="object-cover border-4 border-white rounded-full shadow-lg w-72 h-72"
             />
@@ -558,15 +513,23 @@ const StoreDetailPage = ({ data }) => {
                   <h2 className="ml-10 text-2xl font-semibold ">Photos</h2>
                   <div>
                     <div className="grid grid-cols-4 gap-2 my-4 ml-18">
-                      {(store.photos?.length
-                        ? store.photos
+                      {/* `${imageUrl}/${healthStoreData?.business.coverImage}` */}
+                      {/* src={} */}
+                      {(healthStoreData?.business?.galleryImages?.length
+                        ? healthStoreData?.business?.galleryImages
                         : store.galleryImages?.length
                         ? store.galleryImages
                         : []
                       ).map((item, idx) => {
                         // Convert object to URL string instantly:
-                        const src =
-                          typeof item === "string" ? item : item.preview ?? "";
+                        console.log(item);
+                        const src = healthStoreData
+                          ? typeof item === "string"
+                            ? `${imageUrl}/${item}`
+                            : item?.preview
+                          : typeof item === "string"
+                          ? item
+                          : item?.preview ?? "";
 
                         return (
                           <img
@@ -765,167 +728,160 @@ const StoreDetailPage = ({ data }) => {
               </a>
             </div>
             {/* Contact and Info Section  quick info */}
-            <div>
-              <div className="p-4 space-y-4 bg-white rounded-lg text-md ">
-                <div className="flex items-center space-x-2">
-                  <Phone className="w-4 h-4" />
-                  <span>
+
+            <div className="bg-white rounded-lg ">
+              <div className="divide-y divide-gray-200">
+                {/* Row Item */}
+                <div className="grid grid-cols-2 py-3">
+                  <div className="font-medium text-gray-700">Phone</div>
+                  <div>
                     {store?.phone ||
                       healthStoreData?.business?.phone ||
                       "Not Available"}
-                  </span>
+                  </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4" />
-                  <span>
+                <div className="grid grid-cols-2 py-3">
+                  <div className="font-medium text-gray-700">Email</div>
+                  <div>
                     {store?.email ||
                       healthStoreData?.business?.email ||
                       "Not Available"}
-                  </span>
+                  </div>
                 </div>
 
-                <div>
-                  <strong>Register Number:</strong>{" "}
-                  {store?.registerNumber ||
-                    store?.categoryData?.registerNumber ||
-                    healthStoreData?.business?.registerNumber ||
-                    "Not Available"}
+                <div className="grid grid-cols-2 py-3">
+                  <div className="font-medium text-gray-700">
+                    Register Number
+                  </div>
+                  <div>
+                    {store.categoryData.registerNumber ||
+                      store.registrationNumber ||
+                      "Not Available"}
+                  </div>
                 </div>
 
-                <div>
-                  <strong>Appointment Link:</strong>{" "}
-                  {store?.appointmentLink ||
-                  store?.categoryData.appointmentLink ||
-                  healthStoreData?.business?.appointmentLink ? (
-                    <a
-                      href={
-                        store?.appointmentLink ||
-                        store?.categoryData.appointmentLink ||
-                        healthStoreData?.business?.appointmentLink
-                      }
-                      className="text-blue-600 underline"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Book Now
-                    </a>
-                  ) : (
-                    "Not Available"
+                <div className="grid grid-cols-2 py-3">
+                  <div className="font-medium text-gray-700">
+                    Appointment Link
+                  </div>
+                  <div>
+                    {store.categoryData.appointmentLink ? (
+                      <a
+                        href={store.categoryData.appointmentLink}
+                        className="text-blue-600 underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Book Now
+                      </a>
+                    ) : (
+                      "Not Available"
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 py-3">
+                  <div className="font-medium text-gray-700">Experience</div>
+                  <div>{store.experience || "Not Available"}</div>
+                </div>
+
+                <div className="grid grid-cols-2 py-1">
+                  <div className="font-medium text-gray-700">Award</div>
+                  {store?.awards?.length > 0 && (
+                    <div>
+                      <ul className="p-0 m-0 list-none list-inside">
+                        {store.awards.map((award, idx) => (
+                          <li key={idx}>{award}</li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
                 </div>
 
-                <div>
-                  <strong>Experience:</strong>{" "}
-                  {store?.experience ||
-                    healthStoreData?.business?.experience ||
-                    "Not Available"}
+                <div className="grid grid-cols-2 py-3">
+                  <div className="font-medium text-gray-700">Affiliation</div>
+                  <div>{store.categoryData.affiliation || "Not Available"}</div>
                 </div>
 
-                <div>
-                  <strong>Award:</strong>{" "}
-                  {store?.award ||
-                    healthStoreData?.business?.extraFields?.awards ||
-                    "Not Available"}
+                <div className="grid grid-cols-2 py-3">
+                  <div className="font-medium text-gray-700">Specialty</div>
+                  <div>{store.categoryData.speciality || "Not Available"}</div>
                 </div>
 
-                <div>
-                  <strong>Affiliation:</strong>{" "}
-                  {store?.affiliation ||
-                    store?.categoryData?.affiliation ||
-                    healthStoreData?.business?.extraFields?.affiliation ||
-                    "Not Available"}
+                <div className="grid grid-cols-2 py-3">
+                  <div className="font-medium text-gray-700">Website</div>
+                  <div>
+                    {store.website ? (
+                      <a
+                        href={store.website}
+                        className="text-blue-600 underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {store.website}
+                      </a>
+                    ) : (
+                      "Not Available"
+                    )}
+                  </div>
                 </div>
 
-                <div>
-                  <strong>Specialty:</strong>{" "}
-                  {store?.specialty ||
-                    store?.categoryData?.specialty ||
-                    healthStoreData?.business?.categoryData?.speciality ||
-                    "Not Available"}
+                <div className="grid grid-cols-2 py-3">
+                  <div className="font-medium text-gray-700">Video URL</div>
+                  <div>
+                    {store?.categoryData?.extraFields?.videoUrl ? (
+                      <a
+                        href={store?.categoryData.extraFields.videoUrl}
+                        className="text-blue-600 underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Watch Video
+                      </a>
+                    ) : (
+                      "Not Available"
+                    )}
+                  </div>
                 </div>
 
-                <div>
-                  <strong>Website:</strong>{" "}
-                  {store?.website || healthStoreData?.business?.website ? (
-                    <a
-                      href={
-                        store?.website || healthStoreData?.business?.website
-                      }
-                      className="text-blue-600 underline"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {store?.website || healthStoreData?.business?.website}
-                    </a>
-                  ) : (
-                    "Not Available"
-                  )}
+                <div className="grid grid-cols-2 py-3">
+                  <div className="font-medium text-gray-700">
+                    Customer Reviews
+                  </div>
+                  <div>{store?.reviews?.length || 0}</div>
                 </div>
 
-                <div>
-                  <strong>VideoURL:</strong>{" "}
-                  {store?.categoryData?.extraFields.videoUrl ||
-                  healthStoreData?.business?.extraFields?.videoUrl ? (
-                    <a
-                      href={
-                        store?.videoURL ||
-                        store?.categoryData?.extraFields?.videoUrl ||
-                        healthStoreData?.business?.extraFields?.videoUrl
-                      }
-                      className="text-blue-600 underline"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Watch Video
-                    </a>
-                  ) : (
-                    "Not Available"
-                  )}
-                </div>
-
-                <div>
-                  <strong>Customer Reviews:</strong>{" "}
-                  {store?.reviews?.length ||
-                    healthStoreData?.business?.numberOfReviews ||
-                    0}
-                </div>
-
-                <div>
-                  <strong>Social Media:</strong>
-                  <div className="flex items-center mt-1 space-x-4">
-                    {healthStoreData?.business?.socialLinks?.facebook ||
-                      store.socialLinks.instagram ||
-                      (healthStoreData?.business?.socialLinks?.facebook && (
-                        <a
-                          href={
-                            store.socialLinks.facebook ||
-                            healthStoreData?.business?.socialLinks.facebook
-                          }
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <img
-                            src="https://cdn-icons-png.flaticon.com/512/145/145802.png"
-                            alt="Facebook"
-                            className="w-5 h-5"
-                          />
-                        </a>
-                      ))}
-                    {healthStoreData?.business?.socialLinks?.instagram ||
-                      (store?.socialLinks?.instagram && (
-                        <a
-                          href={store.socialLinks.instagram}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <img
-                            src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
-                            alt="Instagram"
-                            className="w-5 h-5"
-                          />
-                        </a>
-                      ))}
+                <div className="grid grid-cols-2 py-3">
+                  <div className="font-medium text-gray-700">Social Media</div>
+                  <div className="flex space-x-4">
+                    {(store.socialMedia?.facebook ||
+                      store.socialLinks.facebook) && (
+                      <a
+                        href={store.socialLinks.facebook}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src="https://cdn-icons-png.flaticon.com/512/145/145802.png"
+                          alt="Facebook"
+                          className="w-5 h-5"
+                        />
+                      </a>
+                    )}
+                    {store.socialLinks?.instagram && (
+                      <a
+                        href={store.socialLinks.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
+                          alt="Instagram"
+                          className="w-5 h-5"
+                        />
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>
