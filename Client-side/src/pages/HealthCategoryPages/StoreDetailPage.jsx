@@ -17,9 +17,9 @@ const StoreDetailPage = ({ data }) => {
   const location = useLocation();
   const { slug, storeId } = useParams();
   const token = localStorage.token;
-  console.log(storeId);
-  console.log(slug);
-  console.log(token);
+  console.log("storeId " + storeId);
+  console.log("slug " + slug);
+  console.log("token " + token);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,33 +30,36 @@ const StoreDetailPage = ({ data }) => {
   );
   // const { storeId } = location.state || {};
   // getBusinessById(storeId, token);
-  useEffect(() => {
-    console.log("storeId:", storeId, "token:", token);
-    if (!storeId || !token) {
-      console.log("Missing storeId or token, skipping fetch");
-      setError("Missing store ID or token");
-      setLoading(false);
-      return;
-    }
+  // getBusinessById(storeId, token);
 
-    const fetchStore = async () => {
-      try {
-        console.log("Fetching store with storeId:", storeId);
-        const data = await getBusinessById(storeId, token);
-        console.log("Fetched data:", data);
+  if (!isFormPreview) {
+    useEffect(() => {
+      console.log("storeId:", storeId, "token:", token);
+      if (!storeId || !token) {
+        console.log("Missing storeId or token, skipping fetch");
+        setError("Missing store ID or token");
         setLoading(false);
-        setHealthStoreData(data);
-        console.log(store);
-      } catch (err) {
-        console.error("Fetch error:", err);
-        setError("Failed to fetch store data");
-        setLoading(false);
+        return;
       }
-    };
-    fetchStore();
-  }, [storeId, token]);
 
-  console.log(healthStoreData);
+      const fetchStore = async () => {
+        try {
+          console.log("Fetching store with storeId:", storeId);
+          const data = await getBusinessById(storeId, token);
+          console.log("Fetched data:", data);
+          setLoading(false);
+          setHealthStoreData(data);
+          console.log(store);
+        } catch (err) {
+          console.error("Fetch error:", err);
+          setError("Failed to fetch store data");
+          setLoading(false);
+        }
+      };
+      fetchStore();
+      console.log("healthStore data " + healthStoreData);
+    }, [storeId, token]);
+  }
 
   // console.log(store);
   // const store = healthCategoryData.find((s) => String(s.id) === storeId);
@@ -93,9 +96,9 @@ const StoreDetailPage = ({ data }) => {
     }
   }, [store, filter]);
 
-  console.log(store);
+  console.log("store " + store);
 
-  if (!healthStoreData) return <div>Loading...</div>;
+  // if (healthStoreData) return <div>Loading...</div>;
   // function formatAddressPretty(address) {
   //   return address
   //     .trim()
@@ -142,21 +145,21 @@ const StoreDetailPage = ({ data }) => {
 
   const iframeSrc = `https://www.google.com/maps?q=${formattedLoc}&output=embed`;
 
-  if (!healthStoreData) {
-    return (
-      <div className="flex items-center justify-center min-h-screen pt-20 bg-gray-50">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Store not found</h1>
-          <Link
-            to={`/categories/${slug}`}
-            className="inline-block mt-4 text-blue-600"
-          >
-            ← Back to {slug}
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // if (!healthStoreData) {
+  //   return (
+  //     <div className="flex items-center justify-center min-h-screen pt-20 bg-gray-50">
+  //       <div className="text-center">
+  //         <h1 className="text-2xl font-bold">Store not found</h1>
+  //         <Link
+  //           to={`/categories/${slug}`}
+  //           className="inline-block mt-4 text-blue-600"
+  //         >
+  //           ← Back to {slug}
+  //         </Link>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   const tabList = [
     "Overview",
@@ -167,7 +170,6 @@ const StoreDetailPage = ({ data }) => {
     "Reviews",
   ];
 
-  console.log(store);
   // console.log(store.Banner);
 
   return (
@@ -183,7 +185,7 @@ const StoreDetailPage = ({ data }) => {
                 store?.photos?.[0] ||
                 store?.Banner?.preview ||
                 store?.coverImage ||
-                healthStoreData.business.coverImage
+                healthStoreData?.business?.coverImage
               })`,
             }}
           ></div>

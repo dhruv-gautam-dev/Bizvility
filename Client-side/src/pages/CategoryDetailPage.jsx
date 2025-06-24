@@ -12,7 +12,8 @@ const CategoryDetailPage = () => {
   const [businesses, setBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
-
+  const imageUrl = import.meta.env.VITE_Image_URL;
+  console.log(imageUrl);
   useEffect(() => {
     const fetchBusinesses = async () => {
       try {
@@ -82,14 +83,14 @@ const CategoryDetailPage = () => {
                       className="pb-6 border-b border-gray-200 rounded-lg last:border-0 last:pb-0"
                     >
                       <div className="flex items-start">
-                        {console.log(biz)}
-                        {console.log(biz.profileImage)}
+                        {console.log("biz" + biz)}
+                        {/* {console.log(biz.profileImage)} */}
                         {/* const formattedLoc = encodeURIComponent( `$
                         {store.location.address}, ${store.location.city}, $
                         {store.location.state} ${store.location.pincode}` ); */}
                         <div>
                           <img
-                            src={biz.profileImage}
+                            src={`${imageUrl}/${biz.profileImage}`}
                             alt={biz.alt}
                             className="object-cover w-24 h-24 rounded-lg"
                           />

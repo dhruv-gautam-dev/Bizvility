@@ -20,6 +20,7 @@ import {
 import { data, Link, useNavigate } from "react-router-dom";
 import StoreDetailPage from "./HealthCategoryPages/StoreDetailPage";
 import { FaFacebook } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 const ListBusinessPage = () => {
   const [currentStep, setCurrentStep] = useState("basic");
@@ -79,85 +80,16 @@ const ListBusinessPage = () => {
   });
 
   console.log(formData);
-  // const handleSubmit = async () => {
-  //   try {
-  //     const form = new FormData();
-
-  //     form.append("name", formData.businessName);
-  //     form.append("ownerName", formData.ownerName);
-  //     form.append("experience", formData.experience);
-  //     form.append("description", formData.description);
-  //     form.append("phone", formData.phone);
-  //     form.append("email", formData.email);
-  //     form.append("website", formData.website);
-  //     form.append("category", formData.category);
-
-  //     const ownerId = localStorage.getItem("userId");
-  //     form.append("owner", ownerId);
-  //     Object.entries(formData.location).forEach(([key, value]) => {
-  //       form.append(`location[${key}]`, value);
-  //     });
-
-  //     Object.entries(formData.socialLinks).forEach(([key, value]) => {
-  //       form.append(`socialLinks[${key}]`, value);
-  //     });
-
-  //     Object.entries(formData.categoryData).forEach(([key, value]) => {
-  //       if (key === "extraFields") {
-  //         Object.entries(value).forEach(([subKey, subValue]) => {
-  //           form.append(`categoryData[extraFields][${subKey}]`, subValue);
-  //         });
-  //       } else {
-  //         form.append(`categoryData[${key}]`, value);
-  //       }
-  //     });
-
-  //     formData.businessHours.forEach((item, index) => {
-  //       form.append(`businessHours[${index}][day]`, item.day);
-  //       form.append(`businessHours[${index}][open]`, item.open);
-  //       form.append(`businessHours[${index}][close]`, item.close);
-  //     });
-
-  //     if (formData.profilePhoto?.file) {
-  //       form.append("profilePhoto", formData.profilePhoto.file);
-  //     }
-
-  //     if (formData.Banner?.file) {
-  //       form.append("Banner", formData.Banner.file);
-  //     }
-
-  //     formData.certificateImages.forEach((item, index) => {
-  //       form.append("certificateImages", item.file);
-  //     });
-
-  //     formData.galleryImages.forEach((item, index) => {
-  //       form.append("galleryImages", item.file);
-  //     });
-
-  //     const token = localStorage.getItem("token");
-  //     console.log(token);
-
-  //     const response = await axios.post(
-  //       "http://localhost:5000/api/business/business",
-  //       form,
-  //       {
-  //         headers: {
-  //           "Content-Type": "multipart/form-data",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     console.log("Business created:", response.data);
-  //     // You can show toast or navigate here
-  //   } catch (error) {
-  //     console.error("Error submitting business form:", error);
-  //     // You can show error toast here
-  //   }
-  // };
 
   const handleSubmit = async () => {
     try {
+      console.log("inside handle submit ");
+      console.log(formData);
+      // if (formData.category == "Health") {
+      //   slug = "health";
+      // }
+      // console.log(slug);
+
       const form = new FormData();
 
       // ✅ Flat fields (corrected)
@@ -198,6 +130,7 @@ const ListBusinessPage = () => {
         form.append("galleryImages", item?.file);
       });
 
+      console.log(formData);
       // ✅ API call
       const token = localStorage.getItem("token");
       form.append("token", token);
@@ -212,6 +145,16 @@ const ListBusinessPage = () => {
           },
         }
       );
+      // use conditonsl to store slug
+      console.log(formData);
+      if (formData.category == "Health") {
+        navigate(`/categories/health`);
+      } else if (formData.category == "restaurants") {
+        navigate(`/categories/restaurants`);
+      } else if (formData.category == "beauty") {
+        navigate(`/categories/beauty`);
+      }
+      // console.log(slug);
 
       console.log("Business created:", response.data);
     } catch (error) {
@@ -1056,7 +999,14 @@ const ListBusinessPage = () => {
     if (currentIndex < steps.length - 1) {
       setCurrentStep(steps[currentIndex + 1]);
     } else {
+      console.log(formData);
+
       handleSubmit();
+      if (formData.category == "Health") {
+        slug = "health";
+      }
+      console.log(slug);
+      // navigate(`/categories/health`);
     }
   };
 
