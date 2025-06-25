@@ -62,34 +62,34 @@ const StoreDetailPage = ({ data }) => {
     return data || healthStoreData?.business || null;
   }, [data, healthStoreData]);
 
-  const getTimestamp = (r) => new Date(`${r.date} ${r.time}`).getTime();
+  const getTimestamp = (r) => new Date(r.time).getTime();
 
   const reviews = useMemo(() => {
     if (!store?.reviews) return [];
+    const copy = [...store.reviews];
 
-    const copy = [...store?.reviews] || [healthStoreData?.business.reviews];
     switch (filter) {
       case "Latest":
-        return copy.sort((a, b) => getTimestamp(b) - getTimestamp(a));
+        return [...copy].sort((a, b) => getTimestamp(b) - getTimestamp(a));
       case "High to Low":
-        return copy.sort((a, b) => b.rating - a.rating);
+        return [...copy].sort((a, b) => b.rating - a.rating);
       default:
-        return copy.sort(
+        return [...copy].sort(
           (a, b) => (b.likes || 0) + b.rating - ((a.likes || 0) + a.rating)
         );
     }
-  }, [store, filter]);
+  }, [store?.reviews, filter]);
 
-  const sorted = useMemo(() => {
-    if (!isFormPreview || !store?.reviews) return [];
-    const copy = [...store.reviews];
+  // const sorted = useMemo(() => {
+  //   if (!isFormPreview || !store?.reviews) return [];
+  //   const copy = [...store.reviews];
 
-    if (filter === "Latest")
-      return copy.sort((a, b) => getTimestamp(b) - getTimestamp(a));
-    if (filter === "High to Low")
-      return copy.sort((a, b) => b.rating - a.rating);
-    return copy;
-  }, [filter, store?.reviews, isFormPreview]);
+  //   if (filter === "Latest")
+  //     return copy.sort((a, b) => getTimestamp(b) - getTimestamp(a));
+  //   if (filter === "High to Low")
+  //     return copy.sort((a, b) => b.rating - a.rating);
+  //   return copy;
+  // }, [filter, store?.reviews, isFormPreview]);
 
   const formattedLoc = encodeURIComponent(
     `${store?.location?.address || ""}, ${store?.location?.city || ""}, ${
@@ -578,7 +578,7 @@ const StoreDetailPage = ({ data }) => {
                         ))}
                       </div>
                       {/* Reviews List */}
-                      {healthStoreData?.business.reviews.map((r) => (
+                      {reviews.map((r) => (
                         <div
                           key={r.id}
                           className="pb-6 ml-24 space-y-4 border-b last:border-0"
