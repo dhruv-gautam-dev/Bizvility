@@ -1,7 +1,7 @@
 import express from 'express';
 import upload from '../middlewares/upload.js';
 
-import { getUserProfile, updateUserProfile } from '../controllers/userController.js';
+import { getUserProfile, updateUserProfile, getUserReviews, getUserBusinesses } from '../controllers/userController.js';
 import { protect } from '../middlewares/auth.js';
 
 const router = express.Router();
@@ -20,5 +20,10 @@ router.put(
   upload.single('userImage'), // ⬅️ This handles uploading the image
   updateUserProfile
 );
+// 🔐 Example: Only allow business owners to access their own reviews
+router.get('/my-business-reviews', protect, getUserReviews);
+router.get('/getbusinessbyid', protect, getUserBusinesses);
+
+
 
 export default router;

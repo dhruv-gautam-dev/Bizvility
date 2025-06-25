@@ -1,3 +1,4 @@
+
 import Business from '../models/Business.js';
 import Health from '../models/Health.js';
 import Hotel from '../models/Hotel.js';
@@ -8,6 +9,78 @@ const categoryModels = {
   Hotel: Hotel,
   BeautySpa: BeautySpa
 };
+
+// export const createBusiness = async (req, res) => {
+//   try {
+//     const {
+//       name,
+//       ownerName,
+//       owner,
+//       location,
+//       phone,
+//       website,
+//       email,
+//       socialLinks,
+//       businessHours,
+//       category,
+//       experience,
+//       description,
+
+//     } = req.body;
+
+// const categoryModel = category; // derive from category
+//  CategoryModel = categoryModels[categoryModel];
+//     if (!CategoryModel) {
+//       return res.status(400).json({ message: 'Invalid category model' });
+//     }
+
+//     const categoryDoc = new CategoryModel(categoryData);
+//     const savedCategoryData = await categoryDoc.save();
+
+//     // ✅ Handle file uploads
+//     const files = req.files || {};
+
+//     const profileImage = files.profileImage?.[0]?.path || null;
+//     const coverImage = files.coverImage?.[0]?.path || null;
+
+//     const certificateImages = files.certificateImages
+//       ? files.certificateImages.map((file) => file.path).slice(0, 5) // max 5
+//       : [];
+
+//     const galleryImages = files.galleryImages
+//       ? files.galleryImages.map((file) => file.path).slice(0, 10) // max 10
+//       : [];
+
+//     const business = new Business({
+//       name,
+//       ownerName,
+//       owner,
+//       location,
+//       phone,
+//       website,
+//       email,
+//       socialLinks,
+//       businessHours,
+//       profileImage,
+//       coverImage,
+//       certificateImages,
+//       galleryImages,
+//       category,
+//       categoryModel,
+//       categoryRef: savedCategoryData._id
+//     });
+
+//     const savedBusiness = await business.save();
+
+//     res.status(201).json({
+//       message: 'Business created successfully',
+//       business: savedBusiness
+//     });
+//   } catch (error) {
+//     console.error('Error creating business:', error);
+//     res.status(500).json({ message: 'Server Error', error: error.message });
+//   }
+// };
 
 // export const createBusiness = async (req, res) => {
 //   try {
@@ -47,12 +120,13 @@ const categoryModels = {
 //     const galleryImages = files.galleryImages?.map(file => file.path).slice(0, 10) || [];
 
 //     const formattedBusinessHours = Array.isArray(parsedBusinessHours)
-//       ? parsedBusinessHours.map((entry) => ({
-//           day: entry.day,
-//           open: entry.open || '',
-//           close: entry.close || ''
-//         }))
-//       : [];
+//   ? parsedBusinessHours.map((entry) => ({
+//       day: entry.day,
+//       open: entry.open || '',
+//       close: entry.close || ''
+//     }))
+//   : [];
+
 
 //     // ✅ Step 1: Create Business without categoryRef
 //     const business = new Business({
@@ -103,8 +177,6 @@ const categoryModels = {
 //     });
 //   }
 // };
-
-
 export const createBusiness = async (req, res) => {
   try {
     const {
@@ -212,6 +284,7 @@ export const createBusiness = async (req, res) => {
     });
   }
 };
+
 
 
 export const updateBusiness = async (req, res) => {
@@ -428,3 +501,6 @@ export const getAllBusinesses = async (req, res) => {
     });
   }
 };
+  
+
+

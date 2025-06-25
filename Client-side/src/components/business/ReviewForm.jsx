@@ -1,18 +1,66 @@
 import React, { useState } from "react";
 import { FaStar } from "react-icons/fa";
+// import { useParams } from "react-router-dom";
 
-const ReviewForm = () => {
+const ReviewForm = ({ businessId }) => {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(null);
   const [review, setReview] = useState("");
   const [image, setImage] = useState(null);
+  // const { businessId } = useParams();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Rating:", rating);
-    console.log("Review:", review);
-    console.log("Image:", image);
-    // Add API call or action here
+    const token = localStorage.getItem("token");
+
+    if (!rating || !review) {
+      alert("Please add a rating and a review before submitting.");
+      return;
+    }
+
+    const formData = new FormData();
+
+    const body = JSON.stringify({
+      rating,
+      comment: review,
+    });
+    console.log(rating);
+    console.log(review);
+    console.log(businessId);
+
+    console.log(formData);
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/reviews/${businessId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`, // ✅ pass the token here
+          },
+          body: body,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to submit review");
+      }
+
+      const data = await response.json();
+      console.log("Review submitted successfully:", data);
+      alert("Thank you for your review!");
+
+      // Optional: Reset form
+      setRating(0);
+      setReview("");
+      setImage(null);
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert(
+        error.message || "Something went wrong while submitting the review."
+      );
+    }
   };
 
   return (
@@ -50,14 +98,14 @@ const ReviewForm = () => {
         <textarea
           value={review}
           onChange={(e) => setReview(e.target.value)}
-          rows={5}
+          rows={1}
           placeholder="Share your experience..."
           className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           required
         />
 
         {/* Image Upload */}
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <label className="block mb-2 text-sm font-medium text-gray-700">
             Upload Image (optional)
           </label>
@@ -68,7 +116,7 @@ const ReviewForm = () => {
             className="w-full p-2 border border-gray-300 rounded-md cursor-pointer"
           />
           {image && <p className="mt-2 text-sm text-gray-600">{image.name}</p>}
-        </div>
+        </div> */}
 
         {/* Submit Button */}
         <button

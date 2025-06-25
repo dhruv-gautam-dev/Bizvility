@@ -7,8 +7,11 @@ import { errorHandler } from './utils/errorHandler.js';
 import businessRoutes from './routes/businessRoute.js';
 import userRoutes from './routes/userRoute.js';
 import superAdminRoute from './routes/superAdminRoute.js';
+import plansRoute from './routes/plansRoute.js';
+import reviewRoute from './routes/reviewRoute.js';
+import path from 'path';
 import cors from "cors"
-import path from 'path'
+
 
 dotenv.config();
 const app = express();
@@ -31,9 +34,11 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/business', businessRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/superadmin', superAdminRoute);
+app.use('/api/plan', plansRoute);
+app.use('/api/reviews', reviewRoute);
+
 // ✅ Serve static files from 'uploads' folder
 app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));
-
 // Error handling
 app.use(errorHandler);
 

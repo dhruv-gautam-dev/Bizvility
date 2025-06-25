@@ -3,6 +3,7 @@ import User from '../models/user.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import sendEmail from '../utils/emailSender.js';
 import bcrypt from 'bcrypt';
+
 // Helper: Generate JWT
 const generateToken = (id, expiresIn) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn });
@@ -16,7 +17,7 @@ const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString()
 export const register = asyncHandler(async (req, res) => {
   const {
     fullName,
-    // username,
+    username,
     email,
     password,
     role = 'customer',
@@ -47,7 +48,7 @@ export const register = asyncHandler(async (req, res) => {
 
   const user = await User.create({
     fullName,
-    // username,
+    username,
     email,
     password,
     profile,
@@ -107,7 +108,7 @@ export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
-  console.log(user);
+  console.log(user)
 
   if (!user || !(await user.matchPassword(password))) {
     res.status(401);
@@ -119,7 +120,7 @@ export const login = asyncHandler(async (req, res) => {
     throw new Error('Please verify your email first');
   }
 
-  const accessToken = generateToken(user._id, '1d');
+  const accessToken = generateToken(user._id, '30d');
   const refreshToken = generateToken(user._id, '7d');
 
   user.refreshTokens.push(refreshToken);
@@ -193,52 +194,135 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Verify OTP and reset password
+// @route   POST /api/auth/verify-forgot-otp
+// /api/auth/verify-forgot-otp
+export const verifyForgotOTP = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
 
-// export const resetPassword = asyncHandler(async (req, res) => {
-//   const { email, newPassword } = req.body;
+  if (!email || !otp) {
+    res.status(400);
+    throw new Error('Email and OTP are required');
+  }
 
-//   if (!email || !newPassword) {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  if (
+    user.resetPasswordOTP !== otp ||
+    !user.resetPasswordExpires ||
+    user.resetPasswordExpires < Date.now()
+  ) {
+    res.status(400);
+    throw new Error('Invalid or expired OTP');
+  }
+
+  // ✅ Mark OTP as verified (optional flag)
+  user.isResetOTPVerified = true;
+  await user.save();
+
+  res.json({ message: 'OTP verified. You may now reset your password.' });
+});
+
+
+export const logout = asyncHandler(async (req, res) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    res.status(401);
+    throw new Error('No token found');
+  }
+
+  const token = authHeader.split(' ')[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await User.findById(decoded.id);
+
+  if (!user) {
+    res.status(401);
+    throw new Error('User not found');
+  }
+
+  // Remove only the matching refresh token
+  user.refreshTokens = user.refreshTokens.filter(rt => rt !== token);
+  await user.save();
+
+  res.json({ message: 'Logged out successfully' });
+});
+
+//resend otp
+// @desc    Resend OTP to email (if not verified)
+// @route   POST /api/auth/resend-otp
+export const resendOTP = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  if (user.isVerified) {
+    res.status(400);
+    throw new Error('User already verified');
+  }
+
+  const otp = generateOTP();
+  const otpExpires = Date.now() + 10 * 60 * 1000;
+
+  user.emailVerifyOTP = otp;
+  user.emailVerifyExpires = otpExpires;
+  await user.save();
+
+  await sendEmail({
+    to: user.email,
+    subject: 'Resend Email Verification OTP',
+    text: `Your new OTP is: ${otp}`
+  });
+
+  res.json({ message: 'New OTP sent to your email' });
+});
+
+
+//forget
+// export const verifyForgotOTP = asyncHandler(async (req, res) => {
+//   const { email, otp, newPassword } = req.body;
+
+//   if (!email || !otp || !newPassword) {
 //     res.status(400);
-//     throw new Error('Email and new password are required');
-//   }
-
-//   if (newPassword.length < 12) {
-//     res.status(400);
-//     throw new Error('Password must be at least 12 characters long');
+//     throw new Error('All fields (email, otp, newPassword) are required');
 //   }
 
 //   const user = await User.findOne({ email });
-
 //   if (!user) {
 //     res.status(404);
 //     throw new Error('User not found');
 //   }
 
-//   if (!user.isResetOTPVerified) {
-//     res.status(403);
-//     throw new Error('OTP not verified. Cannot reset password.');
+//   if (
+//     user.resetPasswordOTP !== otp ||
+//     !user.resetPasswordExpires ||
+//     user.resetPasswordExpires < Date.now()
+//   ) {
+//     res.status(400);
+//     throw new Error('Invalid or expired OTP');
 //   }
 
-//   // ✅ Encrypt the password manually
-//   const salt = await bcrypt.genSalt(10);
-//   const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-//   user.password = hashedPassword;
-//   user.isResetOTPVerified = undefined;
+//   user.password = newPassword;
 //   user.resetPasswordOTP = undefined;
 //   user.resetPasswordExpires = undefined;
 
 //   await user.save();
 
-//   res.json({ message: 'Password has been updated successfully' });
+//   res.json({ message: 'Password reset successful' });
 // });
-
-
-
-// @desc    Verify OTP and reset password
-// @route   POST /api/auth/verify-forgot-otp
-// /api/auth/verify-forgot-otp
-
+//password reset
+// @desc    Update password after OTP verified
+//reset password
 export const resetPassword = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -272,94 +356,3 @@ export const resetPassword = asyncHandler(async (req, res) => {
 });
 
 
-
-export const verifyForgotOTP = asyncHandler(async (req, res) => {
-  const { email, otp } = req.body;
-
-  if (!email || !otp) {
-    res.status(400);
-    throw new Error('Email and OTP are required');
-  }
-
-  const user = await User.findOne({ email });
-
-  if (!user) {
-    res.status(404);
-    throw new Error('User not found');
-  }
-
-  if (
-    user.resetPasswordOTP !== otp ||
-    !user.resetPasswordExpires ||
-    user.resetPasswordExpires < Date.now()
-  ) {
-    res.status(400);
-    throw new Error('Invalid or expired OTP');
-  }
-
-  // ✅ Mark OTP as verified (optional flag)
-  user.isResetOTPVerified = true;
-  await user.save();
-
-  res.json({ message: 'OTP verified. You may now reset your password.' });
-});
-
-export const logout = asyncHandler(async (req, res) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401);
-    throw new Error('No token found');
-  }
-
-  const token = authHeader.split(' ')[1];
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const user = await User.findById(decoded.id);
-
-  if (!user) {
-    res.status(401);
-    throw new Error('User not found');
-  }
-
-  // Remove only the matching refresh token
-  user.refreshTokens = user.refreshTokens.filter(rt => rt !== token);
-  await user.save();
-
-  res.json({ message: 'Logged out successfully' });
-});
-
-//resend otp
-// @desc    Resend OTP to email (if not verified)
-// @route   POST /api/auth/resend-otp
-export const resendOTP = asyncHandler(async (req, res) => {
-
-  const { email } = req.body;
-
-  const user = await User.findOne({ email });
-  console.log(user);
-
-  if (!user) {
-    res.status(404);
-    throw new Error('User not found');
-  }
-
-  if (user.isVerified) {
-    res.status(400);
-    throw new Error('User already verified');
-  }
-
-  const otp = generateOTP();
-  const otpExpires = Date.now() + 10 * 60 * 1000;
-
-  user.emailVerifyOTP = otp;
-  user.emailVerifyExpires = otpExpires;
-  await user.save();
-
-  await sendEmail({
-    to: user.email,
-    subject: 'Resend Email Verification OTP',
-    text: `Your new OTP is: ${otp}`
-  });
-
-  res.json({ message: 'New OTP sent to your email' });
-});

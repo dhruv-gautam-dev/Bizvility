@@ -22,7 +22,7 @@ const StoreDetailPage = ({ data }) => {
   const [activeTab, setActiveTab] = useState("Overview");
   const [filter, setFilter] = useState("Relevant");
   const imageUrl = import.meta.env.VITE_Image_URL;
-
+  // console.log(storeId);
   const isFormPreview = location.pathname.includes(
     "/Reacts/list-business/form"
   );
@@ -552,7 +552,7 @@ const StoreDetailPage = ({ data }) => {
                       <h2 className="ml-10 text-2xl font-semibold ">
                         Write a Review
                       </h2>
-                      <ReviewForm />
+                      <ReviewForm businessId={storeId} />
 
                       <h2 className="ml-10 text-2xl font-semibold ">
                         User Reviews
