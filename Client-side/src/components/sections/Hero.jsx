@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Search, MapPin } from "lucide-react";
 import SearchForm from "../layout/SearchForm";
+import bgImg from "../../assets/images/homeImages/HeroImage.webp";
 
 function Hero() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -10,7 +11,7 @@ function Hero() {
     <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
       {/* Background image */}
       <img
-        src="https://images.pexels.com/photos/1036657/pexels-photo-1036657.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
+        src={bgImg}
         alt="Background"
         className="absolute inset-0 object-cover w-full h-full"
       />
@@ -18,8 +19,13 @@ function Hero() {
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background:
-            "linear-gradient(to right, rgb(30, 58, 138, 1) 0%, rgb(30, 58, 138, .5) 50%, rgba(15, 23, 42, 0.3) 80%, rgba(15, 23, 42, 0.05) 100%)",
+          background: `linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.3) 0%,    /* light whiteish at top */
+      rgba(0, 0, 0, 0.5)   40%,       /* soft transition to darker */
+      rgba(0, 0, 0, 0.6)   80%,       /* darker mid-lower section */
+      rgba(0, 0, 0, 0.9)   100%       /* darkest near bottom */
+    )`,
         }}
       ></div>
 
