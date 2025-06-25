@@ -99,7 +99,15 @@ const businessSchema = new mongoose.Schema({
     default: 0
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+// ✅ Virtual field for associated reviews
+businessSchema.virtual('reviews', {
+  ref: 'Review', // The model to use
+  localField: '_id', // Find reviews where `business` = `_id`
+  foreignField: 'business', // In the Review model, the field to match
 });
 
 const Business = mongoose.model('Business', businessSchema);

@@ -1,8 +1,9 @@
-
 import Business from '../models/Business.js';
 import Health from '../models/Health.js';
 import Hotel from '../models/Hotel.js';
 import BeautySpa from '../models/BeautySpa.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import Review from '../models/Review.js';
 
 const categoryModels = {
   Health,
@@ -502,5 +503,53 @@ export const getAllBusinesses = async (req, res) => {
   }
 };
   
+//get the business by id with reveiws data
+export const getBusinessId = asyncHandler(async (req, res) => {
+  const { id } = req.params;
 
+  // 🔍 1. Find the business by ID
+  const business = await Business.findById(id).lean();
+  if (!business) {
+    console.log('❌ Business not found with id:', id);
+    return res.status(404).json({ message: 'Business not found' });
+  }
 
+  // 🧠 2. Resolve dynamic category model and fetch category-specific data
+  const CategoryModel = categoryModels[business.categoryModel];
+  let categoryData = {};
+
+  if (CategoryModel && business.categoryRef) {
+    const categoryDoc = await CategoryModel.findById(business.categoryRef).lean();
+    if (categoryDoc) {
+      const { _id, __v, ...rest } = categoryDoc;
+      categoryData = rest;
+    }
+  }
+
+  // 💬 3. Fetch reviews related to this business
+  const reviews = await Review.find({ business: id })
+    .populate('user', 'fullName profile.avatar')
+    .sort({ createdAt: -1 }) // latest first
+    .lean();
+
+  // 🧾 4. Format reviews
+  const formattedReviews = reviews.map((r) => ({
+    reviewerName: r.user?.fullName || 'Anonymous',
+    reviewerAvatar: r.user?.profile?.avatar || null,
+    rating: r.rating,
+    comment: r.comment,
+    time: r.createdAt,
+  }));
+
+  // 📦 5. Combine everything
+  const fullData = {
+    ...business,
+    categoryData,
+    reviews: formattedReviews,
+  };
+
+  res.status(200).json({
+    message: 'Business fetched successfully',
+    business: fullData,
+  });
+});

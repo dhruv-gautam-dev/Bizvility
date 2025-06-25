@@ -19,6 +19,7 @@ const StoreDetailPage = ({ data }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [healthStoreData, setHealthStoreData] = useState(null);
+  // const [storeReviewsData, setStoreReviewsData] = useState(null);
   const [activeTab, setActiveTab] = useState("Overview");
   const [filter, setFilter] = useState("Relevant");
   const imageUrl = import.meta.env.VITE_Image_URL;
@@ -54,6 +55,8 @@ const StoreDetailPage = ({ data }) => {
     else setLoading(false);
   }, [storeId, token, data]);
 
+  console.log(healthStoreData);
+
   // ✅ Memoized store logic with safe fallback
   const store = useMemo(() => {
     return data || healthStoreData?.business || null;
@@ -64,7 +67,7 @@ const StoreDetailPage = ({ data }) => {
   const reviews = useMemo(() => {
     if (!store?.reviews) return [];
 
-    const copy = [...store.reviews];
+    const copy = [...store?.reviews] || [healthStoreData?.business.reviews];
     switch (filter) {
       case "Latest":
         return copy.sort((a, b) => getTimestamp(b) - getTimestamp(a));
@@ -575,7 +578,7 @@ const StoreDetailPage = ({ data }) => {
                         ))}
                       </div>
                       {/* Reviews List */}
-                      {reviews?.map((r) => (
+                      {healthStoreData?.business.reviews.map((r) => (
                         <div
                           key={r.id}
                           className="pb-6 ml-24 space-y-4 border-b last:border-0"
@@ -584,23 +587,26 @@ const StoreDetailPage = ({ data }) => {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center">
                               <img
-                                src={r.image}
+                                src={
+                                  r.image ||
+                                  `https://cdn-icons-png.flaticon.com/512/17246/17246544.png`
+                                }
                                 alt={r.name}
                                 className="object-cover w-16 h-16 mr-4 bg-gray-200 rounded-full"
                               />
                               <div>
                                 <div className="flex items-center space-x-2">
                                   <h3 className="text-lg font-medium">
-                                    {r.name}
+                                    {r.reviewerName}
                                   </h3>
                                   {r.reviewsCount && (
                                     <span className="text-sm text-gray-500">
-                                      {r.reviewsCount} reviews
+                                      {r.rating} reviews
                                     </span>
                                   )}
                                 </div>
                                 <p className="text-sm text-gray-500">
-                                  {new Date(r.date).toLocaleDateString()}
+                                  {new Date(r.time).toLocaleDateString()}
                                 </p>
                               </div>
                             </div>
@@ -637,19 +643,19 @@ const StoreDetailPage = ({ data }) => {
                           )}
 
                           {/* Review Text */}
-                          <p className="text-gray-700">{r.text}</p>
+                          <p className="text-gray-700">{r.comment}</p>
 
                           {/* Actions */}
                           <div className="flex mt-4 space-x-6 text-gray-600">
-                            <button className="flex items-center space-x-1 hover:text-blue-600">
+                            {/* <button className="flex items-center space-x-1 hover:text-blue-600">
                               <FaThumbsUp /> <span>Helpful</span>
-                            </button>
+                            </button> */}
                             <button className="flex items-center space-x-1 hover:text-gray-800">
                               <FaCommentAlt /> <span>Comment</span>
                             </button>
-                            <button className="flex items-center space-x-1 hover:text-gray-800">
+                            {/* <button className="flex items-center space-x-1 hover:text-gray-800">
                               <FaShareAlt /> <span>Share</span>
-                            </button>
+                            </button> */}
                           </div>
                         </div>
                       ))}

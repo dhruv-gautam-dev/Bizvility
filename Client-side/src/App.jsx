@@ -54,74 +54,79 @@ import Analytics from "./pages/superAdmin/Analytics.jsx";
 import Settings from "./pages/superAdmin/Settings.jsx";
 import StoreDetailPage from "./pages/HealthCategoryPages/StoreDetailPage.jsx";
 import ForgotPassword from "./components/auth/ForgotPassword.jsx";
+import { ToastContainer } from "react-toastify";
+import toast, { Toaster } from "react-hot-toast";
 // import ProfileSettings from './pages/superAdmin/Profile.jsx';
 
 function App() {
   return (
-    <Router basename="/Reacts">
-      <Routes>
-        {/* Auth routes (no layout) */}
-        <Route path="/signin" element={<SignInForm />} />
-        <Route path="/signup" element={<SignUpForm />} />
-        <Route path="/verify-email" element={<EmailVerification />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/verify-email" element={<EmailVerification />} />
+    <>
+      <Toaster />
+      <Router basename="/Reacts">
+        <Routes>
+          {/* Auth routes (no layout) */}
+          <Route path="/signin" element={<SignInForm />} />
+          <Route path="/signup" element={<SignUpForm />} />
+          <Route path="/verify-email" element={<EmailVerification />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-email" element={<EmailVerification />} />
 
-        {/* Public Site (Layout) */}
-        <Route element={<Layout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/categories" element={<CategoriesPage />} />
-          <Route path="/categories/:slug" element={<CategoryDetailPage />} />
-          <Route
-            path="/categories/:slug/store/:storeId"
-            element={<StoreDetailPage />}
-          />
-          <Route path="/locations" element={<LocationsPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/partners" element={<PartnersPage />} />
-          <Route path="/careers" element={<CareersPage />} />
-          <Route
-            path="/careers/apply/:jobTitle"
-            element={<JobApplicationPage />}
-          />
-          <Route path="/list-business" element={<BusinessListingPage />} />
-          <Route path="/list-business/form" element={<ListBusinessPage />} />
-          <Route path="/support" element={<SupportPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/sitemap" element={<SitemapPage />} />
-          <Route path="/resources" element={<ResourcesPage />} />
-          <Route path="/help" element={<HelpPage />} />
-          <Route path="/press" element={<PressPage />} />
-          <Route path="/accessibility" element={<AccessibilityPage />} />
-          <Route path="/cookies" element={<CookiesPage />} />
-          <Route path="/support/faqs" element={<FAQPage />} />
-        </Route>
+          {/* Public Site (Layout) */}
+          <Route element={<Layout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/categories" element={<CategoriesPage />} />
+            <Route path="/categories/:slug" element={<CategoryDetailPage />} />
+            <Route
+              path="/categories/:slug/store/:storeId"
+              element={<StoreDetailPage />}
+            />
+            <Route path="/locations" element={<LocationsPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/partners" element={<PartnersPage />} />
+            <Route path="/careers" element={<CareersPage />} />
+            <Route
+              path="/careers/apply/:jobTitle"
+              element={<JobApplicationPage />}
+            />
+            <Route path="/list-business" element={<BusinessListingPage />} />
+            <Route path="/list-business/form" element={<ListBusinessPage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/sitemap" element={<SitemapPage />} />
+            <Route path="/resources" element={<ResourcesPage />} />
+            <Route path="/help" element={<HelpPage />} />
+            <Route path="/press" element={<PressPage />} />
+            <Route path="/accessibility" element={<AccessibilityPage />} />
+            <Route path="/cookies" element={<CookiesPage />} />
+            <Route path="/support/faqs" element={<FAQPage />} />
+          </Route>
 
-        {/* Super Admin Dashboard (AdminLayout) */}
-        <Route element={<AdminLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/businesses" element={<Businesses />} />
-          <Route path="/dashboard-categories" element={<Categories />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/settings" element={<Settings />} />
-          {/* <Route path="/profile" element={<ProfileSettings/>} /> */}
-        </Route>
+          {/* Super Admin Dashboard (AdminLayout) */}
+          <Route element={<AdminLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/businesses" element={<Businesses />} />
+            <Route path="/dashboard-categories" element={<Categories />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/settings" element={<Settings />} />
+            {/* <Route path="/profile" element={<ProfileSettings/>} /> */}
+          </Route>
 
-        {/* User Dashboard (UserLayout) */}
-        <Route element={<UserLayout />}>
-          <Route path="/user-dashboard" element={<UserDashboard />} />
-          <Route path="/user-profile" element={<UserProfile />} />
-          <Route path="/user-my-listings" element={<UserListings />} />
-          <Route path="/user-analytics" element={<UserAnalytics />} />
-          <Route path="/user-my-reviews" element={<UserReviews />} />
-          <Route path="/user-invoices" element={<UserInvoice />} />
-        </Route>
-      </Routes>
-    </Router>
+          {/* User Dashboard (UserLayout) */}
+          <Route element={<UserLayout />}>
+            <Route path="/user-dashboard" element={<UserDashboard />} />
+            <Route path="/user-profile" element={<UserProfile />} />
+            <Route path="/user-my-listings" element={<UserListings />} />
+            <Route path="/user-analytics" element={<UserAnalytics />} />
+            <Route path="/user-my-reviews" element={<UserReviews />} />
+            <Route path="/user-invoices" element={<UserInvoice />} />
+          </Route>
+        </Routes>
+      </Router>
+    </>
   );
 }
 

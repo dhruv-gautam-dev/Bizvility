@@ -1,13 +1,12 @@
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import { FaStar } from "react-icons/fa";
-// import { useParams } from "react-router-dom";
 
 const ReviewForm = ({ businessId }) => {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(null);
   const [review, setReview] = useState("");
   const [image, setImage] = useState(null);
-  // const { businessId } = useParams();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,7 +35,7 @@ const ReviewForm = ({ businessId }) => {
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`, // ✅ pass the token here
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
           body: body,
@@ -50,7 +49,7 @@ const ReviewForm = ({ businessId }) => {
 
       const data = await response.json();
       console.log("Review submitted successfully:", data);
-      alert("Thank you for your review!");
+      toast.success("Thank you for your review!");
 
       // Optional: Reset form
       setRating(0);

@@ -1,5 +1,5 @@
 import express from 'express';
-import { createBusiness, updateBusiness, getBusinessById, getAllBusinesses } from '../controllers/businessController.js';
+import { createBusiness, updateBusiness, getBusinessById, getAllBusinesses, getBusinessId } from '../controllers/businessController.js';
 import upload from '../middlewares/upload.js';
 import { protect } from '../middlewares/auth.js';
 
@@ -15,7 +15,8 @@ const mediaFields = upload.fields([
 
 router.post('/business', protect, mediaFields, createBusiness);
 router.put('/business/:id', protect, mediaFields, updateBusiness);
-router.get('/business/:id', protect, getBusinessById);
+// router.get('/business/:id', protect, getBusinessById);
 router.get('/businesses', getAllBusinesses)
+router.get('/byid/:id', getBusinessId);
 
 export default router;

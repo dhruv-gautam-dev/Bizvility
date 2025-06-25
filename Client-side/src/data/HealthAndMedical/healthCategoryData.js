@@ -641,7 +641,7 @@ export const getAllBusinesses = async (token) => {
 export const getBusinessById = async (id, token) => {
 console.log(token,id);
   try {
-    const response = await axios.get(`${API_URL}/business/${id}`, {
+    const response = await axios.get(`http://localhost:5000/api/business/byid/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`, // Assuming you use Bearer token auth
       },
@@ -653,4 +653,9 @@ console.log(token,id);
   }
 };
 
+
+
+
+
+// http://localhost:5000/api/business/byid/:id
 
