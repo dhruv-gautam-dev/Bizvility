@@ -37,6 +37,7 @@ const ReviewForm = ({ businessId }) => {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`, // ✅ pass the token here
+            "Content-Type": "application/json",
           },
           body: body,
         }
