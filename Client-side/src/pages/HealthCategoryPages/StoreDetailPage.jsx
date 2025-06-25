@@ -9,6 +9,7 @@ import {
   FaCommentAlt,
   FaShareAlt,
 } from "react-icons/fa";
+import ReviewForm from "../../components/business/ReviewForm";
 
 const StoreDetailPage = ({ data }) => {
   const location = useLocation();
@@ -547,12 +548,18 @@ const StoreDetailPage = ({ data }) => {
               {!isFormPreview && (
                 <section>
                   {activeTab === "Reviews" && (
-                    <section className="w-4/5 max-w-4xl p-6 space-y-6 bg-white rounded ">
+                    <section className="w-full max-w-6xl p-6 space-y-6 bg-white rounded ">
+                      <h2 className="ml-10 text-2xl font-semibold ">
+                        Write a Review
+                      </h2>
+                      <ReviewForm />
+
                       <h2 className="ml-10 text-2xl font-semibold ">
                         User Reviews
                       </h2>
+
                       {/* Filter Tabs */}
-                      <div className="flex mb-4 space-x-2 ml-18">
+                      <div className="flex mb-4 space-x-2 ml-22">
                         {["Relevant", "Latest", "High to Low"].map((tab) => (
                           <button
                             key={tab}
@@ -660,7 +667,11 @@ const StoreDetailPage = ({ data }) => {
                 Business Hours
               </h2>
               <ul className="text-sm text-gray-700 divide-y divide-gray-200">
-                {store?.businessHours?.map(({ day, open, close }) => {
+                {(
+                  store?.businessHours ||
+                  healthStoreData?.business?.businessHours ||
+                  []
+                ).map(({ day, open, close }) => {
                   let timeDisplay = "Closed";
 
                   if (open && close) {

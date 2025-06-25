@@ -26,6 +26,8 @@ const businessSchema = new mongoose.Schema({
       lng: Number
     }
   },
+  experience: {type: String, require:true},
+  description:{type: String, require:true},
   phone: { type: Number, required: true },
   website: String,
   email: {
@@ -46,16 +48,23 @@ const businessSchema = new mongoose.Schema({
   //   close: String,
   //   isOpen24Hours: { type: Boolean, default: false }
   // },
-  businessHours: {
-    monday: { open: String, close: String },
-    tuesday: { open: String, close: String },
-    wednesday: { open: String, close: String },
-    thursday: { open: String, close: String },
-    friday: { open: String, close: String },
-    saturday: { open: String, close: String },
-    sunday: { open: String, close: String },
-    // ...repeat for other days
-  },
+  // businessHours: {
+  //   monday: { open: String, close: String },
+  //   tuesday: { open: String, close: String },
+  //   wednesday: { open: String, close: String },
+  //   thursday: { open: String, close: String },
+  //   friday: { open: String, close: String },
+  //   saturday: { open: String, close: String },
+  //   sunday: { open: String, close: String },
+  //   // ...repeat for other days
+  // },
+  businessHours: [
+    {
+      day: { type: String, required: true },
+      open: { type: String, default: "" },  // Use "HH:mm" format
+      close: { type: String, default: "" }  // Use "HH:mm" format
+    }
+  ],
    profileImage: { type: String }, // single file path or URL
    coverImage: { type: String }, // single file path or URL
 
@@ -72,13 +81,25 @@ const businessSchema = new mongoose.Schema({
     message: 'galleryImages exceeds the limit of 10'
   }
 },
+ 
 
   category: { type: String, required: true }, // e.g., 'health-medical'
   categoryRef: {
     type: mongoose.Schema.Types.ObjectId,
     refPath: 'categoryModel'
   },
-  categoryModel: { type: String, required: true } // e.g., 'HealthMedical'
+  categoryModel: { type: String, required: true }, // e.g., 'HealthMedical'
+    // ✅ Review stats (newly added)
+  averageRating: {
+    type: Number,
+    default: 0
+  },
+  numberOfReviews: {
+    type: Number,
+    default: 0
+  }
+}, {
+  timestamps: true
 });
 
 const Business = mongoose.model('Business', businessSchema);

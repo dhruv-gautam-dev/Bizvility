@@ -23,63 +23,87 @@ const categoryModels = {
 //       businessHours,
 //       category,
 //       experience,
-//       description,
-
+//       description
 //     } = req.body;
 
-// const categoryModel = category; // derive from category
-//  CategoryModel = categoryModels[categoryModel];
+//     // 🧠 Get model
+//     const categoryModel = category;
+//     const CategoryModel = categoryModels[categoryModel];
 //     if (!CategoryModel) {
 //       return res.status(400).json({ message: 'Invalid category model' });
 //     }
 
-//     const categoryDoc = new CategoryModel(categoryData);
-//     const savedCategoryData = await categoryDoc.save();
+//     // ✅ Parse complex fields
+//     const parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
+//     const parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
+//     const parsedBusinessHours = typeof businessHours === 'string' ? JSON.parse(businessHours) : businessHours;
+//     const parsedCategoryData = req.body.categoryData ? JSON.parse(req.body.categoryData) : {};
 
 //     // ✅ Handle file uploads
 //     const files = req.files || {};
-
 //     const profileImage = files.profileImage?.[0]?.path || null;
 //     const coverImage = files.coverImage?.[0]?.path || null;
+//     const certificateImages = files.certificateImages?.map(file => file.path).slice(0, 5) || [];
+//     const galleryImages = files.galleryImages?.map(file => file.path).slice(0, 10) || [];
 
-//     const certificateImages = files.certificateImages
-//       ? files.certificateImages.map((file) => file.path).slice(0, 5) // max 5
+//     const formattedBusinessHours = Array.isArray(parsedBusinessHours)
+//       ? parsedBusinessHours.map((entry) => ({
+//           day: entry.day,
+//           open: entry.open || '',
+//           close: entry.close || ''
+//         }))
 //       : [];
 
-//     const galleryImages = files.galleryImages
-//       ? files.galleryImages.map((file) => file.path).slice(0, 10) // max 10
-//       : [];
-
+//     // ✅ Step 1: Create Business without categoryRef
 //     const business = new Business({
 //       name,
 //       ownerName,
 //       owner,
-//       location,
+//       location: parsedLocation,
 //       phone,
 //       website,
 //       email,
-//       socialLinks,
-//       businessHours,
+//       socialLinks: parsedSocialLinks,
+//       businessHours: formattedBusinessHours,
+//       experience,
+//       description,
 //       profileImage,
 //       coverImage,
 //       certificateImages,
 //       galleryImages,
 //       category,
-//       categoryModel,
-//       categoryRef: savedCategoryData._id
+//       categoryModel
 //     });
 
 //     const savedBusiness = await business.save();
+//     console.log("✅ Business saved with ID:", savedBusiness._id);
+
+//     // ✅ Step 2: Create category model with business reference
+//     const categoryDoc = new CategoryModel({
+//       ...parsedCategoryData,
+//       business: savedBusiness._id
+//     });
+//     const savedCategoryData = await categoryDoc.save();
+//     console.log("✅ Category saved:", savedCategoryData);
+
+//     // ✅ Step 3: Update business with categoryRef
+//     savedBusiness.categoryRef = savedCategoryData._id;
+//     const finalBusiness = await savedBusiness.save();
 
 //     res.status(201).json({
 //       message: 'Business created successfully',
-//       business: savedBusiness
+//       business: finalBusiness
 //     });
+
 //   } catch (error) {
-//     console.error('Error creating business:', error);
-//     res.status(500).json({ message: 'Server Error', error: error.message });
+//     console.error('❌ Error creating business:', error);
+//     res.status(500).json({
+//       message: 'Server Error',
+//       error: error.message
+//     });
 //   }
 // };
+
 
 export const createBusiness = async (req, res) => {
   try {
@@ -108,8 +132,29 @@ export const createBusiness = async (req, res) => {
     // ✅ Parse complex fields
     const parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
     const parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
-    const parsedBusinessHours = typeof businessHours === 'string' ? JSON.parse(businessHours) : businessHours;
     const parsedCategoryData = req.body.categoryData ? JSON.parse(req.body.categoryData) : {};
+
+    // ✅ Fix businessHours parsing
+    let parsedBusinessHours = [];
+    try {
+      parsedBusinessHours =
+        typeof businessHours === 'string' ? JSON.parse(businessHours) : businessHours;
+
+      if (!Array.isArray(parsedBusinessHours)) {
+        throw new Error('businessHours must be an array');
+      }
+    } catch (err) {
+      console.error('❌ Invalid businessHours format:', err.message);
+      return res.status(400).json({
+        message: 'Invalid businessHours format. It must be an array of objects with day, open, and close.',
+      });
+    }
+
+    const formattedBusinessHours = parsedBusinessHours.map((entry) => ({
+      day: entry.day || '',
+      open: entry.open || '',
+      close: entry.close || ''
+    }));
 
     // ✅ Handle file uploads
     const files = req.files || {};
@@ -117,14 +162,6 @@ export const createBusiness = async (req, res) => {
     const coverImage = files.coverImage?.[0]?.path || null;
     const certificateImages = files.certificateImages?.map(file => file.path).slice(0, 5) || [];
     const galleryImages = files.galleryImages?.map(file => file.path).slice(0, 10) || [];
-
-    const formattedBusinessHours = Array.isArray(parsedBusinessHours)
-      ? parsedBusinessHours.map((entry) => ({
-          day: entry.day,
-          open: entry.open || '',
-          close: entry.close || ''
-        }))
-      : [];
 
     // ✅ Step 1: Create Business without categoryRef
     const business = new Business({
