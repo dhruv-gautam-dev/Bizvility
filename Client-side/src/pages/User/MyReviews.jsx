@@ -177,9 +177,9 @@ export default function UserMyReviews() {
                   </div>
 
                   <div className="mb-2">
-                    <h4 className="text-sm font-medium text-gray-900">
+                    {/* <h4 className="text-sm font-medium text-gray-900">
                       {review.title}
-                    </h4>
+                    </h4> */}
                     <p className="text-sm text-gray-600">
                       for {review.business}
                     </p>

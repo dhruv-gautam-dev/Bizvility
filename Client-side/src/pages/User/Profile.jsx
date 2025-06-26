@@ -6,9 +6,12 @@ import {
 } from "@heroicons/react/24/outline";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { fetchUserProfile } from "../../data/UserData/userProfileData";
 
 export default function UserProfile() {
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [profile, setProfile] = useState(() => {
     // Load initial profile data from localStorage if it exists
     const savedProfile = localStorage.getItem("userProfile");
@@ -29,9 +32,62 @@ export default function UserProfile() {
         };
   });
 
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (!userId || !token) {
+      setError("User ID or token missing");
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    fetchUserProfile(userId, token)
+      .then((data) => {
+        // Transform API data to match the expected profile structure
+        const transformedProfile = {
+          name: data.data.fullName || "Admin User",
+          email: data.data.email || "admin@listingpro.com",
+          role: data.data.role
+            ? data.data.role.charAt(0).toUpperCase() + data.data.role.slice(1)
+            : "Administrator",
+          phone: profile.phone || "+1 (555) 123-4567", // Default since API doesn't provide
+          location: profile.location || "New York, NY", // Default since API doesn't provide
+          bio:
+            profile.bio ||
+            "Experienced administrator managing the ListingPro platform with expertise in business directory management and user experience optimization.", // Default since API doesn't provide
+          avatar: profile.avatar || "", // Retain existing avatar or empty
+          joinDate: data.data.createdAt
+            ? new Date(data.data.createdAt).toISOString().split("T")[0]
+            : "2024-01-01",
+          lastLogin: data.data.updatedAt
+            ? new Date(data.data.updatedAt).toLocaleString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })
+            : "2024-01-20 10:30 AM",
+          totalLogins: profile.totalLogins || 1247, // Default since API doesn't provide
+          managedListings: profile.managedListings || 2847, // Default since API doesn't provide
+        };
+
+        setProfile(transformedProfile);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [userId, token]);
+
   // Save profile to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("userProfile", JSON.stringify(profile));
+
     // Dispatch a custom event to notify other components of the change
     window.dispatchEvent(new Event("profileUpdated"));
   }, [profile]);
@@ -67,9 +123,12 @@ export default function UserProfile() {
     }
   };
 
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <div className="p-6">
-      {/* <ToastContainer /> */}
+      <ToastContainer />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Your Profile</h1>
         {!isEditing ? (

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   PlusIcon,
@@ -13,61 +13,18 @@ import {
 } from "@heroicons/react/24/outline";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-const userStats = {
-  totalListings: 3,
-  activeListings: 2,
-  pendingListings: 1,
-  totalViews: 1247,
-  totalReviews: 18,
-  averageRating: 4.6,
-  monthlyViews: 342,
-  profileViews: 89,
-};
-
-const initialListings = [
-  {
-    id: 1,
-    title: "The Coffee House",
-    status: "Active",
-    views: 456,
-    reviews: 12,
-    rating: 4.8,
-    lastUpdated: "2024-01-20",
-    image: "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg",
-  },
-  {
-    id: 2,
-    title: "Tech Solutions Inc",
-    status: "Active",
-    views: 234,
-    reviews: 6,
-    rating: 4.5,
-    lastUpdated: "2024-01-18",
-    image: "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg",
-  },
-  {
-    id: 3,
-    title: "Fashion Boutique",
-    status: "Pending",
-    views: 0,
-    reviews: 0,
-    rating: 0,
-    lastUpdated: "2024-01-15",
-    image: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg",
-  },
-];
+import { fetchUserListings } from "../../data/UserData/userBusinessLIsting";
 
 const recentActivity = [
   {
     action: "New review received",
-    item: "The Coffee House",
+    item: "Vishal Raj Medical Mart",
     time: "2 hours ago",
     type: "review",
   },
   {
     action: "Listing viewed",
-    item: "Tech Solutions Inc",
+    item: "Agra college",
     time: "4 hours ago",
     type: "view",
   },
@@ -79,7 +36,7 @@ const recentActivity = [
   },
   {
     action: "New listing created",
-    item: "Fashion Boutique",
+    item: "Vishal Raj Medical Mart",
     time: "3 days ago",
     type: "listing",
   },
@@ -87,7 +44,19 @@ const recentActivity = [
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const [listings, setListings] = useState(initialListings);
+  const [listings, setListings] = useState([]);
+  const [userStats, setUserStats] = useState({
+    totalListings: 0,
+    activeListings: 0,
+    pendingListings: 0,
+    totalViews: 0,
+    totalReviews: 0,
+    averageRating: 0,
+    monthlyViews: 0,
+    profileViews: 89, // Static since API doesn't provide this
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [quickActionExpanded, setQuickActionExpanded] = useState(true);
   const [recentActivityExpanded, setRecentActivityExpanded] = useState(true);
   const [performanceExpanded, setPerformanceExpanded] = useState(true);
@@ -99,6 +68,72 @@ const UserDashboard = () => {
     status: "",
     image: "",
   });
+
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    setLoading(true);
+    fetchUserListings(userId, token)
+      .then((data) => {
+        // Transform API data to match the expected structure
+        const transformedListings = data.listings.map((listing) => ({
+          id: listing._id,
+          title: listing.name,
+          status: "Active", // Default status since API doesn't provide it
+          views: 0, // Default since API doesn't provide it
+          reviews: listing.numberOfReviews || 0,
+          rating: listing.averageRating || 0,
+          lastUpdated: new Date(listing.updatedAt).toISOString().split("T")[0],
+          image: listing.profileImage
+            ? `http://localhost:5000/${listing.profileImage.replace(
+                /\\/g,
+                "/"
+              )}`
+            : "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg", // Fallback image
+        }));
+
+        // Calculate userStats from the transformed listings
+        const totalListings = transformedListings.length;
+        const activeListings = transformedListings.filter(
+          (l) => l.status === "Active"
+        ).length;
+        const pendingListings = transformedListings.filter(
+          (l) => l.status === "Pending"
+        ).length;
+        const totalViews = transformedListings.reduce(
+          (sum, l) => sum + l.views,
+          0
+        );
+        const totalReviews = transformedListings.reduce(
+          (sum, l) => sum + l.reviews,
+          0
+        );
+        const averageRating = totalListings
+          ? (
+              transformedListings.reduce((sum, l) => sum + l.rating, 0) /
+              totalListings
+            ).toFixed(1)
+          : 0;
+
+        setListings(transformedListings);
+        setUserStats({
+          totalListings,
+          activeListings,
+          pendingListings,
+          totalViews,
+          totalReviews,
+          averageRating,
+          monthlyViews: 0, // Default since API doesn't provide it
+          profileViews: 89, // Static since API doesn't provide it
+        });
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [userId, token]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -126,6 +161,10 @@ const UserDashboard = () => {
       default:
         return "📝";
     }
+  };
+
+  const handleViewModal = (listing) => {
+    navigate(`/categories/health/store/${listing.id}`);
   };
 
   const handleOpenEditModal = (listing) => {
@@ -197,6 +236,27 @@ const UserDashboard = () => {
             <button
               onClick={() => {
                 setListings(listings.filter((l) => l.id !== listing.id));
+                setUserStats((prev) => ({
+                  ...prev,
+                  totalListings: prev.totalListings - 1,
+                  activeListings:
+                    listing.status === "Active"
+                      ? prev.activeListings - 1
+                      : prev.activeListings,
+                  pendingListings:
+                    listing.status === "Pending"
+                      ? prev.pendingListings - 1
+                      : prev.pendingListings,
+                  totalReviews: prev.totalReviews - listing.reviews,
+                  averageRating:
+                    prev.totalListings - 1
+                      ? (
+                          (prev.averageRating * prev.totalListings -
+                            listing.rating) /
+                          (prev.totalListings - 1)
+                        ).toFixed(1)
+                      : 0,
+                }));
                 closeToast();
                 toast.success(
                   `${listing.title} has been deleted successfully!`,
@@ -222,9 +282,12 @@ const UserDashboard = () => {
     );
   };
 
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <div className="p-6">
-      {/* <ToastContainer /> */}
+      <ToastContainer />
 
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -241,7 +304,7 @@ const UserDashboard = () => {
         <StatCard
           Icon={BuildingStorefrontIcon}
           label="Total Listings"
-          value={listings.length}
+          value={userStats.totalListings}
           color="text-blue-600"
         />
         <StatCard
@@ -282,7 +345,7 @@ const UserDashboard = () => {
               navigate={navigate}
               icon={BuildingStorefrontIcon}
               label="My Listings"
-              href="/my-listings"
+              href="/user-my-listings"
               color="text-green-600"
             />
             <QuickActionButton
@@ -371,7 +434,7 @@ const UserDashboard = () => {
                 </div>
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => window.open(listing.image, "_blank")}
+                    onClick={() => handleViewModal(listing)}
                     className="p-2 text-blue-600 hover:text-blue-800"
                   >
                     <EyeIcon className="w-4 h-4" />
@@ -412,7 +475,7 @@ const UserDashboard = () => {
               color="text-green-600"
             />
             <PerformanceStat
-              value={listings.filter((l) => l.status === "Active").length}
+              value={userStats.activeListings}
               label="Active Listings"
               color="text-purple-600"
             />

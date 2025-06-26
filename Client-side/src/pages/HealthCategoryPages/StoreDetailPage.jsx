@@ -80,17 +80,6 @@ const StoreDetailPage = ({ data }) => {
     }
   }, [store?.reviews, filter]);
 
-  // const sorted = useMemo(() => {
-  //   if (!isFormPreview || !store?.reviews) return [];
-  //   const copy = [...store.reviews];
-
-  //   if (filter === "Latest")
-  //     return copy.sort((a, b) => getTimestamp(b) - getTimestamp(a));
-  //   if (filter === "High to Low")
-  //     return copy.sort((a, b) => b.rating - a.rating);
-  //   return copy;
-  // }, [filter, store?.reviews, isFormPreview]);
-
   const formattedLoc = encodeURIComponent(
     `${store?.location?.address || ""}, ${store?.location?.city || ""}, ${
       store?.location?.state || ""
@@ -138,7 +127,7 @@ const StoreDetailPage = ({ data }) => {
           </div>
 
           {/* Circle Doctor Profile Image */}
-          <div className="absolute transform translate-y-1/2 -top-16 left-4 sm:left-8 sm:-top-36 md:left-28 md:-top-36">
+          <div className="absolute transform translate-y-1/2 -top-18 left-4 sm:left-8 sm:-top-36 md:left-28 md:-top-20">
             <img
               src={
                 store?.profilePhoto?.preview ||
@@ -149,7 +138,7 @@ const StoreDetailPage = ({ data }) => {
                 store?.ownerName ||
                 healthStoreData?.business.ownerName
               }
-              className="object-cover w-40 h-40 border-4 border-white rounded-full shadow-lg sm:w-60 sm:h-60 md:w-72 md:h-72"
+              className="object-cover w-40 h-40 border-4 border-white rounded-full shadow-md sm:w-60 sm:h-60 md:w-72 md:h-72"
             />
           </div>
           {/* Header Info */}
