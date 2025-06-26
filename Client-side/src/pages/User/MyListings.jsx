@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   MagnifyingGlassIcon,
   PlusIcon,
@@ -11,51 +11,12 @@ import {
 } from "@heroicons/react/24/outline";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-const initialListings = [
-  {
-    id: 1,
-    title: "The Coffee House",
-    category: "Restaurant",
-    location: "New York, NY",
-    status: "Active",
-    rating: 4.5,
-    reviews: 128,
-    views: 1247,
-    date: "2024-01-15",
-    featured: true,
-    image: "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg",
-  },
-  {
-    id: 2,
-    title: "Tech Solutions Inc",
-    category: "Services",
-    location: "San Francisco, CA",
-    status: "Active",
-    rating: 4.8,
-    reviews: 89,
-    views: 892,
-    date: "2024-01-14",
-    featured: false,
-    image: "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg",
-  },
-  {
-    id: 3,
-    title: "Fashion Boutique",
-    category: "Retail",
-    location: "Los Angeles, CA",
-    status: "Pending",
-    rating: 0,
-    reviews: 0,
-    views: 0,
-    date: "2024-01-13",
-    featured: false,
-    image: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg",
-  },
-];
+import { fetchUserListings } from "../../data/UserData/userBusinessLIsting";
 
 export default function UserMyListings() {
-  const [listings, setListings] = useState(initialListings);
+  const [listings, setListings] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,13 +29,53 @@ export default function UserMyListings() {
     image: null,
   });
   const [editingListing, setEditingListing] = useState(null);
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
 
-  const filteredListings = listings.filter((listing) => {
+  useEffect(() => {
+    setLoading(true);
+    fetchUserListings(userId, token)
+      .then((data) => {
+        // Transform API data to match the expected structure
+        const transformedListings = data.listings.map((listing) => ({
+          id: listing._id,
+          title: listing.name,
+          category: listing.category,
+          location: `${listing.location.address}, ${listing.location.city}, ${listing.location.state}`,
+          status: "Active", // Default status since API doesn't provide it
+          rating: listing.averageRating || 0,
+          reviews: listing.numberOfReviews || 0,
+          views: 0, // Default value since API doesn't provide it
+          date: new Date(listing.createdAt).toISOString().split("T")[0],
+          featured: false, // Default value since API doesn't provide it
+          image: listing.profileImage
+            ? `http://localhost:5000/${listing.profileImage.replace(
+                /\\/g,
+                "/"
+              )}`
+            : "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg", // Fallback image
+        }));
+        setListings(transformedListings);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [userId, token]);
+
+  const filteredListings = listings?.filter((listing) => {
+    const name = listing.title?.toLowerCase() || "";
+    const location = listing.location?.toLowerCase() || "";
+    const status = listing.status?.toLowerCase() || "";
+
     const matchesSearch =
-      listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      listing.location.toLowerCase().includes(searchTerm.toLowerCase());
+      name.includes(searchTerm.toLowerCase()) ||
+      location.includes(searchTerm.toLowerCase());
+
     const matchesStatus =
-      filterStatus === "all" || listing.status.toLowerCase() === filterStatus;
+      filterStatus === "all" || status === filterStatus.toLowerCase();
+
     return matchesSearch && matchesStatus;
   });
 
@@ -170,7 +171,7 @@ export default function UserMyListings() {
       });
     } else {
       const newListing = {
-        id: listings.length + 1,
+        id: `new-${Date.now()}`, // Temporary ID for new listings
         title: formData.title,
         category: formData.category,
         location: formData.location,
@@ -197,7 +198,6 @@ export default function UserMyListings() {
   };
 
   const handleDelete = (listing) => {
-    // Show confirmation toast with buttons
     toast(
       ({ closeToast }) => (
         <div className="flex flex-col gap-2">
@@ -243,9 +243,13 @@ export default function UserMyListings() {
     window.open(listing.image, "_blank");
   };
 
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!listings) return null;
+
   return (
     <div className="p-6">
-      {/* <ToastContainer /> */}
+      <ToastContainer />
 
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">My Listings</h1>
@@ -429,6 +433,7 @@ export default function UserMyListings() {
                   className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select a category</option>
+                  <option value="Health">Health</option>
                   <option value="Restaurant">Restaurant</option>
                   <option value="Services">Services</option>
                   <option value="Retail">Retail</option>
@@ -444,7 +449,7 @@ export default function UserMyListings() {
                   value={formData.location}
                   onChange={handleFormChange}
                   className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter location (e.g., New York, NY)"
+                  placeholder="Enter location (e.g., Sector 63, Noida, Uttar Pradesh)"
                 />
               </div>
               <div>
