@@ -102,34 +102,84 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
 
 
 //get all reviews by user
-export const getUserReviews = asyncHandler(async (req, res) => {
-  try {
-    const ownerId = req.user._id;
+// export const getUserReviews = asyncHandler(async (req, res) => {
+//   try {
+//     const ownerId = req.user._id;
 
-    // 🔍 Step 1: Get all businesses created by this user
-    const businesses = await Business.find({ owner: ownerId }).select('_id');
+//     // 🔍 Step 1: Get all businesses created by this user
+//     const businesses = await Business.find({ owner: ownerId }).select('_id');
+
+//     if (!businesses.length) {
+//       return res.status(404).json({
+//         status: 'fail',
+//         message: 'You have not listed any businesses yet.',
+//         data: [],
+//       });
+//     }
+
+//     const businessIds = businesses.map((b) => b._id);
+
+//     // 📥 Step 2: Fetch reviews for these business IDs
+//     const reviews = await Review.find({ business: { $in: businessIds } })
+//       .populate('user', 'fullName profile.avatar') // Reviewer info
+//       .populate('business', 'name')               // Business name
+//       .sort({ createdAt: -1 });
+
+//     // 🎁 Step 3: Format reviews neatly
+//     const formatted = reviews.map((r) => ({
+//       reviewerName: r.user?.fullName,
+//       reviewerAvatar: r.user?.profile?.avatar || null,
+//       businessName: r.business?.name,
+//       comment: r.comment,
+//       rating: r.rating,
+//       time: r.createdAt,
+//     }));
+
+//     return res.status(200).json({
+//       status: 'success',
+//       total: formatted.length,
+//       reviews: formatted,
+//     });
+
+//   } catch (error) {
+//     console.error('❌ Error while fetching user reviews:', error);
+
+//     return res.status(500).json({
+//       status: 'error',
+//       message: 'Something went wrong while fetching your business reviews.',
+//       error: error.message,
+//     });
+//   }
+// });
+export const getUserReviews = asyncHandler(async (req, res) => {
+  const ownerId = req.user._id;
+
+  try {
+    // 🔍 1. Get all businesses listed by the current user
+    const businesses = await Business.find({ owner: ownerId }).select('_id name');
 
     if (!businesses.length) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'You have not listed any businesses yet.',
-        data: [],
+      return res.status(200).json({
+        status: 'success',
+        message: 'No businesses listed by this user yet.',
+        reviews: [],
       });
     }
 
     const businessIds = businesses.map((b) => b._id);
 
-    // 📥 Step 2: Fetch reviews for these business IDs
+    // 📝 2. Find all reviews on those businesses
     const reviews = await Review.find({ business: { $in: businessIds } })
-      .populate('user', 'fullName profile.avatar') // Reviewer info
-      .populate('business', 'name')               // Business name
-      .sort({ createdAt: -1 });
+      .populate('user', 'fullName profile.avatar') // reviewer info
+      .populate('business', 'name')               // business info
+      .sort({ createdAt: -1 })                    // latest first
+      .lean();
 
-    // 🎁 Step 3: Format reviews neatly
-    const formatted = reviews.map((r) => ({
-      reviewerName: r.user?.fullName,
+    // 📦 3. Format the review response
+    const formattedReviews = reviews.map((r) => ({
+      reviewerName: r.user?.fullName || 'Anonymous',
       reviewerAvatar: r.user?.profile?.avatar || null,
-      businessName: r.business?.name,
+      businessName: r.business?.name || 'Unknown',
       comment: r.comment,
       rating: r.rating,
       time: r.createdAt,
@@ -137,55 +187,55 @@ export const getUserReviews = asyncHandler(async (req, res) => {
 
     return res.status(200).json({
       status: 'success',
-      total: formatted.length,
-      reviews: formatted,
+      total: formattedReviews.length,
+      reviews: formattedReviews,
     });
 
   } catch (error) {
-    console.error('❌ Error while fetching user reviews:', error);
-
+    console.error('❌ Error while fetching reviews for user businesses:', error);
     return res.status(500).json({
       status: 'error',
-      message: 'Something went wrong while fetching your business reviews.',
+      message: 'Server error while fetching business reviews.',
       error: error.message,
     });
   }
 });
+
 
 //get the business by use id
-export const getUserBusinesses = asyncHandler(async (req, res) => {
-  try {
-    const userId = req.user._id;
+// export const getUserBusinesses = asyncHandler(async (req, res) => {
+//   try {
+//     const userId = req.user._id;
 
-    // Fetch businesses owned by this user
-    const businesses = await Business.find({ owner: userId })
-      .populate('owner', 'fullName profile.avatar') // Owner info
-      .sort({ createdAt: -1 });
+//     // Fetch businesses owned by this user
+//     const businesses = await Business.find({ owner: userId })
+//       .populate('owner', 'fullName profile.avatar') // Owner info
+//       .sort({ createdAt: -1 });
 
-    if (!businesses.length) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'You have not listed any businesses yet.',
-        data: [],
-      });
-    }
+//     if (!businesses.length) {
+//       return res.status(404).json({
+//         status: 'fail',
+//         message: 'You have not listed any businesses yet.',
+//         data: [],
+//       });
+//     }
 
-    return res.status(200).json({
-      status: 'success',
-      total: businesses.length,
-      businesses,
-    });
+//     return res.status(200).json({
+//       status: 'success',
+//       total: businesses.length,
+//       businesses,
+//     });
 
-  } catch (error) {
-    console.error('❌ Error while fetching user businesses:', error);
+//   } catch (error) {
+//     console.error('❌ Error while fetching user businesses:', error);
 
-    return res.status(500).json({
-      status: 'error',
-      message: 'Something went wrong while fetching your businesses.',
-      error: error.message,
-    });
-  }
-});
+//     return res.status(500).json({
+//       status: 'error',
+//       message: 'Something went wrong while fetching your businesses.',
+//       error: error.message,
+//     });
+//   }
+// });
 
 //better error handling
 export const handleError = (error, res) => {  
@@ -196,3 +246,42 @@ export const handleError = (error, res) => {
     error: error.message || 'Unknown error',
   });
 }
+
+
+// @desc    Get all business listings created by the current user
+// @route   GET /api/user/listings
+// @access  Private
+export const getUserListings = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  try {
+    const listings = await Business.find({ owner: userId })
+      .select('-__v') // optional: exclude Mongoose version key
+      .populate('categoryRef') // optional: load category info if needed
+      .sort({ createdAt: -1 }); // newest first
+
+    if (!listings.length) {
+      return res.status(200).json({
+        status: 'success',
+        message: 'No business listings found for this user.',
+        listings: [],
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      total: listings.length,
+      listings,
+    });
+  } catch (error) {
+    console.error('❌ Error fetching user listings:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch business listings.',
+      error: error.message,
+    });
+  }
+});
+
+
+//edit business listing by id check the businessController.js put api

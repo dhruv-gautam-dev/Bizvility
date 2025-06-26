@@ -118,24 +118,11 @@ const StoreDetailPage = ({ data }) => {
 
   return (
     <>
-      <div className="pt-24 bg-gray-50">
+      <div className="min-h-screen pt-24 bg-gray-50">
         {/* Background image and header section */}
-        <section>
+        <section className="relative">
           {/* Background Image */}
-          <div
-          // className="relative px-4 py-40 text-white bg-center bg-cover md:px-16"
-          // style={{
-          //   backgroundImage: `url(${
-          //     store?.Banner?.preview ||
-          //     `${imageUrl}/${healthStoreData?.business.coverImage}`
-
-          //     // store?.photos?.[0] ||
-          //     // store?.Banner?.preview ||
-          //     // store?.coverImage ||
-          //     // healthStoreData?.business?.coverImage
-          //   })`,
-          // }}
-          >
+          <div className="w-full">
             <img
               src={
                 store?.Banner?.preview ||
@@ -146,12 +133,12 @@ const StoreDetailPage = ({ data }) => {
                 store?.ownerName ||
                 healthStoreData?.business.ownerName
               }
-              className="object-cover w-full border-4 border-white w-72 h-96"
+              className="object-cover w-full h-48 border-4 border-white sm:h-64 md:h-80 lg:h-96"
             />
           </div>
 
           {/* Circle Doctor Profile Image */}
-          <div className="relative flex flex-col items-center left-3 -top-40 md:w-1/3 md:mt-0">
+          <div className="absolute transform translate-y-1/2 -top-16 left-4 sm:left-8 sm:-top-36 md:left-28 md:-top-36">
             <img
               src={
                 store?.profilePhoto?.preview ||
@@ -162,12 +149,12 @@ const StoreDetailPage = ({ data }) => {
                 store?.ownerName ||
                 healthStoreData?.business.ownerName
               }
-              className="object-cover border-4 border-white rounded-full shadow-lg w-72 h-72"
+              className="object-cover w-40 h-40 border-4 border-white rounded-full shadow-lg sm:w-60 sm:h-60 md:w-72 md:h-72"
             />
           </div>
           {/* Header Info */}
-          <div className="container flex flex-col py-6 mx-auto -mt-40 ml-28 md:flex-row md:items-center md:justify-between">
-            <div className="ml-16 ">
+          <div className="flex flex-col gap-4 px-4 mt-16 sm:px-2 lg:px-8 sm:mt-24 md:mt-36 md:flex-row md:items-center md:justify-between">
+            <div className="text-left md:text-left ">
               <h2 className="text-3xl font-bold">
                 {store?.name ||
                   store?.ownerName ||
@@ -191,7 +178,7 @@ const StoreDetailPage = ({ data }) => {
                     <span className="text-gray-600">Claimed</span>
                   ))}
               </div>
-              <div className="flex flex-wrap items-center mt-2 space-x-4 text-gray-600">
+              <div className="flex flex-wrap items-center mt-2 mb-3 space-x-4 text-gray-600">
                 <MapPin className="w-5 h-5" />
                 <span>{store?.address || address}</span>
                 <span>• Open until {store?.openUntil}</span>
@@ -205,7 +192,7 @@ const StoreDetailPage = ({ data }) => {
                 <span>• Membership from ₹{store?.price || "0"}</span>
               </div>
             </div>
-            <div className="flex mt-4 space-x-2 md:mt-0">
+            <div className="flex flex-wrap justify-center gap-2 mb-2 space-x-2 md:justify-end">
               <a
                 href={
                   `tel:${store?.phone}` ||
@@ -232,16 +219,16 @@ const StoreDetailPage = ({ data }) => {
             </div>
           </div>
         </section>
-        <section className="container flex flex-row mx-2 bg-white ">
+        <section className="flex flex-col gap-6 bg-white sm:px-6 lg:px-8 lg:flex-row">
           {/* Tabs Section */}
-          <section className="container flex flex-col w-2/3 bg-white border-t ">
+          <section className="w-full mx-auto bg-white border-t lg:w-2/3 ">
             {/* Tab Navigation */}
-            <nav className="flex px-6 pl-16 space-x-8 border-b">
+            <nav className="flex flex-wrap px-2 space-x-4 overflow-x-auto border-b sm:px-2 sm:space-x-8">
               {tabList.map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`py-4 font-medium border-b-2 ${
+                  className={`py-3 sm:py-4 font-medium border-b-2 text-sm sm:text-base ${
                     activeTab === tab
                       ? "border-blue-600 text-blue-600"
                       : "border-transparent text-gray-600"
@@ -256,12 +243,14 @@ const StoreDetailPage = ({ data }) => {
             <div className="w-full ">
               {activeTab === "Overview" && (
                 <div className="w-full">
-                  <section className="max-w-4xl p-6 ml-10 bg-white rounded-lg ">
+                  <section className="p-4 bg-white rounded-lg sm:p-6">
                     <header className="mb-3">
-                      <h2 className="text-2xl font-semibold ">Overview</h2>
+                      <h2 className="text-xl font-semibold sm:text-2xl">
+                        Overview
+                      </h2>
                     </header>
 
-                    <div className="w-full space-y-4 text-gray-700 bg-white rounded-lg pl-7">
+                    <div className="mx-8 space-y-2 text-gray-700 bg-white rounded-lg">
                       {/* 1. Summary */}
                       <div>
                         <h3 className="text-lg font-semibold text-gray-800">
@@ -331,10 +320,12 @@ const StoreDetailPage = ({ data }) => {
                 </div>
               )}
               {activeTab === "Quick Info" && (
-                <div className="w-5/6 p-6 space-y-4 bg-white rounded ">
-                  <h2 className="ml-10 text-2xl font-semibold ">Quick Info</h2>
+                <div className="w-full p-4 space-y-4 bg-white rounded sm:p-6">
+                  <h2 className="text-xl font-semibold sm:text-2xl">
+                    Quick Info
+                  </h2>
 
-                  <div className="pl-16 bg-white rounded-lg ">
+                  <div className="bg-white rounded-lg">
                     <div className="divide-y divide-gray-200">
                       {/* Row Item */}
                       <div className="grid grid-cols-2 py-3">
@@ -513,12 +504,10 @@ const StoreDetailPage = ({ data }) => {
                 </div>
               )}
               {activeTab === "Photos" && (
-                <section className="w-5/6 p-6 space-y-6 bg-white rounded ">
-                  <h2 className="ml-10 text-2xl font-semibold ">Photos</h2>
+                <section className="p-4 space-y-6 bg-white rounded sm:p-6">
+                  <h2 className="text-xl font-semibold sm:text-2xl">Photos</h2>
                   <div>
-                    <div className="grid grid-cols-4 gap-2 my-4 ml-18">
-                      {/* `${imageUrl}/${healthStoreData?.business.coverImage}` */}
-                      {/* src={} */}
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
                       {(healthStoreData?.business?.galleryImages?.length
                         ? healthStoreData?.business?.galleryImages
                         : store.galleryImages?.length
@@ -540,7 +529,7 @@ const StoreDetailPage = ({ data }) => {
                             key={idx}
                             src={src}
                             alt={`preview-${idx}`}
-                            className="object-cover w-48 rounded-md aspect-square"
+                            className="object-cover w-full rounded-md aspect-square"
                           />
                         );
                       })}
@@ -551,18 +540,18 @@ const StoreDetailPage = ({ data }) => {
               {!isFormPreview && (
                 <section>
                   {activeTab === "Reviews" && (
-                    <section className="w-full max-w-6xl p-6 space-y-6 bg-white rounded ">
-                      <h2 className="ml-10 text-2xl font-semibold ">
+                    <section className="p-4 space-y-6 bg-white rounded sm:p-6">
+                      <h2 className="text-xl font-semibold sm:text-2xl">
                         Write a Review
                       </h2>
                       <ReviewForm businessId={storeId} />
 
-                      <h2 className="ml-10 text-2xl font-semibold ">
+                      <h2 className="text-xl font-semibold sm:text-2xl">
                         User Reviews
                       </h2>
 
                       {/* Filter Tabs */}
-                      <div className="flex mb-4 space-x-2 ml-22">
+                      <div className="flex flex-wrap mb-4 space-x-2">
                         {["Relevant", "Latest", "High to Low"].map((tab) => (
                           <button
                             key={tab}
@@ -581,10 +570,10 @@ const StoreDetailPage = ({ data }) => {
                       {reviews.map((r) => (
                         <div
                           key={r.id}
-                          className="pb-6 ml-24 space-y-4 border-b last:border-0"
+                          className="pb-6 space-y-4 border-b last:border-0"
                         >
                           {/* Header: avatar, name, count, date, rating */}
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
                             <div className="flex items-center">
                               <img
                                 src={
@@ -592,36 +581,36 @@ const StoreDetailPage = ({ data }) => {
                                   `https://cdn-icons-png.flaticon.com/512/17246/17246544.png`
                                 }
                                 alt={r.name}
-                                className="object-cover w-16 h-16 mr-4 bg-gray-200 rounded-full"
+                                className="object-cover w-12 h-12 mr-4 bg-gray-200 rounded-full sm:w-16 sm:h-16"
                               />
                               <div>
                                 <div className="flex items-center space-x-2">
-                                  <h3 className="text-lg font-medium">
+                                  <h3 className="text-base font-medium sm:text-lg">
                                     {r.reviewerName}
                                   </h3>
                                   {r.reviewsCount && (
-                                    <span className="text-sm text-gray-500">
+                                    <span className="text-xs text-gray-500 sm:text-sm">
                                       {r.rating} reviews
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-xs text-gray-500 sm:text-sm">
                                   {new Date(r.time).toLocaleDateString()}
                                 </p>
                               </div>
                             </div>
                             {/* Rating */}
-                            <div className="flex items-center space-x-1">
+                            <div className="flex items-center mt-2 space-x-1 sm:mt-0">
                               {[1, 2, 3, 4, 5].map((i) =>
                                 i <= Math.round(r.rating) ? (
                                   <FaStar
                                     key={i}
-                                    className="w-5 h-5 text-green-500"
+                                    className="w-4 h-4 text-green-500 sm:w-5 sm:h-5"
                                   />
                                 ) : (
                                   <FaRegStar
                                     key={i}
-                                    className="w-5 h-5 text-gray-300"
+                                    className="w-4 h-4 text-gray-300 sm:w-5 sm:h-5"
                                   />
                                 )
                               )}
@@ -634,7 +623,7 @@ const StoreDetailPage = ({ data }) => {
                               {r.tags.map((tag) => (
                                 <span
                                   key={tag}
-                                  className="flex items-center px-3 py-1 space-x-1 text-sm text-gray-700 bg-gray-100 rounded-full"
+                                  className="flex items-center px-2 py-1 space-x-1 text-xs text-gray-700 bg-gray-100 rounded-full sm:text-sm"
                                 >
                                   <FaThumbsUp /> <span>{tag}</span>
                                 </span>
@@ -643,14 +632,16 @@ const StoreDetailPage = ({ data }) => {
                           )}
 
                           {/* Review Text */}
-                          <p className="text-gray-700">{r.comment}</p>
+                          <p className="text-sm text-gray-700 sm:text-base">
+                            {r.comment}
+                          </p>
 
                           {/* Actions */}
-                          <div className="flex mt-4 space-x-6 text-gray-600">
+                          <div className="flex mt-1 space-x-6 text-gray-600">
                             {/* <button className="flex items-center space-x-1 hover:text-blue-600">
                               <FaThumbsUp /> <span>Helpful</span>
                             </button> */}
-                            <button className="flex items-center space-x-1 hover:text-gray-800">
+                            <button className="flex items-center space-x-1 text-xs hover:text-gray-800 sm:text-sm">
                               <FaCommentAlt /> <span>Comment</span>
                             </button>
                             {/* <button className="flex items-center space-x-1 hover:text-gray-800">
@@ -666,13 +657,13 @@ const StoreDetailPage = ({ data }) => {
             </div>
           </section>
           {/* Store detail section  */}
-          <section className="container w-1/3 max-w-4xl p-6 pt-24 mx-auto bg-white rounded-lg ">
+          <section className="w-full p-4 bg-white rounded-lg lg:w-1/3 sm:p-6">
             {/* Business Hours     */}
-            <div className="p-1 mb-4 bg-white rounded-md ">
-              <h2 className="mb-4 text-lg font-semibold text-red-600">
+            <div className="p-4 mb-4 bg-white rounded-md">
+              <h2 className="mb-4 text-lg font-semibold text-red-600 sm:text-xl">
                 Business Hours
               </h2>
-              <ul className="text-sm text-gray-700 divide-y divide-gray-200">
+              <ul className="text-xs text-gray-700 divide-y divide-gray-200 sm:text-sm">
                 {(
                   store?.businessHours ||
                   healthStoreData?.business?.businessHours ||
@@ -709,19 +700,12 @@ const StoreDetailPage = ({ data }) => {
 
             {/* Embedded Google Map */}
             <div className="mb-4">
-              <h3 className="mb-2 text-lg font-semibold">Address</h3>
-              <p className="mb-2 text-sm text-gray-600">{address}</p>
-
-              {/* <iframe
-                title="Google Map"
-                className="w-full h-64 border rounded"
-                allowFullScreen=""
-                loading="lazy"
-              /> */}
+              <h3 className="mb-2 text-lg font-semibold sm:text-xl">Address</h3>
+              <p className="mb-2 text-xs text-gray-600 sm:text-sm">{address}</p>
 
               <div className="w-full aspect-video">
                 <iframe
-                  className="w-full h-full"
+                  className="w-full h-full rounded"
                   title={`Map for ${formattedLoc}`}
                   src={iframeSrc}
                   frameBorder="0"
@@ -739,7 +723,7 @@ const StoreDetailPage = ({ data }) => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <button className="px-6 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
+                <button className="px-4 py-2 text-sm text-white bg-blue-600 rounded sm:px-6 sm:py-2 hover:bg-blue-700 sm:text-base">
                   Get Direction
                 </button>
               </a>
