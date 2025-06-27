@@ -76,24 +76,35 @@ const UserDashboard = () => {
     setLoading(true);
     fetchUserListings(userId, token)
       .then((data) => {
-        // Transform API data to match the expected structure
-        const transformedListings = data.listings.map((listing) => ({
-          id: listing._id,
-          title: listing.name,
-          status: "Active", // Default status since API doesn't provide it
-          views: 0, // Default since API doesn't provide it
-          reviews: listing.numberOfReviews || 0,
-          rating: listing.averageRating || 0,
-          lastUpdated: new Date(listing.updatedAt).toISOString().split("T")[0],
-          image: listing.profileImage
-            ? `http://localhost:5000/${listing.profileImage.replace(
-                /\\/g,
-                "/"
-              )}`
-            : "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg", // Fallback image
-        }));
+        const transformedListings = data.listings.map((listing) => {
+          let formattedUpdatedDate = "Unknown";
 
-        // Calculate userStats from the transformed listings
+          if (listing.updatedAt && typeof listing.updatedAt === "string") {
+            const parsedDate = new Date(listing.updatedAt);
+            if (!isNaN(parsedDate.getTime())) {
+              formattedUpdatedDate = parsedDate.toISOString().split("T")[0];
+            } else {
+              console.warn("Invalid updatedAt date:", listing.updatedAt);
+            }
+          }
+
+          return {
+            id: listing._id,
+            title: listing.name,
+            status: "Active",
+            views: 0,
+            reviews: listing.numberOfReviews || 0,
+            rating: listing.averageRating || 0,
+            lastUpdated: formattedUpdatedDate,
+            image: listing.profileImage
+              ? `http://localhost:5000/${listing.profileImage.replace(
+                  /\\/g,
+                  "/"
+                )}`
+              : "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg",
+          };
+        });
+
         const totalListings = transformedListings.length;
         const activeListings = transformedListings.filter(
           (l) => l.status === "Active"

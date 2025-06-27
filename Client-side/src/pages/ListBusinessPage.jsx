@@ -192,10 +192,10 @@ const ListBusinessPage = () => {
       console.log("inside handle submit ");
       console.log(formData);
 
-      // if (formData.consentGiven !== true) {
-      //   alert("You must give consent to proceed.");
-      //   return;
-      // }
+      if (!formData.categoryData.consentGiven) {
+        alert("You must give consent to proceed.");
+        return;
+      }
       // if (formData.category == "Health") {
       //   slug = "health";
       // }
@@ -259,10 +259,20 @@ const ListBusinessPage = () => {
       );
       // use conditonsl to store slug
       console.log(formData);
-      const category = formData.category.toLowerCase();
-      if (["health", "hotal", "beautySpa"].includes(category)) {
-        navigate(`/categories/${category}`);
+
+      if (formData.category == "Health") {
+        //Add commentMore actions
+        navigate(`/categories/health`);
+      } else if (formData.category == "Hotel") {
+        navigate(`/categories/restaurants`);
+      } else if (formData.category == "BeautySpa") {
+        navigate(`/categories/beauty`);
       }
+
+      // const category = formData.category.toLowerCase();
+      // if (["health", "hotel", "beautySpa"].includes(category)) {
+      //   navigate(`/categories/${category}`);
+      // }
       // console.log(slug);
 
       console.log("Business created:", response.data);
@@ -583,26 +593,6 @@ const ListBusinessPage = () => {
                   />
                 </div>
               </div>
-              <div className="mt-3">
-                <label
-                  htmlFor="registerNumber"
-                  className="block mb-1 text-sm font-medium text-gray-700"
-                >
-                  Registration Number
-                </label>
-                <div className="relative">
-                  <Key className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
-                  <input
-                    type="text"
-                    id="registerNumber"
-                    name="registerNumber"
-                    required
-                    className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={formData.categoryData.registerNumber}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
             </div>
           )}
 
@@ -710,6 +700,26 @@ const ListBusinessPage = () => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+        <div className="mt-3">
+          <label
+            htmlFor="registerNumber"
+            className="block mb-1 text-sm font-medium text-gray-700"
+          >
+            Registration Number
+          </label>
+          <div className="relative">
+            <Key className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+            <input
+              type="text"
+              id="registerNumber"
+              name="registerNumber"
+              required
+              className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.categoryData.registerNumber}
+              onChange={handleInputChange}
+            />
           </div>
         </div>
         <div>
@@ -1270,7 +1280,7 @@ const ListBusinessPage = () => {
       if (formData.category == "Health") {
         slug = "health";
       }
-      console.log(slug);
+      // console.log(slug);
       // navigate(`/categories/health`);
     }
   };

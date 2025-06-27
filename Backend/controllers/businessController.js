@@ -11,173 +11,7 @@ const categoryModels = {
   BeautySpa: BeautySpa
 };
 
-// export const createBusiness = async (req, res) => {
-//   try {
-//     const {
-//       name,
-//       ownerName,
-//       owner,
-//       location,
-//       phone,
-//       website,
-//       email,
-//       socialLinks,
-//       businessHours,
-//       category,
-//       experience,
-//       description,
-
-//     } = req.body;
-
-// const categoryModel = category; // derive from category
-//  CategoryModel = categoryModels[categoryModel];
-//     if (!CategoryModel) {
-//       return res.status(400).json({ message: 'Invalid category model' });
-//     }
-
-//     const categoryDoc = new CategoryModel(categoryData);
-//     const savedCategoryData = await categoryDoc.save();
-
-//     // ✅ Handle file uploads
-//     const files = req.files || {};
-
-//     const profileImage = files.profileImage?.[0]?.path || null;
-//     const coverImage = files.coverImage?.[0]?.path || null;
-
-//     const certificateImages = files.certificateImages
-//       ? files.certificateImages.map((file) => file.path).slice(0, 5) // max 5
-//       : [];
-
-//     const galleryImages = files.galleryImages
-//       ? files.galleryImages.map((file) => file.path).slice(0, 10) // max 10
-//       : [];
-
-//     const business = new Business({
-//       name,
-//       ownerName,
-//       owner,
-//       location,
-//       phone,
-//       website,
-//       email,
-//       socialLinks,
-//       businessHours,
-//       profileImage,
-//       coverImage,
-//       certificateImages,
-//       galleryImages,
-//       category,
-//       categoryModel,
-//       categoryRef: savedCategoryData._id
-//     });
-
-//     const savedBusiness = await business.save();
-
-//     res.status(201).json({
-//       message: 'Business created successfully',
-//       business: savedBusiness
-//     });
-//   } catch (error) {
-//     console.error('Error creating business:', error);
-//     res.status(500).json({ message: 'Server Error', error: error.message });
-//   }
-// };
-
-// export const createBusiness = async (req, res) => {
-//   try {
-//     const {
-//       name,
-//       ownerName,
-//       owner,
-//       location,
-//       phone,
-//       website,
-//       email,
-//       socialLinks,
-//       businessHours,
-//       category,
-//       experience,
-//       description
-//     } = req.body;
-
-//     // 🧠 Get model
-//     const categoryModel = category;
-//     const CategoryModel = categoryModels[categoryModel];
-//     if (!CategoryModel) {
-//       return res.status(400).json({ message: 'Invalid category model' });
-//     }
-
-//     // ✅ Parse complex fields
-//     const parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
-//     const parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
-//     const parsedBusinessHours = typeof businessHours === 'string' ? JSON.parse(businessHours) : businessHours;
-//     const parsedCategoryData = req.body.categoryData ? JSON.parse(req.body.categoryData) : {};
-
-//     // ✅ Handle file uploads
-//     const files = req.files || {};
-//     const profileImage = files.profileImage?.[0]?.path || null;
-//     const coverImage = files.coverImage?.[0]?.path || null;
-//     const certificateImages = files.certificateImages?.map(file => file.path).slice(0, 5) || [];
-//     const galleryImages = files.galleryImages?.map(file => file.path).slice(0, 10) || [];
-
-//     const formattedBusinessHours = Array.isArray(parsedBusinessHours)
-//   ? parsedBusinessHours.map((entry) => ({
-//       day: entry.day,
-//       open: entry.open || '',
-//       close: entry.close || ''
-//     }))
-//   : [];
-
-
-//     // ✅ Step 1: Create Business without categoryRef
-//     const business = new Business({
-//       name,
-//       ownerName,
-//       owner,
-//       location: parsedLocation,
-//       phone,
-//       website,
-//       email,
-//       socialLinks: parsedSocialLinks,
-//       businessHours: formattedBusinessHours,
-//       experience,
-//       description,
-//       profileImage,
-//       coverImage,
-//       certificateImages,
-//       galleryImages,
-//       category,
-//       categoryModel
-//     });
-
-//     const savedBusiness = await business.save();
-//     console.log("✅ Business saved with ID:", savedBusiness._id);
-
-//     // ✅ Step 2: Create category model with business reference
-//     const categoryDoc = new CategoryModel({
-//       ...parsedCategoryData,
-//       business: savedBusiness._id
-//     });
-//     const savedCategoryData = await categoryDoc.save();
-//     console.log("✅ Category saved:", savedCategoryData);
-
-//     // ✅ Step 3: Update business with categoryRef
-//     savedBusiness.categoryRef = savedCategoryData._id;
-//     const finalBusiness = await savedBusiness.save();
-
-//     res.status(201).json({
-//       message: 'Business created successfully',
-//       business: finalBusiness
-//     });
-
-//   } catch (error) {
-//     console.error('❌ Error creating business:', error);
-//     res.status(500).json({
-//       message: 'Server Error',
-//       error: error.message
-//     });
-//   }
-// };
+//controller/businessController.js
 export const createBusiness = async (req, res) => {
   try {
     const {
@@ -190,28 +24,32 @@ export const createBusiness = async (req, res) => {
       email,
       socialLinks,
       businessHours,
-      category,
+      category, // expecting value: "Health", "Hotel", or "BeautySpa"
       experience,
       description
     } = req.body;
 
-    // 🧠 Get model
-    const categoryModel = category;
+    // Get model to store additional category-specific information
+    const categoryModel = category; // e.g. "Health"
     const CategoryModel = categoryModels[categoryModel];
     if (!CategoryModel) {
       return res.status(400).json({ message: 'Invalid category model' });
     }
 
-    // ✅ Parse complex fields
-    const parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
-    const parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
-    const parsedCategoryData = req.body.categoryData ? JSON.parse(req.body.categoryData) : {};
+    // Parse complex fields
+    const parsedLocation =
+      typeof location === 'string' ? JSON.parse(location) : location;
 
-    // ✅ Fix businessHours parsing
+    const parsedSocialLinks =
+      typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
+
+    // Parse businessHours ensuring it's an array
     let parsedBusinessHours = [];
     try {
       parsedBusinessHours =
-        typeof businessHours === 'string' ? JSON.parse(businessHours) : businessHours;
+        typeof businessHours === 'string'
+          ? JSON.parse(businessHours)
+          : businessHours;
 
       if (!Array.isArray(parsedBusinessHours)) {
         throw new Error('businessHours must be an array');
@@ -219,24 +57,38 @@ export const createBusiness = async (req, res) => {
     } catch (err) {
       console.error('❌ Invalid businessHours format:', err.message);
       return res.status(400).json({
-        message: 'Invalid businessHours format. It must be an array of objects with day, open, and close.',
+        message:
+          'Invalid businessHours format. It must be an array of objects with day, open, and close.'
       });
     }
-
-    const formattedBusinessHours = parsedBusinessHours.map((entry) => ({
+    const formattedBusinessHours = parsedBusinessHours.map(entry => ({
       day: entry.day || '',
       open: entry.open || '',
       close: entry.close || ''
     }));
 
-    // ✅ Handle file uploads
+    // Parse services if provided. Expected as a JSON string.
+    const parsedServices =
+      req.body.services && typeof req.body.services === 'string'
+        ? JSON.parse(req.body.services)
+        : req.body.services || {};
+
+    // Parse categoryData for additional category model details.
+    const parsedCategoryData =
+      req.body.categoryData && typeof req.body.categoryData === 'string'
+        ? JSON.parse(req.body.categoryData)
+        : req.body.categoryData || {};
+
+    // Handle file uploads (if using multer, etc.)
     const files = req.files || {};
     const profileImage = files.profileImage?.[0]?.path || null;
     const coverImage = files.coverImage?.[0]?.path || null;
-    const certificateImages = files.certificateImages?.map(file => file.path).slice(0, 5) || [];
-    const galleryImages = files.galleryImages?.map(file => file.path).slice(0, 10) || [];
+    const certificateImages =
+      files.certificateImages?.map(file => file.path).slice(0, 5) || [];
+    const galleryImages =
+      files.galleryImages?.map(file => file.path).slice(0, 10) || [];
 
-    // ✅ Step 1: Create Business without categoryRef
+    // Step 1: Create Business document
     const business = new Business({
       name,
       ownerName,
@@ -253,22 +105,24 @@ export const createBusiness = async (req, res) => {
       coverImage,
       certificateImages,
       galleryImages,
-      category,
-      categoryModel
+      category, // e.g. "Health"
+      categoryModel, // using same value as category for now
+      // New field: services
+      services: parsedServices
     });
 
     const savedBusiness = await business.save();
     console.log("✅ Business saved with ID:", savedBusiness._id);
 
-    // ✅ Step 2: Create category model with business reference
+    // Step 2: Create category-specific document with business reference.
     const categoryDoc = new CategoryModel({
       ...parsedCategoryData,
       business: savedBusiness._id
     });
     const savedCategoryData = await categoryDoc.save();
-    console.log("✅ Category saved:", savedCategoryData);
+    console.log("✅ Category data saved:", savedCategoryData);
 
-    // ✅ Step 3: Update business with categoryRef
+    // Step 3: Update Business with categoryRef
     savedBusiness.categoryRef = savedCategoryData._id;
     const finalBusiness = await savedBusiness.save();
 
@@ -288,37 +142,41 @@ export const createBusiness = async (req, res) => {
 
 
 
+//updateBusiness inside the businessController
 export const updateBusiness = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 1️⃣  Pull raw body values (strings from form‑data)
+    // 1️⃣  Extract raw form-data values
     const {
       name,
       ownerName,
       phone,
       website,
       email,
-      category: newCategory,     // user may change category
+      category: newCategory,     // in case of category change
       experience,
       description,
+      services: rawServices,
       location: rawLocation,
       socialLinks: rawSocialLinks,
       businessHours: rawBusinessHours
     } = req.body;
 
-    // 2️⃣  Parse JSON‑string fields
+    // 2️⃣  Parse JSON-stringified fields
     let location = {};
     let socialLinks = {};
     let businessHoursArr = [];
     let categoryData = {};
+    let services = {};
 
     try { location = rawLocation ? JSON.parse(rawLocation) : {}; }        catch { return res.status(400).json({ message: 'Invalid JSON in location' }); }
     try { socialLinks = rawSocialLinks ? JSON.parse(rawSocialLinks) : {}; }catch { return res.status(400).json({ message: 'Invalid JSON in socialLinks' }); }
     try { businessHoursArr = rawBusinessHours ? JSON.parse(rawBusinessHours) : []; } catch { return res.status(400).json({ message: 'Invalid JSON in businessHours' }); }
     try { categoryData = req.body.categoryData ? JSON.parse(req.body.categoryData) : {}; } catch { return res.status(400).json({ message: 'Invalid JSON in categoryData' }); }
+    try { services = rawServices ? JSON.parse(rawServices) : {}; } catch { return res.status(400).json({ message: 'Invalid JSON in services' }); }
 
-    // 3️⃣  Fetch the listing
+    // 3️⃣  Fetch existing business
     const business = await Business.findById(id);
     if (!business) return res.status(404).json({ message: 'Business not found' });
 
@@ -335,7 +193,7 @@ export const updateBusiness = async (req, res) => {
       business.galleryImages = files.galleryImages.map(f => f.path).slice(0, 10);
 
     /* ------------------------------------------------------------------ */
-    /* 5️⃣  Update simple scalar fields                                   */
+    /* 5️⃣  Update scalar fields                                          */
     /* ------------------------------------------------------------------ */
     business.name        = name        ?? business.name;
     business.ownerName   = ownerName   ?? business.ownerName;
@@ -346,10 +204,12 @@ export const updateBusiness = async (req, res) => {
     business.description = description ?? business.description;
 
     /* ------------------------------------------------------------------ */
-    /* 6️⃣  Replace complex objects if sent                               */
+    /* 6️⃣  Update complex object fields                                  */
     /* ------------------------------------------------------------------ */
     if (Object.keys(location).length)      business.location    = location;
     if (Object.keys(socialLinks).length)   business.socialLinks = socialLinks;
+    if (Object.keys(services).length)      business.services     = services;
+
     if (Array.isArray(businessHoursArr) && businessHoursArr.length) {
       business.businessHours = businessHoursArr.map(bh => ({
         day:   bh.day,
@@ -359,16 +219,16 @@ export const updateBusiness = async (req, res) => {
     }
 
     /* ------------------------------------------------------------------ */
-    /* 7️⃣  CATEGORY CHANGE or CATEGORY DATA UPDATE                       */
+    /* 7️⃣  Category Update (switch or same)                              */
     /* ------------------------------------------------------------------ */
     if (newCategory && newCategory !== business.category) {
-      /* --- user picked a new category --- */
+      // ✨ Switch to a new category
       const newModelName = newCategory;
       const NewCategoryModel = categoryModels[newModelName];
-      if (!NewCategoryModel)
+      if (!NewCategoryModel) {
         return res.status(400).json({ message: `Invalid category "${newCategory}"` });
+      }
 
-      // create fresh category doc
       const newCatDoc = new NewCategoryModel(categoryData);
       await newCatDoc.save();
 
@@ -376,7 +236,7 @@ export const updateBusiness = async (req, res) => {
       business.categoryModel = newModelName;
       business.categoryRef   = newCatDoc._id;
     } else {
-      /* --- same category, just update its extra data (if any) --- */
+      // ✨ Update existing categoryData
       const CurrentCatModel = categoryModels[business.categoryModel];
       if (CurrentCatModel && Object.keys(categoryData).length && business.categoryRef) {
         const catDoc = await CurrentCatModel.findById(business.categoryRef);
@@ -388,16 +248,16 @@ export const updateBusiness = async (req, res) => {
     }
 
     /* ------------------------------------------------------------------ */
-    /* 8️⃣  Save & respond                                                */
+    /* 8️⃣  Save and respond                                              */
     /* ------------------------------------------------------------------ */
     const updatedBusiness = await business.save();
 
     res.status(200).json({
-      message: 'Business listing updated successfully',
+      message: '✅ Business listing updated successfully',
       business: updatedBusiness
     });
   } catch (error) {
-    console.error('Error updating business listing:', error);
+    console.error('❌ Error updating business listing:', error);
     res.status(500).json({
       message: 'Server Error while updating business listing',
       error: error.message

@@ -1,99 +1,64 @@
+//model/BeautySpa
+// models/BeautySpa.js
 import mongoose from 'mongoose';
 
 const beautySpaSchema = new mongoose.Schema({
-  typeOfBusiness: {
+  speciality: {
     type: String,
-    enum: [
-      'Unisex Salon',
-      'Ladies Only',
-      'Gents Only',
-      'Spa',
-      'Beauty Parlour'
-    ],
     required: true
   },
-
-  establishedYear: { type: Date },
-  businessCategory: {
+  registerNumber: {
     type: String,
-    enum: ['Salon', 'Spa', 'Parlour', 'Bridal Studio', 'Hair Clinic']
+    required: true,
+    unique: true,
+    default: ''
   },
-
-  whatsappNumber: String,
-  alternateContactNumber: String,
-
-  // Working Hours – businessHours comes from Business.js
-
-  appointmentBased: Boolean,
-  homeServiceAvailable: Boolean,
-
-  // Services Offered (multi-select checklist)
-  servicesOffered: {
-    hairServices: [String],           // e.g., ['Cut', 'Color', 'Keratin']
-    skinTreatments: [String],
-    spaServices: [String],
-    makeupServices: [String],         // Bridal / Party Makeup
-    nailServices: [String],           // Nail Art, Extensions
-    waxingThreading: [String],
-    manicurePedicure: [String],
-    tattooPiercing: [String]
+  YearOfEstablishment: {
+    type: String,
+    default: ''
   },
-
-  // Staff
-  staffDetails: {
-    numberOfStaff: Number,
-    certifiedProfessionals: Boolean,
-    staffPhotos: [String]
+  appointmentLink: {
+    type: String,
+    default: ''
   },
-
-  // Pricing & Packages
-  pricing: {
-    priceListUploads: [String], // URLs or paths to PDFs/images
-    hasServicePackages: Boolean,
-    hasMembershipPlans: Boolean,
-    discountsOrOffers: String
+  affiliation: {
+    type: String,
+    default: ''
   },
-
-  // Facilities
+  consentGiven: {
+    type: Boolean,
+    default: false
+  },
   facilities: {
-    ac: Boolean,
-    nonAc: Boolean,
-    hygienicTools: Boolean,
-    privateRooms: Boolean,
-    waitingArea: Boolean,
-    beveragesAvailable: Boolean,
-    parkingAvailable: Boolean,
-    wheelchairAccess: Boolean,
-    separateMaleFemaleStaff: Boolean
+    PrivateRooms: { type: Boolean, default: false },
+    AC: { type: Boolean, default: false },
+    Laundry: { type: Boolean, default: false },
+    WiFiAvailable: { type: Boolean, default: false },
+    CateringServicesAvailable: { type: Boolean, default: false },
+    PrivateDiningAndCabinsRooms: { type: Boolean, default: false },
+    KidsZoneAndFamilyFriendly: { type: Boolean, default: false },
+    ParkingFacility: { type: Boolean, default: false },
+    WheelchairAccess: { type: Boolean, default: false },
+    HygienicToolsAndDisposableItems: { type: Boolean, default: false },
+    SeparateMaleAndFemaleStaff: { type: Boolean, default: false },
+    WaitingArea: { type: Boolean, default: false },
+    LiveMusicAndDJAndBar: { type: Boolean, default: false },
+    IndoorSeatingAndOutdoorSeating: { type: Boolean, default: false },
+    RooftopAndGardenSeating: { type: Boolean, default: false },
+    PetFriendly: { type: Boolean, default: false },
+    InHouseDelivery: { type: Boolean, default: false },
+    RefundAndCancellationAvailable: { type: Boolean, default: false },
+    Memberships: { type: Boolean, default: false }
   },
-
-  // Media Uploads
-  media: {
-    interiorPhotos: [String],
-    beforeAfterPhotos: [String],
-    logo: String,
-    video: String
+  extraFields: {
+    type: Map,
+    of: mongoose.Schema.Types.Mixed,
+    default: {}
   },
-
-  // Online Booking & Platforms
-  onlineBooking: {
-    bookingAvailable: Boolean,
-    websiteLink: String,
-    listedPlatforms: [String] // UrbanClap, Justdial, Zoylee, etc.
-  },
-
-  // Reviews
-  reviews: {
-    googleReviewLink: String,
-    testimonials: [String],
-    starRating: Number // optional
-  },
-
-  // Legal & Consent
-  legal: {
-    gstNumber: String,
-    salonLicense: String,
-    consentAuthorized: { type: Boolean, default: false }
+  business: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Business',
+    required: true
   }
 });
 

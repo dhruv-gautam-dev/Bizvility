@@ -31,30 +31,53 @@ export default function UserMyListings() {
   const [editingListing, setEditingListing] = useState(null);
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
-
   useEffect(() => {
     setLoading(true);
     fetchUserListings(userId, token)
       .then((data) => {
-        // Transform API data to match the expected structure
-        const transformedListings = data.listings.map((listing) => ({
-          id: listing._id,
-          title: listing.name,
-          category: listing.category,
-          location: `${listing.location.address}, ${listing.location.city}, ${listing.location.state}`,
-          status: "Active", // Default status since API doesn't provide it
-          rating: listing.averageRating || 0,
-          reviews: listing.numberOfReviews || 0,
-          views: 0, // Default value since API doesn't provide it
-          date: new Date(listing.createdAt).toISOString().split("T")[0],
-          featured: false, // Default value since API doesn't provide it
-          image: listing.profileImage
-            ? `http://localhost:5000/${listing.profileImage.replace(
-                /\\/g,
-                "/"
-              )}`
-            : "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg", // Fallback image
-        }));
+        console.log("API Response:", data.listings);
+
+        const transformedListings = data.listings.map((listing, index) => {
+          let formattedDate = "Unknown";
+
+          try {
+            // Safe check + fallback date format
+            if (listing.createdAt && !isNaN(Date.parse(listing.createdAt))) {
+              formattedDate = new Date(listing.createdAt).toLocaleDateString(
+                "en-IN"
+              );
+            } else {
+              console.warn(
+                `Invalid or missing createdAt for listing ${index}:`,
+                listing.createdAt
+              );
+            }
+          } catch (err) {
+            console.error(`Date formatting failed for listing ${index}`, err);
+          }
+
+          return {
+            id: listing._id,
+            title: listing.name,
+            category: listing.category,
+            location: listing.location
+              ? `${listing.location.address}, ${listing.location.city}, ${listing.location.state}`
+              : "Unknown",
+            status: "Active",
+            rating: listing.averageRating || 0,
+            reviews: listing.numberOfReviews || 0,
+            views: 0,
+            date: formattedDate,
+            featured: false,
+            image: listing.profileImage
+              ? `http://localhost:5000/${listing.profileImage.replace(
+                  /\\/g,
+                  "/"
+                )}`
+              : "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg",
+          };
+        });
+
         setListings(transformedListings);
         setLoading(false);
       })
@@ -161,6 +184,7 @@ export default function UserMyListings() {
                 category: formData.category,
                 location: formData.location,
                 image: imageUrl || listing.image,
+                date: listing.date || currentDate, // ✅ Ensure date is always set
               }
             : listing
         )

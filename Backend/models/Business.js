@@ -1,3 +1,4 @@
+//Models/Business.js
 // models/Business.js
 import mongoose from 'mongoose';
 
@@ -81,8 +82,23 @@ const businessSchema = new mongoose.Schema({
     message: 'galleryImages exceeds the limit of 10'
   }
 },
+  // ✅ Newly added services field (as requested)
+  services: {
+    EventsAvailable: { type: Boolean, default: false },
+    Birthdays: { type: Boolean, default: false },
+    WeddingParties: { type: Boolean, default: false },
+    CorporateMeetings: { type: Boolean, default: false },
+    HairCare: { type: Boolean, default: false },
+    SkinCare: { type: Boolean, default: false },
+    SpaServices: { type: Boolean, default: false },
+    BridalAndPartyMakeup: { type: Boolean, default: false },
+    NailArtExtensions: { type: Boolean, default: false },
+    WaxingThreadingBleach: { type: Boolean, default: false },
+    ManicurePedicure: { type: Boolean, default: false },
+    TattooPiercing: { type: Boolean, default: false }
+  },
  
-
+ 
   category: { type: String, required: true }, // e.g., 'health-medical'
   categoryRef: {
     type: mongoose.Schema.Types.ObjectId,
@@ -98,6 +114,22 @@ const businessSchema = new mongoose.Schema({
     type: Number,
     default: 0
   }
+}, {
+// ✅ New fields for tracking views
+  views: {
+    type: Number,
+    default: 0
+  },
+  viewers: [
+    {
+      ip: String,
+      viewedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ]
+
 }, {
   timestamps: true,
   toJSON: { virtuals: true },

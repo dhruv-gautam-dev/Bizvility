@@ -1,82 +1,66 @@
+//model/Hotel.js
+// models/Hotel.js
 import mongoose from 'mongoose';
 
-const hotelsCafesRestaurantsSchema = new mongoose.Schema({
-  type: { type: String, enum: ['Hotel', 'Café', 'Restaurant', 'Bar', 'Lounge', 'Bakery', 'Food Truck'], required: true },
-  establishedYear: { type: Date },
-  foodCategory: { type: String }, // Veg, Non-Veg, etc.
-  whatsappNumber: String,
-  alternateContactNumber: String,
-
-
-
-  cuisineTypes: [String],
-  menuUploads: [String], // file URLs or paths
-  signatureDishes: [String],
-  pricingLevel: { type: String, enum: ['Low', 'Mid-range', 'Premium'] },
-
+const hotelSchema = new mongoose.Schema({
+  speciality: {
+    type: String,
+    required: true
+  },
+  registerNumber: {
+    type: String,
+    required: true,
+    unique: true,
+    default: ''
+  },
+  YearOfEstablishment: {
+    type: String,
+    default: ''
+  },
+  appointmentLink: {
+    type: String,
+    default: ''
+  },
+  affiliation: {
+    type: String,
+    default: ''
+  },
+  consentGiven: {
+    type: Boolean,
+    default: false
+  },
   facilities: {
-    indoorSeating: Boolean,
-    outdoorSeating: Boolean,
-    ac: Boolean,
-    nonAc: Boolean,
-    liveMusic: Boolean,
-    dj: Boolean,
-    rooftop: Boolean,
-    gardenSeating: Boolean,
-    wifi: Boolean,
-    parking: Boolean,
-    petFriendly: Boolean,
-    kidsZone: Boolean,
-    privateDining: Boolean,
-    danceFloor: Boolean,
-    bar: Boolean
+    PrivateRooms: { type: Boolean, default: false },
+    AC: { type: Boolean, default: false },
+    Laundry: { type: Boolean, default: false },
+    WiFiAvailable: { type: Boolean, default: false },
+    CateringServicesAvailable: { type: Boolean, default: false },
+    PrivateDiningAndCabinsRooms: { type: Boolean, default: false },
+    KidsZoneAndFamilyFriendly: { type: Boolean, default: false },
+    ParkingFacility: { type: Boolean, default: false },
+    WheelchairAccess: { type: Boolean, default: false },
+    HygienicToolsAndDisposableItems: { type: Boolean, default: false },
+    SeparateMaleAndFemaleStaff: { type: Boolean, default: false },
+    WaitingArea: { type: Boolean, default: false },
+    LiveMusicAndDJAndBar: { type: Boolean, default: false },
+    IndoorSeatingAndOutdoorSeating: { type: Boolean, default: false },
+    RooftopAndGardenSeating: { type: Boolean, default: false },
+    PetFriendly: { type: Boolean, default: false },
+    InHouseDelivery: { type: Boolean, default: false },
+    RefundAndCancellationAvailable: { type: Boolean, default: false },
+    Memberships: { type: Boolean, default: false }
   },
-
-  bookingAndDelivery: {
-    onlineReservation: Boolean,
-    zomatoLink: String,
-    swiggyLink: String,
-    inhouseDelivery: Boolean,
-    tableBookingLink: String
+  extraFields: {
+    type: Map,
+    of: mongoose.Schema.Types.Mixed,
+    default: {}
   },
-
-  hotelRoomDetails: {
-    numberOfRooms: Number,
-    roomTypes: [String],
-    checkinTime: String,
-    checkoutTime: String,
-    facilities: [String],
-    roomPhotos: [String],
-    priceRange: String
-  },
-
-  mediaUploads: {
-    logo: String,
-    premisePhotos: [String],
-    promoVideos: [String]
-  },
-
-  reviews: {
-    googleReviewLink: String,
-    tripAdvisorLink: String,
-    zomatoReviewLink: String,
-    testimonials: [String]
-  },
-
-  paymentAndPolicies: {
-    paymentModes: [String],
-    gstNumber: String,
-    taxInvoiceAvailable: Boolean,
-    refundPolicy: String
-  },
-
-  eventsServices: {
-    availableForEvents: Boolean,
-    cateringAvailable: Boolean,
-    livePerformances: Boolean,
-    loyaltyPrograms: Boolean
+  business: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Business',
+    required: true
   }
 });
 
-const Hotel = mongoose.model('Hotel', hotelsCafesRestaurantsSchema);
+const Hotel = mongoose.model('Hotel', hotelSchema);
 export default Hotel;
