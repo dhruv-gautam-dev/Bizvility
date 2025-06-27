@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import {
   Phone,
@@ -75,9 +75,67 @@ const ListBusinessPage = () => {
       affiliation: "",
       AC: true,
       Parking: true,
+      facilities: {
+        PrivateRooms: false,
+        AC: false,
+        Laundry: false,
+        WiFiAvailable: false,
+        CateringServicesAvailable: false,
+        PrivateDiningAndCabinsRooms: false,
+        KidsZoneAndFamilyFriendly: false,
+        ParkingFacility: false,
+        WheelchairAccess: false,
+        HygienicToolsAndDisposableItems: false,
+        SeparateMaleAndFemaleStaff: false,
+        WaitingArea: false,
+        LiveMusicAndDJAndBar: false,
+        IndoorSeatingAndOutdoorSeating: false,
+        RooftopAndGardenSeating: false,
+        PetFriendly: false,
+        InHouseDelivery: false,
+        RefundAndCancellationAvailable: false,
+        Memberships: false,
+      },
       extraFields: { videoUrl: "" },
     },
   });
+  // list of facilities labels
+  const facilitiesList = [
+    "Private Rooms",
+    "AC",
+    "Laundry",
+    "WiFi Available",
+    "Catering Services Available",
+    "Private Dining And Cabins Rooms",
+    "Kids Zone And Family Friendly",
+    "Parking Facility",
+    "Wheelchair Access",
+    "Hygienic Tools And Disposable Items",
+    "Separate Male And Female Staff",
+    "Waiting Area",
+    "Live Music And DJ And Bar",
+    "Indoor Seating And Outdoor Seating",
+    "Rooftop And Garden Seating",
+    "Pet Friendly",
+    "InHouse Delivery",
+    "Refund And Cancellation Available",
+    "Memberships",
+  ];
+  const [isFacilitiesOpen, setIsFacilitiesOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsFacilitiesOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   console.log(formData);
 
@@ -222,6 +280,18 @@ const ListBusinessPage = () => {
         return { ...prev, [name]: value };
       }
     });
+  };
+  const handleFacilityToggle = (facilityKey) => {
+    setFormData((prev) => ({
+      ...prev,
+      categoryData: {
+        ...prev.categoryData,
+        facilities: {
+          ...prev.categoryData.facilities,
+          [facilityKey]: !prev.categoryData.facilities[facilityKey],
+        },
+      },
+    }));
   };
 
   const handleBusinessHourChange = (index, field, value) => {
@@ -482,6 +552,44 @@ const ListBusinessPage = () => {
               value={formData.categoryData.speciality}
               onChange={handleInputChange}
             />
+          </div>
+        </div>
+        <div ref={dropdownRef}>
+          <h2 className="block mb-1 text-sm font-medium text-gray-700">
+            Facilities & Features
+          </h2>
+          <div className="space-y-4">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsFacilitiesOpen((o) => !o)}
+                className="w-full px-3 py-3 text-left border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                Select Facilities…
+                <span className="float-right">▼</span>
+              </button>
+              {isFacilitiesOpen && (
+                <div className="absolute z-10 w-full mt-1 overflow-y-auto bg-white border border-gray-300 rounded-md max-h-64">
+                  {facilitiesList.map((label) => {
+                    const key = label.replace(/\W/g, ""); // e.g., "Private Rooms" → "PrivateRooms"
+                    return (
+                      <label
+                        key={key}
+                        className="flex items-center px-4 py-2 hover:bg-gray-100"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={!!formData.categoryData.facilities[key]}
+                          onChange={() => handleFacilityToggle(key)}
+                          className="w-4 h-4 mr-3 text-blue-600 border-gray-300 rounded"
+                        />
+                        <span className="text-gray-700">{label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <div>

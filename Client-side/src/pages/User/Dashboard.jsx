@@ -124,8 +124,8 @@ const UserDashboard = () => {
           totalViews,
           totalReviews,
           averageRating,
-          monthlyViews: 0, // Default since API doesn't provide it
-          profileViews: 89, // Static since API doesn't provide it
+          monthlyViews: 0,
+          profileViews: 89,
         });
         setLoading(false);
       })
