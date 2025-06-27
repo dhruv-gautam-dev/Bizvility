@@ -16,6 +16,10 @@ import {
   Link2,
   UserCheck,
   Key,
+  Wrench,
+  LayoutGrid,
+  Tags,
+  Link2Icon,
 } from "lucide-react";
 import { data, Link, useNavigate } from "react-router-dom";
 import StoreDetailPage from "./HealthCategoryPages/StoreDetailPage";
@@ -67,14 +71,28 @@ const ListBusinessPage = () => {
     certificateImages: [],
     galleryImages: [],
 
+    services: {
+      EventsAvailable: false,
+      Birthdays: false,
+      WeddingParties: false,
+      CorporateMeetings: false,
+      HairCare: false,
+      SkinCare: false,
+      SpaServices: false,
+      BridalAndPartyMakeup: false,
+      NailArtExtensions: false,
+      WaxingThreadingBleach: false,
+      ManicurePedicure: false,
+      TattooPiercing: false,
+    },
+
     categoryData: {
       speciality: "",
       registerNumber: "",
       YearOfEstablishment: "",
       appointmentLink: "",
       affiliation: "",
-      AC: true,
-      Parking: true,
+      consentGiven: false,
       facilities: {
         PrivateRooms: false,
         AC: false,
@@ -96,7 +114,7 @@ const ListBusinessPage = () => {
         RefundAndCancellationAvailable: false,
         Memberships: false,
       },
-      extraFields: { videoUrl: "" },
+      extraFields: { videoUrl: "", BookingAndDeliveryUrl: "" },
     },
   });
   // list of facilities labels
@@ -121,8 +139,39 @@ const ListBusinessPage = () => {
     "Refund And Cancellation Available",
     "Memberships",
   ];
+  const servicesByCategory = {
+    Hotel: [
+      "Events Available",
+      "Birthdays",
+      "Wedding Parties",
+      "Corporate Meetings",
+    ],
+    BeautySpa: [
+      "Hair Care",
+      "Skin Care",
+      "Spa Services",
+      "Bridal and Party Makeup",
+      "Nail Art / Extensions",
+      "Waxing / Threading / Bleach",
+      "Manicure / Pedicure",
+      "Tattoo / Piercing",
+    ],
+    // Add more categories if needed
+  };
+  const specialityPlaceholders = {
+    Health: "e.g., Neuro Surgeon, Cardiologist, Pediatrician…",
+    Hotel: "e.g., Indian, Chinese, Italian, Continental, South Indian…",
+    BeautySpa: "e.g., Men, Women, Unisex",
+  };
+
+  const placeholderText =
+    specialityPlaceholders[formData.category] || "Enter speciality…";
+
   const [isFacilitiesOpen, setIsFacilitiesOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const currentCategory = formData.category; // e.g., "Hotels" or "Beauty"
+  const servicesList = servicesByCategory[currentCategory] || [];
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -130,7 +179,6 @@ const ListBusinessPage = () => {
         setIsFacilitiesOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -143,6 +191,11 @@ const ListBusinessPage = () => {
     try {
       console.log("inside handle submit ");
       console.log(formData);
+
+      // if (formData.consentGiven !== true) {
+      //   alert("You must give consent to proceed.");
+      //   return;
+      // }
       // if (formData.category == "Health") {
       //   slug = "health";
       // }
@@ -170,6 +223,7 @@ const ListBusinessPage = () => {
       form.append("socialLinks", JSON.stringify(formData.socialLinks));
       form.append("businessHours", JSON.stringify(formData.businessHours));
       form.append("categoryData", JSON.stringify(formData.categoryData));
+      form.append("services", JSON.stringify(formData.services));
 
       // ✅ Files
       if (formData.profilePhoto?.file) {
@@ -205,12 +259,9 @@ const ListBusinessPage = () => {
       );
       // use conditonsl to store slug
       console.log(formData);
-      if (formData.category == "Health") {
-        navigate(`/categories/health`);
-      } else if (formData.category == "restaurants") {
-        navigate(`/categories/restaurants`);
-      } else if (formData.category == "beauty") {
-        navigate(`/categories/beauty`);
+      const category = formData.category.toLowerCase();
+      if (["health", "hotal", "beautySpa"].includes(category)) {
+        navigate(`/categories/${category}`);
       }
       // console.log(slug);
 
@@ -223,10 +274,29 @@ const ListBusinessPage = () => {
     }
   };
 
+  const handleServiceToggle = (serviceKey) => {
+    setFormData((prev) => ({
+      ...prev,
+      services: {
+        ...prev.services,
+        [serviceKey]: !prev.services[serviceKey],
+      },
+    }));
+  };
+
   const handleInputChange = (e, index = null, nestedArrayKey = null) => {
     const { name, value, type, files } = e.target;
 
     setFormData((prev) => {
+      if (type === "checkbox" && name === "consentGiven") {
+        return {
+          ...prev,
+          categoryData: {
+            ...prev.categoryData,
+            consentGiven: e.target.checked,
+          },
+        };
+      }
       // existing nested cases...
       if (nestedArrayKey && typeof index === "number") {
         // ...
@@ -383,8 +453,8 @@ const ListBusinessPage = () => {
   };
   const renderBasicInfoStep = () => (
     <div>
-      <h2 className="mb-6 text-2xl font-bold">Basic Information</h2>
-      <div className="space-y-6">
+      <h2 className="mb-6 text-2xl ml-[22%] font-bold ">Basic Information</h2>
+      <div className="mx-auto space-y-6 max-w-1/2">
         <div>
           <label
             htmlFor="ownerName"
@@ -453,21 +523,24 @@ const ListBusinessPage = () => {
           >
             Business Category *
           </label>
-          <select
-            id="category"
-            name="category"
-            required
-            className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={formData.category}
-            onChange={handleInputChange}
-          >
-            <option value="">Select a category</option>
-            {/* <option value="retail">Retail</option> */}
-            {/* <option value="service">Service</option> */}
-            <option value="Health">Healthcare</option>
-            <option value="Restaurant">Restaurant</option>
-            <option value="Beauty">Beauty & Spa</option>
-          </select>
+
+          <div className="relative">
+            <Tags className="absolute text-gray-400 transform -translate-y-1/2 pointer-events-none left-3 top-1/2" />
+
+            <select
+              id="category"
+              name="category"
+              required
+              className="w-full py-3 pl-10 pr-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.category}
+              onChange={handleInputChange}
+            >
+              <option value="">Select a category</option>
+              <option value="Health">Healthcare</option>
+              <option value="Hotel">Hotels / Cafes / Restaurants</option>
+              <option value="BeautySpa">Salon / Parlour / Spa</option>
+            </select>
+          </div>
           {formData.category === "Health" && (
             <div>
               <div className="mt-3">
@@ -532,28 +605,74 @@ const ListBusinessPage = () => {
               </div>
             </div>
           )}
-        </div>
 
-        <div>
-          <label
-            htmlFor="speciality"
-            className="block mb-1 text-sm font-medium text-gray-700"
-          >
-            speciality *
-          </label>
-          <div className="relative">
-            <Badge className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
-            <input
-              type="text"
-              id="speciality"
-              name="speciality"
-              required
-              className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.categoryData.speciality}
-              onChange={handleInputChange}
-            />
+          <div>
+            <label
+              htmlFor="speciality"
+              className="block mb-1 text-sm font-medium text-gray-700"
+            >
+              speciality *
+            </label>
+            <div className="relative mb-4">
+              <Badge className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+              <input
+                type="text"
+                id="speciality"
+                name="speciality"
+                placeholder={placeholderText}
+                required
+                className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={formData.categoryData.speciality}
+                onChange={handleInputChange}
+              />
+            </div>
+          </div>
+
+          <div className="relative" ref={dropdownRef}>
+            <label
+              htmlFor="speciality"
+              className="block mb-1 text-sm font-medium text-gray-700"
+            >
+              Business Services *
+            </label>
+            <button
+              type="button"
+              onClick={() => setIsOpen((o) => !o)}
+              className="w-full px-5 py-3 text-left border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <Wrench className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+              Select Services…
+              <span className="float-right">▼</span>
+            </button>
+
+            {isOpen && (
+              <div className="absolute z-10 w-full mt-1 overflow-y-auto bg-white border border-gray-300 rounded-md max-h-64">
+                {servicesList.length === 0 ? (
+                  <p className="p-3 text-gray-500">Pick a category first</p>
+                ) : (
+                  servicesList.map((service) => {
+                    const key = service.replace(/\W/g, "");
+                    return (
+                      <label
+                        key={key}
+                        className="flex items-center px-4 py-2 hover:bg-gray-100"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={!!formData.services[key]}
+                          onChange={() => handleServiceToggle(key)}
+                          className="w-4 h-4 mr-3 text-blue-600 border-gray-300 rounded"
+                        />
+                        <span className="text-gray-700">{service}</span>
+                      </label>
+                    );
+                  })
+                )}
+              </div>
+            )}
           </div>
         </div>
+
         <div ref={dropdownRef}>
           <h2 className="block mb-1 text-sm font-medium text-gray-700">
             Facilities & Features
@@ -563,8 +682,9 @@ const ListBusinessPage = () => {
               <button
                 type="button"
                 onClick={() => setIsFacilitiesOpen((o) => !o)}
-                className="w-full px-3 py-3 text-left border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-5 py-3 text-left border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
+                <LayoutGrid className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
                 Select Facilities…
                 <span className="float-right">▼</span>
               </button>
@@ -636,8 +756,8 @@ const ListBusinessPage = () => {
 
   const renderContactStep = () => (
     <div>
-      <h2 className="mb-6 text-2xl font-bold">Contact Information</h2>
-      <div className="space-y-6">
+      <h2 className="mb-6 text-2xl ml-[22%] font-bold">Contact Information</h2>
+      <div className="mx-auto space-y-6 max-w-1/2">
         <div>
           <label
             htmlFor="email"
@@ -705,8 +825,8 @@ const ListBusinessPage = () => {
 
   const renderLocationStep = () => (
     <div>
-      <h2 className="mb-6 text-2xl font-bold">Location Information</h2>
-      <div className="space-y-6">
+      <h2 className="mb-6 ml-[22%] text-2xl font-bold">Location Information</h2>
+      <div className="mx-auto space-y-6 max-w-1/2">
         <div>
           <label
             htmlFor="address"
@@ -789,8 +909,8 @@ const ListBusinessPage = () => {
 
   const renderHoursStep = () => (
     <div>
-      <h2 className="mb-6 text-2xl font-bold">Business Hours</h2>
-      <div className="space-y-6">
+      <h2 className="mb-6 ml-[22%] text-2xl font-bold">Business Hours</h2>
+      <div className="mx-auto space-y-6 max-w-1/2">
         {formData.businessHours.map((bh, index) => (
           <div key={bh.day} className="flex items-center space-x-4">
             <div className="w-24 capitalize">{bh.day}</div>
@@ -836,8 +956,8 @@ const ListBusinessPage = () => {
 
   const renderMediaStep = () => (
     <div>
-      <h2 className="mb-6 text-2xl font-bold">Photos & Media</h2>
-      <div className="space-y-6">
+      <h2 className="mb-6 ml-[22%] text-2xl font-bold">Photos & Media</h2>
+      <div className="mx-auto space-y-6 max-w-1/2">
         {/* Profile Photo */}
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">
@@ -1025,6 +1145,27 @@ const ListBusinessPage = () => {
           </div>
         </div>
 
+        {/* BookingAndDeliveryUrlL */}
+        <div>
+          <label
+            htmlFor="BookingAndDeliveryUrl"
+            className="block mb-1 text-sm font-medium text-gray-700"
+          >
+            Booking And Delivery Url
+          </label>
+          <div className="relative">
+            <Link2Icon className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+            <input
+              type="text"
+              id="BookingAndDeliveryUrl"
+              name="BookingAndDeliveryUrl"
+              required
+              className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData?.categoryData?.extraFields?.BookingAndDeliveryUrl}
+              onChange={handleInputChange}
+            />
+          </div>
+        </div>
         {/* Facebook */}
         <div>
           <label
@@ -1067,6 +1208,22 @@ const ListBusinessPage = () => {
               onChange={handleInputChange}
             />
           </div>
+        </div>
+
+        <div className="mb-4">
+          <label className="inline-flex items-center">
+            <input
+              type="checkbox"
+              name="consentGiven"
+              checked={formData.categoryData.consentGiven}
+              onChange={handleInputChange}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded"
+            />
+            <span className="ml-2 text-gray-700">
+              I authorize the platform to publish and promote my business
+              details.
+            </span>
+          </label>
         </div>
       </div>
     </div>

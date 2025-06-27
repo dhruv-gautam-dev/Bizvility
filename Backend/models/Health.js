@@ -9,7 +9,7 @@ const healthMedicalSchema = new mongoose.Schema({
   },
   registerNumber: {
     type: String,
-    required: true,
+    // required: true,
     unique: true
   },
   YearOfEstablishment: {
