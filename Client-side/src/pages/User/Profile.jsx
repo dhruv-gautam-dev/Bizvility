@@ -13,23 +13,33 @@ export default function UserProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [profile, setProfile] = useState(() => {
-    // Load initial profile data from localStorage if it exists
-    const savedProfile = localStorage.getItem("userProfile");
-    return savedProfile
-      ? JSON.parse(savedProfile)
-      : {
-          name: "Admin User",
-          email: "admin@listingpro.com",
-          role: "Administrator",
-          phone: "+1 (555) 123-4567",
-          location: "New York, NY",
-          bio: "Experienced administrator managing the ListingPro platform with expertise in business directory management and user experience optimization.",
-          avatar: "",
-          joinDate: "2024-01-01",
-          lastLogin: "2024-01-20 10:30 AM",
-          totalLogins: 1247,
-          managedListings: 2847,
-        };
+    let savedProfile = null;
+    try {
+      const storedProfile = localStorage.getItem("userProfile");
+      if (storedProfile) {
+        savedProfile = JSON.parse(storedProfile);
+      }
+    } catch (err) {
+      console.error("Error parsing userProfile from localStorage:", err);
+    }
+    return (
+      savedProfile || {
+        name: "Admin User",
+        email: "admin@listingpro.com",
+        role: "Administrator",
+        phone: "5551234567",
+        city: "New York",
+        state: "NY",
+        country: "USA",
+        zipCode: "10001",
+        bio: "Experienced administrator managing the ListingPro platform.",
+        avatar: "",
+        joinDate: "2024-01-01",
+        lastLogin: "2024-01-20 10:30 AM",
+        totalLogins: 1247,
+        managedListings: 2847,
+      }
+    );
   });
 
   const userId = localStorage.getItem("userId");
@@ -42,26 +52,29 @@ export default function UserProfile() {
       return;
     }
 
-    setLoading(true);
-    fetchUserProfile(userId, token)
-      .then((data) => {
-        // Transform API data to match the expected profile structure
+    const loadProfile = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchUserProfile(userId, token);
         const transformedProfile = {
-          name: data.data.fullName || "Admin User",
-          email: data.data.email || "admin@listingpro.com",
-          role: data.data.role
+          name: data?.data?.fullName || "Admin User",
+          email: data?.data?.email || "admin@listingpro.com",
+          role: data?.data?.role
             ? data.data.role.charAt(0).toUpperCase() + data.data.role.slice(1)
             : "Administrator",
-          phone: profile.phone || "+1 (555) 123-4567", // Default since API doesn't provide
-          location: profile.location || "New York, NY", // Default since API doesn't provide
+          phone: data?.data?.phone?.toString() || "5551234567",
+          city: data?.data?.city || "New York",
+          state: data?.data?.state || "NY",
+          country: data?.data?.country || "USA",
+          zipCode: data?.data?.zipCode || "10001",
           bio:
-            profile.bio ||
-            "Experienced administrator managing the ListingPro platform with expertise in business directory management and user experience optimization.", // Default since API doesn't provide
-          avatar: profile.avatar || "", // Retain existing avatar or empty
-          joinDate: data.data.createdAt
+            data?.data?.profile?.bio ||
+            "Experienced administrator managing the ListingPro platform.",
+          avatar: data?.data?.profile?.avatar || "",
+          joinDate: data?.data?.createdAt
             ? new Date(data.data.createdAt).toISOString().split("T")[0]
             : "2024-01-01",
-          lastLogin: data.data.updatedAt
+          lastLogin: data?.data?.updatedAt
             ? new Date(data.data.updatedAt).toLocaleString("en-US", {
                 year: "numeric",
                 month: "long",
@@ -71,37 +84,94 @@ export default function UserProfile() {
                 hour12: true,
               })
             : "2024-01-20 10:30 AM",
-          totalLogins: profile.totalLogins || 1247, // Default since API doesn't provide
-          managedListings: profile.managedListings || 2847, // Default since API doesn't provide
+          totalLogins: data?.data?.totalLogins || 1247,
+          managedListings: data?.data?.managedListings || 2847,
         };
 
         setProfile(transformedProfile);
         setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
+      } catch (err) {
+        setError(err.message || "Failed to fetch profile");
         setLoading(false);
-      });
+      }
+    };
+
+    loadProfile();
   }, [userId, token]);
 
-  // Save profile to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem("userProfile", JSON.stringify(profile));
-
-    // Dispatch a custom event to notify other components of the change
-    window.dispatchEvent(new Event("profileUpdated"));
+    try {
+      localStorage.setItem("userProfile", JSON.stringify(profile));
+      window.dispatchEvent(new Event("profileUpdated"));
+    } catch (err) {
+      console.error("Error saving profile to localStorage:", err);
+    }
   }, [profile]);
 
-  const handleSave = () => {
-    setIsEditing(false);
-    toast.success("Profile updated successfully!", {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    });
+  const handleSave = async () => {
+    try {
+      const updateData = {
+        fullName: profile.name,
+        email: profile.email,
+        phone: profile.phone,
+        city: profile.city,
+        state: profile.state,
+        country: profile.country,
+        zipCode: profile.zipCode,
+        "profile.name": profile.name,
+        "profile.phone": profile.phone,
+        "profile.avatar": profile.avatar || undefined,
+      };
+
+      const response = await fetch(
+        `http://localhost:5000/api/user/profile/${userId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(updateData),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update profile");
+      }
+
+      const updatedUser = await response.json();
+      setProfile((prev) => ({
+        ...prev,
+        name: updatedUser?.data?.fullName || prev.name,
+        email: updatedUser?.data?.email || prev.email,
+        phone: updatedUser?.data?.phone?.toString() || prev.phone,
+        city: updatedUser?.data?.city || prev.city,
+        state: updatedUser?.data?.state || prev.state,
+        country: updatedUser?.data?.country || prev.country,
+        zipCode: updatedUser?.data?.zipCode || prev.zipCode,
+        avatar: updatedUser?.data?.profile?.avatar || prev.avatar,
+      }));
+
+      setIsEditing(false);
+      toast.success("Profile updated successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    } catch (err) {
+      toast.error(`Error: ${err.message}`, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
   };
 
   const handleCancel = () => {
@@ -158,7 +228,6 @@ export default function UserProfile() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Profile Card */}
         <div className="lg:col-span-1">
           <div className="p-6 bg-white rounded-lg shadow">
             <div className="text-center">
@@ -197,33 +266,9 @@ export default function UserProfile() {
               <p className="text-gray-600">{profile.role}</p>
               <p className="mt-2 text-sm text-gray-500">{profile.email}</p>
             </div>
-
-            <div className="mt-6 space-y-4">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Member since:</span>
-                <span className="font-medium">{profile.joinDate}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Last login:</span>
-                <span className="font-medium">{profile.lastLogin}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Total logins:</span>
-                <span className="font-medium">
-                  {profile.totalLogins.toLocaleString()}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Managed listings:</span>
-                <span className="font-medium">
-                  {profile.managedListings.toLocaleString()}
-                </span>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* Profile Details */}
         <div className="lg:col-span-2">
           <div className="p-6 bg-white rounded-lg shadow">
             <h3 className="mb-6 text-lg font-medium text-gray-900">
@@ -288,87 +333,76 @@ export default function UserProfile() {
 
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700">
-                    Location
+                    City
                   </label>
                   {isEditing ? (
                     <input
                       type="text"
-                      value={profile.location}
+                      value={profile.city}
                       onChange={(e) =>
-                        handleInputChange("location", e.target.value)
+                        handleInputChange("city", e.target.value)
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   ) : (
-                    <p className="text-gray-900">{profile.location}</p>
+                    <p className="text-gray-900">{profile.city}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    State
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={profile.state}
+                      onChange={(e) =>
+                        handleInputChange("state", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  ) : (
+                    <p className="text-gray-900">{profile.state}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Country
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={profile.country}
+                      onChange={(e) =>
+                        handleInputChange("country", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  ) : (
+                    <p className="text-gray-900">{profile.country}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Zip Code
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={profile.zipCode}
+                      onChange={(e) =>
+                        handleInputChange("zipCode", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  ) : (
+                    <p className="text-gray-900">{profile.zipCode}</p>
                   )}
                 </div>
               </div>
-
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Bio
-                </label>
-                {isEditing ? (
-                  <textarea
-                    rows={4}
-                    value={profile.bio}
-                    onChange={(e) => handleInputChange("bio", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                ) : (
-                  <p className="text-gray-900">{profile.bio}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Security Settings */}
-          <div className="p-6 mt-6 bg-white rounded-lg shadow">
-            <h3 className="mb-6 text-lg font-medium text-gray-900">
-              Security Settings
-            </h3>
-
-            <div className="space-y-4">
-              <button className="w-full p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      Change Password
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      Update your account password
-                    </p>
-                  </div>
-                  <span className="text-blue-600">→</span>
-                </div>
-              </button>
-
-              <button className="w-full p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      Two-Factor Authentication
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      Add an extra layer of security
-                    </p>
-                  </div>
-                  <span className="text-blue-600">→</span>
-                </div>
-              </button>
-
-              <button className="w-full p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-gray-900">Login History</h4>
-                    <p className="text-sm text-gray-600">
-                      View your recent login activity
-                    </p>
-                  </div>
-                  <span className="text-blue-600">→</span>
-                </div>
-              </button>
             </div>
           </div>
         </div>

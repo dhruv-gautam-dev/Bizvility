@@ -34,7 +34,7 @@ export const getUserProfile = asyncHandler(async (req, res) => {
 export const updateUserProfile = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const allowedFields = ['fullName', 'email', 'username', 'city', 'state', 'country', 'zipCode'];
+  const allowedFields = ['fullName', 'email', 'phone', 'city', 'state', 'country', 'zipCode'];// phonte number
   const updateData = {};
 
   for (let key of allowedFields) {

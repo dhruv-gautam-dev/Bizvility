@@ -264,7 +264,7 @@ const ListBusinessPage = () => {
         //Add commentMore actions
         navigate(`/categories/health`);
       } else if (formData.category == "Hotel") {
-        navigate(`/categories/restaurants`);
+        navigate(`/categories/Hotel`);
       } else if (formData.category == "BeautySpa") {
         navigate(`/categories/beautySpa`);
       }
