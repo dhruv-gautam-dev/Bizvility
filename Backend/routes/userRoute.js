@@ -17,7 +17,7 @@ router.get('/profile/:id', protect, getUserProfile);
 router.put(
   '/profile/:id',
   protect,
-  upload.single('userImage'), // ⬅️ This handles uploading the image
+  upload.single('others'), // ⬅️ This handles uploading the image
   updateUserProfile
 );
 // 🔐 Example: Only allow business owners to access their own reviews

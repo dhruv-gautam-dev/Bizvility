@@ -13,33 +13,23 @@ export default function UserProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [profile, setProfile] = useState(() => {
-    let savedProfile = null;
-    try {
-      const storedProfile = localStorage.getItem("userProfile");
-      if (storedProfile) {
-        savedProfile = JSON.parse(storedProfile);
-      }
-    } catch (err) {
-      console.error("Error parsing userProfile from localStorage:", err);
-    }
-    return (
-      savedProfile || {
-        name: "Admin User",
-        email: "admin@listingpro.com",
-        role: "Administrator",
-        phone: "5551234567",
-        city: "New York",
-        state: "NY",
-        country: "USA",
-        zipCode: "10001",
-        bio: "Experienced administrator managing the ListingPro platform.",
-        avatar: "",
-        joinDate: "2024-01-01",
-        lastLogin: "2024-01-20 10:30 AM",
-        totalLogins: 1247,
-        managedListings: 2847,
-      }
-    );
+    // Load initial profile data from localStorage if it exists
+    const savedProfile = localStorage.getItem("userProfile");
+    return savedProfile
+      ? JSON.parse(savedProfile)
+      : {
+          name: "Admin User",
+          email: "admin@listingpro.com",
+          role: "Administrator",
+          phone: "+1 (555) 123-4567",
+          location: "New York, NY",
+          bio: "Experienced administrator managing the ListingPro platform with expertise in business directory management and user experience optimization.",
+          avatar: "",
+          joinDate: "2024-01-01",
+          lastLogin: "2024-01-20 10:30 AM",
+          totalLogins: 1247,
+          managedListings: 2847,
+        };
   });
 
   const userId = localStorage.getItem("userId");
@@ -52,29 +42,26 @@ export default function UserProfile() {
       return;
     }
 
-    const loadProfile = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchUserProfile(userId, token);
+    setLoading(true);
+    fetchUserProfile(userId, token)
+      .then((data) => {
+        // Transform API data to match the expected profile structure
         const transformedProfile = {
-          name: data?.data?.fullName || "Admin User",
-          email: data?.data?.email || "admin@listingpro.com",
-          role: data?.data?.role
+          name: data.data.fullName || "Admin User",
+          email: data.data.email || "admin@listingpro.com",
+          role: data.data.role
             ? data.data.role.charAt(0).toUpperCase() + data.data.role.slice(1)
             : "Administrator",
-          phone: data?.data?.phone?.toString() || "5551234567",
-          city: data?.data?.city || "New York",
-          state: data?.data?.state || "NY",
-          country: data?.data?.country || "USA",
-          zipCode: data?.data?.zipCode || "10001",
+          phone: profile.phone || "+1 (555) 123-4567", // Default since API doesn't provide
+          location: profile.location || "New York, NY", // Default since API doesn't provide
           bio:
-            data?.data?.profile?.bio ||
-            "Experienced administrator managing the ListingPro platform.",
-          avatar: data?.data?.profile?.avatar || "",
-          joinDate: data?.data?.createdAt
+            profile.bio ||
+            "Experienced administrator managing the ListingPro platform with expertise in business directory management and user experience optimization.", // Default since API doesn't provide
+          avatar: profile.avatar || "", // Retain existing avatar or empty
+          joinDate: data.data.createdAt
             ? new Date(data.data.createdAt).toISOString().split("T")[0]
             : "2024-01-01",
-          lastLogin: data?.data?.updatedAt
+          lastLogin: data.data.updatedAt
             ? new Date(data.data.updatedAt).toLocaleString("en-US", {
                 year: "numeric",
                 month: "long",
@@ -84,94 +71,37 @@ export default function UserProfile() {
                 hour12: true,
               })
             : "2024-01-20 10:30 AM",
-          totalLogins: data?.data?.totalLogins || 1247,
-          managedListings: data?.data?.managedListings || 2847,
+          totalLogins: profile.totalLogins || 1247, // Default since API doesn't provide
+          managedListings: profile.managedListings || 2847, // Default since API doesn't provide
         };
 
         setProfile(transformedProfile);
         setLoading(false);
-      } catch (err) {
-        setError(err.message || "Failed to fetch profile");
+      })
+      .catch((err) => {
+        setError(err.message);
         setLoading(false);
-      }
-    };
-
-    loadProfile();
+      });
   }, [userId, token]);
 
+  // Save profile to localStorage whenever it changes
   useEffect(() => {
-    try {
-      localStorage.setItem("userProfile", JSON.stringify(profile));
-      window.dispatchEvent(new Event("profileUpdated"));
-    } catch (err) {
-      console.error("Error saving profile to localStorage:", err);
-    }
+    localStorage.setItem("userProfile", JSON.stringify(profile));
+
+    // Dispatch a custom event to notify other components of the change
+    window.dispatchEvent(new Event("profileUpdated"));
   }, [profile]);
 
-  const handleSave = async () => {
-    try {
-      const updateData = {
-        fullName: profile.name,
-        email: profile.email,
-        phone: profile.phone,
-        city: profile.city,
-        state: profile.state,
-        country: profile.country,
-        zipCode: profile.zipCode,
-        "profile.name": profile.name,
-        "profile.phone": profile.phone,
-        "profile.avatar": profile.avatar || undefined,
-      };
-
-      const response = await fetch(
-        `http://localhost:5000/api/user/profile/${userId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(updateData),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update profile");
-      }
-
-      const updatedUser = await response.json();
-      setProfile((prev) => ({
-        ...prev,
-        name: updatedUser?.data?.fullName || prev.name,
-        email: updatedUser?.data?.email || prev.email,
-        phone: updatedUser?.data?.phone?.toString() || prev.phone,
-        city: updatedUser?.data?.city || prev.city,
-        state: updatedUser?.data?.state || prev.state,
-        country: updatedUser?.data?.country || prev.country,
-        zipCode: updatedUser?.data?.zipCode || prev.zipCode,
-        avatar: updatedUser?.data?.profile?.avatar || prev.avatar,
-      }));
-
-      setIsEditing(false);
-      toast.success("Profile updated successfully!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    } catch (err) {
-      toast.error(`Error: ${err.message}`, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    }
+  const handleSave = () => {
+    setIsEditing(false);
+    toast.success("Profile updated successfully!", {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
   };
 
   const handleCancel = () => {
@@ -228,6 +158,7 @@ export default function UserProfile() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Profile Card */}
         <div className="lg:col-span-1">
           <div className="p-6 bg-white rounded-lg shadow">
             <div className="text-center">
@@ -269,6 +200,7 @@ export default function UserProfile() {
           </div>
         </div>
 
+        {/* Profile Details */}
         <div className="lg:col-span-2">
           <div className="p-6 bg-white rounded-lg shadow">
             <h3 className="mb-6 text-lg font-medium text-gray-900">
@@ -333,73 +265,19 @@ export default function UserProfile() {
 
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700">
-                    City
+                    Location
                   </label>
                   {isEditing ? (
                     <input
                       type="text"
-                      value={profile.city}
+                      value={profile.location}
                       onChange={(e) =>
-                        handleInputChange("city", e.target.value)
+                        handleInputChange("location", e.target.value)
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   ) : (
-                    <p className="text-gray-900">{profile.city}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">
-                    State
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={profile.state}
-                      onChange={(e) =>
-                        handleInputChange("state", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{profile.state}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">
-                    Country
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={profile.country}
-                      onChange={(e) =>
-                        handleInputChange("country", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{profile.country}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">
-                    Zip Code
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={profile.zipCode}
-                      onChange={(e) =>
-                        handleInputChange("zipCode", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{profile.zipCode}</p>
+                    <p className="text-gray-900">{profile.location}</p>
                   )}
                 </div>
               </div>

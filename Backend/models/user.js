@@ -19,7 +19,6 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 12 
   },
-  phone:{ type: Number},
   
   role: {
     type: String,
@@ -33,7 +32,7 @@ const userSchema = new mongoose.Schema({
   isVerified: { type: Boolean, default: false },
   refreshTokens: [String],
   profile: {
-    name: String,
+    photo: { type: String },
     phone: String,
     avatar: String
   },

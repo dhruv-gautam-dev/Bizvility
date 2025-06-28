@@ -1,3 +1,4 @@
+//usercontroller.js
 // controllers/userController.js
 
 import User from '../models/user.js';
@@ -34,7 +35,7 @@ export const getUserProfile = asyncHandler(async (req, res) => {
 export const updateUserProfile = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const allowedFields = ['fullName', 'email', 'phone', 'city', 'state', 'country', 'zipCode'];// phonte number
+  const allowedFields = ['fullName', 'email', 'username', 'city', 'state', 'country', 'zipCode'];
   const updateData = {};
 
   for (let key of allowedFields) {
@@ -47,13 +48,13 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
   updateData.profile = {
     name: req.body['profile.name'],
     phone: req.body['profile.phone'],
-    avatar: req.file ? `/uploads/userImage/${req.file.filename}` : undefined
+    photo: req.file ? `/uploads/others/${req.file.filename}` : undefined
   };
 
   // Remove undefined fields from profile
-  Object.keys(updateData.profile).forEach(
-    (key) => updateData.profile[key] === undefined && delete updateData.profile[key]
-  );
+  // Object.keys(updateData.profile).forEach(
+  //   (key) => updateData.profile[key] === undefined && delete updateData.profile[key]
+  // );
 
   const updatedUser = await User.findByIdAndUpdate(id, updateData, {
     new: true,
