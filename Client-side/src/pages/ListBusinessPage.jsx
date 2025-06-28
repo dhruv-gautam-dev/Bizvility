@@ -266,7 +266,7 @@ const ListBusinessPage = () => {
       } else if (formData.category == "Hotel") {
         navigate(`/categories/restaurants`);
       } else if (formData.category == "BeautySpa") {
-        navigate(`/categories/beauty`);
+        navigate(`/categories/beautySpa`);
       }
 
       // const category = formData.category.toLowerCase();

@@ -1,45 +1,69 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import CategoryData from "../data/Categories";
-import { MapPin, Phone, Globe, Clock, Star } from "lucide-react";
+import { MapPin, Phone, Globe, Star } from "lucide-react";
 import { getAllBusinesses } from "../data/HealthAndMedical/healthCategoryData";
 
-// console.log(healthCategoryData);
-
-// getAllBusinesses();
 const CategoryDetailPage = () => {
-  const { slug, storeId } = useParams();
+  const { slug } = useParams();
   const [businesses, setBusinesses] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
   const imageUrl = import.meta.env.VITE_Image_URL;
-  console.log(imageUrl);
+
+  console.log("sug is " + slug);
+
   useEffect(() => {
     const fetchBusinesses = async () => {
       try {
-        const data = await getAllBusinesses(token); // 🔥 Accessing response.data directly
-        setBusinesses(data.businesses); // Set to state
-        console.log("Fetched businesses:", data); // Check what you actually receive
-        console.log(data._id);
+        const data = await getAllBusinesses(token);
+        console.log("Fetched businesses:", data.businesses);
+        setBusinesses(data.businesses);
       } catch (err) {
-        console.error("Error loading businesses in Category Page:", err);
+        console.error("Error loading businesses:", err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchBusinesses();
   }, [token]);
 
-  //construct the category in such by using loops or something in such a way it stores the details of targeted category data
-  const category = CategoryData.find((cat) => cat.slug === slug);
+  useEffect(() => {
+    const match = businesses.filter(
+      (biz) => biz.category?.toLowerCase() === slug.toLowerCase()
+    );
+    console.log("Filtered items:", match);
+    setFiltered(match);
+  }, [businesses, slug]);
+
+  // Log available slugs from CategoryData to guide normalization
+  console.log(
+    "Available category slugs:",
+    CategoryData.map((cat) => cat.slug)
+  );
+
+  const category = CategoryData.find(
+    (cat) => cat.slug.toLowerCase() === slug.toLowerCase()
+  );
+  console.log("Category lookup:", category);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-20 bg-gray-50">
+        <div className="container px-4 py-16 mx-auto text-center text-gray-600">
+          Loading "{slug}" businesses…
+        </div>
+      </div>
+    );
+  }
 
   if (!category) {
     return (
       <div className="min-h-screen pt-20 bg-gray-50">
         <div className="container px-4 py-16 mx-auto">
           <h1 className="text-2xl font-bold text-gray-900">
-            Category not found
+            Category "{slug}" not found
           </h1>
         </div>
       </div>
@@ -48,6 +72,7 @@ const CategoryDetailPage = () => {
 
   return (
     <div className="pt-20">
+      {/* Hero Header */}
       <div
         className="relative h-64 bg-center bg-cover"
         style={{ backgroundImage: `url(${category.image})` }}
@@ -62,36 +87,34 @@ const CategoryDetailPage = () => {
         </div>
       </div>
 
+      {/* Content */}
       <div className="container px-4 py-12 mx-auto">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          {/* Business List */}
           <div className="md:col-span-2">
             <div className="p-6 mb-8 bg-white rounded-lg shadow-sm">
               <h2 className="mb-4 text-2xl font-semibold">
                 Popular in {category.name}
               </h2>
-              <div className="grid grid-cols-2 ">
-                {businesses.map((biz) => (
-                  <Link
-                    to={`/categories/${slug}/store/${biz._id}`}
-                    key={biz._id}
-                    state={{ storeId: biz._id }}
-                    className="block gap-3 p-4 pb-6 border-b border-gray-200 rounded-sm hover:bg-gray-50 last:border-0 last:pb-0"
-                  >
-                    <div
+
+              {filtered.length === 0 ? (
+                <p className="text-gray-500">
+                  No businesses found in "{category.name}"
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  {filtered.map((biz) => (
+                    <Link
+                      to={`/categories/${slug}/store/${biz._id}`}
                       key={biz._id}
-                      // store={store}
-                      className="pb-6 border-b border-gray-200 rounded-lg last:border-0 last:pb-0"
+                      state={{ storeId: biz._id }}
+                      className="block gap-3 p-4 pb-6 border-b border-gray-200 rounded-sm hover:bg-gray-50"
                     >
                       <div className="flex items-start">
-                        {console.log("biz" + biz)}
-                        {/* {console.log(biz.profileImage)} */}
-                        {/* const formattedLoc = encodeURIComponent( `$
-                        {store.location.address}, ${store.location.city}, $
-                        {store.location.state} ${store.location.pincode}` ); */}
                         <div>
                           <img
                             src={`${imageUrl}/${biz.profileImage}`}
-                            alt={biz.alt}
+                            alt={biz.name}
                             className="object-cover w-24 h-24 rounded-lg"
                           />
                           <div className="flex items-center justify-center mt-2">
@@ -102,37 +125,29 @@ const CategoryDetailPage = () => {
                           </div>
                         </div>
                         <div className="flex-1 ml-4">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-semibold">
-                              {biz.name}
-                            </h3>
-                          </div>
+                          <h3 className="text-lg font-semibold">{biz.name}</h3>
                           <div className="flex items-center mt-2 text-sm text-gray-500">
-                            {}
                             <MapPin className="w-4 h-4 mr-1" />
-                            <span>{`${biz.location.address}, ${biz.location.city}, ${biz.location.state}`}</span>
+                            {`${biz.location.address}, ${biz.location.city}, ${biz.location.state}`}
                           </div>
                           <div className="flex items-center mt-1 text-sm text-gray-500">
                             <Phone className="w-4 h-4 mr-1" />
-                            <span>{biz.phone}</span>
+                            {biz.phone}
                           </div>
                           <div className="flex items-center mt-1 text-sm text-gray-500">
                             <Globe className="w-4 h-4 mr-1" />
-                            <span>{biz.website}</span>
+                            {biz.website}
                           </div>
-                          {/* <div className="flex items-center mt-1 text-sm text-gray-500">
-                            <Clock className="w-4 h-4 mr-1" />
-                            <span>{biz.hours}</span>
-                          </div> */}
                         </div>
                       </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
+          {/* Sidebar */}
           <div>
             <div className="p-6 mb-8 bg-white rounded-lg shadow-sm">
               <h2 className="mb-4 text-xl font-semibold">Subcategories</h2>
@@ -148,7 +163,6 @@ const CategoryDetailPage = () => {
                 ))}
               </div>
             </div>
-
             <div className="p-6 bg-white rounded-lg shadow-sm">
               <h2 className="mb-4 text-xl font-semibold">Popular Locations</h2>
               <div className="space-y-2">

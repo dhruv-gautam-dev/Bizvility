@@ -1,8 +1,8 @@
 const CategoryData = [
     {
         id: 1,
-        name: 'Restaurants & Food',
-        slug: 'restaurants',
+        name: 'Hotel, Restaurants & Food',
+        slug: 'Hotel',
         description: 'Discover the best places to eat, from casual dining to fine restaurants and cafes',
         image: 'https://images.pexels.com/photos/67468/pexels-photo-67468.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
         listingCount: 1283,
@@ -63,7 +63,7 @@ const CategoryData = [
     {
         id: 7,
         name: 'Beauty & Spa',
-        slug: 'beauty',
+        slug: 'beautySpa',
         description: 'Beauty salons, spas, hair stylists, nail salons, and other personal care services',
         image: 'https://images.pexels.com/photos/3997379/pexels-photo-3997379.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
         listingCount: 426,

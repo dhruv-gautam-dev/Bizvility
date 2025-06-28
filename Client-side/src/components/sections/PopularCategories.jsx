@@ -41,10 +41,10 @@ const PopularCategories = () => {
     },
     {
       icon: <Utensils className="w-8 h-8 text-white" />,
-      title: "Restaurants & Food",
+      title: "Hotel, Restaurants & Food",
       count: 1283,
       color: "bg-red-500",
-      path: "/categories/restaurants",
+      path: "/categories/Hotel",
     },
     // {
     //   icon: <ShoppingBag className="w-8 h-8 text-white" />,
@@ -80,7 +80,7 @@ const PopularCategories = () => {
       title: "Beauty & Spa",
       count: 426,
       color: "bg-pink-500",
-      path: "/categories/beauty",
+      path: "/categories/beautySpa",
     },
     // {
     //   icon: <Dumbbell className="w-8 h-8 text-white" />,
