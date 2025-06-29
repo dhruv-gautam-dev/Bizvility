@@ -15,6 +15,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { fetchUserListings } from "../../data/UserData/userBusinessLIsting";
 
+// Static recent activity data (can be updated with dynamic data later)
 const recentActivity = [
   {
     action: "New review received",
@@ -53,7 +54,7 @@ const UserDashboard = () => {
     totalReviews: 0,
     averageRating: 0,
     monthlyViews: 0,
-    profileViews: 89, // Static since API doesn't provide this
+    profileViews: 89,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -72,21 +73,17 @@ const UserDashboard = () => {
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
 
+  // Fetch user listings and compute stats
   useEffect(() => {
-    setLoading(true);
-    fetchUserListings(userId, token)
-      .then((data) => {
+    const loadListings = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchUserListings(userId, token);
         const transformedListings = data.listings.map((listing) => {
-          let formattedUpdatedDate = "Unknown";
-
-          if (listing.updatedAt && typeof listing.updatedAt === "string") {
-            const parsedDate = new Date(listing.updatedAt);
-            if (!isNaN(parsedDate.getTime())) {
-              formattedUpdatedDate = parsedDate.toISOString().split("T")[0];
-            } else {
-              console.warn("Invalid updatedAt date:", listing.updatedAt);
-            }
-          }
+          const parsedDate = new Date(listing.updatedAt);
+          const formattedUpdatedDate = isNaN(parsedDate.getTime())
+            ? "Unknown"
+            : parsedDate.toISOString().split("T")[0];
 
           return {
             id: listing._id,
@@ -138,42 +135,38 @@ const UserDashboard = () => {
           monthlyViews: 0,
           profileViews: 89,
         });
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         setError(err.message);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    loadListings();
   }, [userId, token]);
 
+  // Helper function to get status color
   const getStatusColor = (status) => {
-    switch (status) {
-      case "Active":
-        return "bg-green-100 text-green-800";
-      case "Pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "Inactive":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+    const statusColors = {
+      Active: "bg-green-100 text-green-800",
+      Pending: "bg-yellow-100 text-yellow-800",
+      Inactive: "bg-gray-100 text-gray-800",
+    };
+    return statusColors[status] || "bg-gray-100 text-gray-800";
   };
 
+  // Helper function to get activity icon
   const getActivityIcon = (type) => {
-    switch (type) {
-      case "review":
-        return "⭐";
-      case "view":
-        return "👁️";
-      case "profile":
-        return "👤";
-      case "listing":
-        return "🏢";
-      default:
-        return "📝";
-    }
+    const activityIcons = {
+      review: "⭐",
+      view: "👁️",
+      profile: "👤",
+      listing: "🏢",
+    };
+    return activityIcons[type] || "📝";
   };
 
+  // Navigation handlers
   const handleViewModal = (listing) => {
     navigate(`/categories/health/store/${listing.id}`);
   };
@@ -196,7 +189,7 @@ const UserDashboard = () => {
 
   const handleEditFormChange = (e) => {
     const { name, value } = e.target;
-    setEditFormData({ ...editFormData, [name]: value });
+    setEditFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSaveEdit = () => {
@@ -208,8 +201,8 @@ const UserDashboard = () => {
       return;
     }
 
-    setListings(
-      listings.map((listing) =>
+    setListings((prev) =>
+      prev.map((listing) =>
         listing.id === editFormData.id
           ? {
               ...listing,
@@ -239,14 +232,14 @@ const UserDashboard = () => {
           </p>
           <div className="flex justify-end gap-2">
             <button
-              onClick={() => closeToast()}
+              onClick={closeToast}
               className="px-3 py-1 text-sm text-gray-600 rounded hover:text-gray-800"
             >
               Cancel
             </button>
             <button
               onClick={() => {
-                setListings(listings.filter((l) => l.id !== listing.id));
+                setListings((prev) => prev.filter((l) => l.id !== listing.id));
                 setUserStats((prev) => ({
                   ...prev,
                   totalListings: prev.totalListings - 1,
@@ -293,13 +286,14 @@ const UserDashboard = () => {
     );
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div className="p-6 text-center">Loading...</div>;
+  if (error)
+    return <div className="p-6 text-center text-red-600">Error: {error}</div>;
 
   return (
     <div className="p-6">
       <ToastContainer />
-
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">
@@ -311,6 +305,7 @@ const UserDashboard = () => {
         </div>
       </div>
 
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           Icon={BuildingStorefrontIcon}
@@ -338,7 +333,9 @@ const UserDashboard = () => {
         />
       </div>
 
+      {/* Main Content */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Quick Actions Section */}
         <CollapsibleSection
           title="Quick Actions"
           expanded={quickActionExpanded}
@@ -349,7 +346,7 @@ const UserDashboard = () => {
               navigate={navigate}
               icon={PlusIcon}
               label="Add Listing"
-              href="/add-listing"
+              href="/list-business"
               color="text-blue-600"
             />
             <QuickActionButton
@@ -363,7 +360,7 @@ const UserDashboard = () => {
               navigate={navigate}
               icon={EyeIcon}
               label="View Profile"
-              href="/profile"
+              href="/user-profile"
               color="text-purple-600"
             />
             <QuickActionButton
@@ -376,6 +373,7 @@ const UserDashboard = () => {
           </div>
         </CollapsibleSection>
 
+        {/* Recent Activity Section */}
         <CollapsibleSection
           title="Recent Activity"
           expanded={recentActivityExpanded}
@@ -402,6 +400,7 @@ const UserDashboard = () => {
           </div>
         </CollapsibleSection>
 
+        {/* My Listings Section */}
         <div className="bg-white rounded-lg shadow lg:col-span-2">
           <div className="flex items-center justify-between p-4 border-b">
             <h2 className="text-lg font-semibold">My Listings</h2>
@@ -447,18 +446,21 @@ const UserDashboard = () => {
                   <button
                     onClick={() => handleViewModal(listing)}
                     className="p-2 text-blue-600 hover:text-blue-800"
+                    title="View Listing"
                   >
                     <EyeIcon className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleOpenEditModal(listing)}
                     className="p-2 text-green-600 hover:text-green-800"
+                    title="Edit Listing"
                   >
                     <PencilIcon className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(listing)}
                     className="p-2 text-red-600 hover:text-red-800"
+                    title="Delete Listing"
                   >
                     <TrashIcon className="w-4 h-4" />
                   </button>
@@ -468,6 +470,7 @@ const UserDashboard = () => {
           </div>
         </div>
 
+        {/* Performance Overview Section */}
         <CollapsibleSection
           title="Performance Overview"
           expanded={performanceExpanded}
@@ -494,6 +497,7 @@ const UserDashboard = () => {
         </CollapsibleSection>
       </div>
 
+      {/* Edit Listing Modal */}
       {isEditModalOpen && (
         <div
           className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ${
@@ -580,6 +584,7 @@ const UserDashboard = () => {
   );
 };
 
+// Reusable Components
 const StatCard = ({ Icon, label, value, color }) => (
   <div className="p-6 bg-white rounded-lg shadow">
     <div className="flex items-center">

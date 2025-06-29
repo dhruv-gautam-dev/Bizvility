@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   MagnifyingGlassIcon,
   PlusIcon,
@@ -7,59 +8,38 @@ import {
   TrashIcon,
   MapPinIcon,
   StarIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { fetchUserListings } from "../../data/UserData/userBusinessLIsting";
 
-export default function UserMyListings() {
-  const [listings, setListings] = useState(null);
+const UserMyListings = () => {
+  const navigate = useNavigate();
+  const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalFade, setModalFade] = useState(false);
-  const [formData, setFormData] = useState({
-    id: null,
-    title: "",
-    category: "",
-    location: "",
-    image: null,
-  });
-  const [editingListing, setEditingListing] = useState(null);
+
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
+
+  // Fetch user listings
   useEffect(() => {
-    setLoading(true);
-    fetchUserListings(userId, token)
-      .then((data) => {
-        console.log("API Response:", data.listings);
-
-        const transformedListings = data.listings.map((listing, index) => {
-          let formattedDate = "Unknown";
-
-          try {
-            // Safe check + fallback date format
-            if (listing.createdAt && !isNaN(Date.parse(listing.createdAt))) {
-              formattedDate = new Date(listing.createdAt).toLocaleDateString(
-                "en-IN"
-              );
-            } else {
-              console.warn(
-                `Invalid or missing createdAt for listing ${index}:`,
-                listing.createdAt
-              );
-            }
-          } catch (err) {
-            console.error(`Date formatting failed for listing ${index}`, err);
-          }
+    const loadListings = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchUserListings(userId, token);
+        const transformedListings = data.listings.map((listing) => {
+          const parsedDate = new Date(listing.createdAt);
+          const formattedDate = isNaN(parsedDate.getTime())
+            ? "Unknown"
+            : parsedDate.toLocaleDateString("en-IN");
 
           return {
             id: listing._id,
             title: listing.name,
-            category: listing.category,
+            category: listing.category || "Unknown",
             location: listing.location
               ? `${listing.location.address}, ${listing.location.city}, ${listing.location.state}`
               : "Unknown",
@@ -79,148 +59,78 @@ export default function UserMyListings() {
         });
 
         setListings(transformedListings);
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
+        console.error("Failed to fetch listings:", err);
         setError(err.message);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    loadListings();
   }, [userId, token]);
 
-  const filteredListings = listings?.filter((listing) => {
+  // Filter listings based on search term and status
+  const filteredListings = listings.filter((listing) => {
     const name = listing.title?.toLowerCase() || "";
     const location = listing.location?.toLowerCase() || "";
     const status = listing.status?.toLowerCase() || "";
-
     const matchesSearch =
       name.includes(searchTerm.toLowerCase()) ||
       location.includes(searchTerm.toLowerCase());
-
     const matchesStatus =
       filterStatus === "all" || status === filterStatus.toLowerCase();
-
     return matchesSearch && matchesStatus;
   });
 
+  // Helper function to get status color
   const getStatusColor = (status) => {
-    switch (status) {
-      case "Active":
-        return "bg-green-100 text-green-800";
-      case "Pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "Inactive":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+    const statusColors = {
+      Active: "bg-green-100 text-green-800",
+      Pending: "bg-yellow-100 text-yellow-800",
+      Inactive: "bg-gray-100 text-gray-800",
+    };
+    return statusColors[status] || "bg-gray-100 text-gray-800";
   };
 
-  const handleOpenModal = (listing = null) => {
-    if (listing) {
-      setEditingListing(listing);
-      setFormData({
-        id: listing.id,
-        title: listing.title,
-        category: listing.category,
-        location: listing.location,
-        image: null,
-      });
-    } else {
-      setEditingListing(null);
-      setFormData({
-        id: null,
-        title: "",
-        category: "",
-        location: "",
-        image: null,
-      });
-    }
-    setModalFade(true);
-    setIsModalOpen(true);
+  // Handle view action (same as UserDashboard)
+  const handleView = (listing) => {
+    navigate(`/categories/health/store/${listing.id}`);
   };
 
-  const handleCloseModal = () => {
-    setModalFade(false);
-    setTimeout(() => setIsModalOpen(false), 300);
-  };
-
-  const handleFormChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "image") {
-      setFormData({ ...formData, image: files[0] });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
-  };
-
-  const handleSaveListing = () => {
-    if (
-      !formData.title ||
-      !formData.category ||
-      !formData.location ||
-      (!formData.image && !editingListing)
-    ) {
-      toast.warning("Please fill in all fields and select an image.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      return;
-    }
-
-    const currentDate = new Date().toISOString().split("T")[0];
-    let imageUrl = editingListing ? editingListing.image : null;
-
-    if (formData.image) {
-      imageUrl = URL.createObjectURL(formData.image);
-    }
-
-    if (editingListing) {
-      setListings(
-        listings.map((listing) =>
-          listing.id === formData.id
-            ? {
-                ...listing,
-                title: formData.title,
-                category: formData.category,
-                location: formData.location,
-                image: imageUrl || listing.image,
-                date: listing.date || currentDate, // ✅ Ensure date is always set
-              }
-            : listing
-        )
+  // Handle edit action (fetch business data and navigate to form)
+  const handleEdit = async (listing) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/business/byid/${listing.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      toast.success("Listing updated successfully!", {
-        position: "top-right",
-        autoClose: 3000,
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch business data: ${response.statusText}`
+        );
+      }
+
+      const businessData = await response.json();
+      console.log(businessData);
+      navigate("/list-business/form", {
+        state: { business: businessData },
       });
-    } else {
-      const newListing = {
-        id: `new-${Date.now()}`, // Temporary ID for new listings
-        title: formData.title,
-        category: formData.category,
-        location: formData.location,
-        status: "Pending",
-        rating: 0,
-        reviews: 0,
-        views: 0,
-        date: currentDate,
-        featured: false,
-        image: imageUrl,
-      };
-      setListings([...listings, newListing]);
-      toast.success("Listing added successfully!", {
+    } catch (err) {
+      console.error("Error fetching business data:", err);
+      toast.error("Failed to load business data. Please try again.", {
         position: "top-right",
         autoClose: 3000,
       });
     }
-
-    handleCloseModal();
   };
 
-  const handleEdit = (listing) => {
-    handleOpenModal(listing);
-  };
-
+  // Handle delete action
   const handleDelete = (listing) => {
     toast(
       ({ closeToast }) => (
@@ -230,14 +140,14 @@ export default function UserMyListings() {
           </p>
           <div className="flex justify-end gap-2">
             <button
-              onClick={() => closeToast()}
+              onClick={closeToast}
               className="px-3 py-1 text-sm text-gray-600 rounded hover:text-gray-800"
             >
               Cancel
             </button>
             <button
               onClick={() => {
-                setListings(listings.filter((l) => l.id !== listing.id));
+                setListings((prev) => prev.filter((l) => l.id !== listing.id));
                 closeToast();
                 toast.success(
                   `${listing.title} has been deleted successfully!`,
@@ -263,22 +173,26 @@ export default function UserMyListings() {
     );
   };
 
-  const handleView = (listing) => {
-    window.open(listing.image, "_blank");
+  // Handle add new listing (navigate to form)
+  const handleAddListing = () => {
+    navigate("/list-business");
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!listings) return null;
+  if (loading) return <div className="p-6 text-center">Loading...</div>;
+  if (error)
+    return <div className="p-6 text-center text-red-600">Error: {error}</div>;
+  if (!listings.length)
+    return <div className="p-6 text-center">No listings found.</div>;
 
   return (
     <div className="p-6">
       <ToastContainer />
 
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">My Listings</h1>
         <button
-          onClick={() => handleOpenModal()}
+          onClick={handleAddListing}
           className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
         >
           <PlusIcon className="w-5 h-5" />
@@ -286,6 +200,7 @@ export default function UserMyListings() {
         </button>
       </div>
 
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-3">
         <div className="p-6 bg-white rounded-lg shadow">
           <h3 className="text-sm font-medium text-gray-500">Total Listings</h3>
@@ -305,6 +220,7 @@ export default function UserMyListings() {
         </div>
       </div>
 
+      {/* Listings Table */}
       <div className="bg-white rounded-lg shadow">
         <div className="p-4 border-b border-gray-200">
           <div className="flex flex-col gap-4 sm:flex-row">
@@ -408,123 +324,8 @@ export default function UserMyListings() {
           ))}
         </div>
       </div>
-
-      {isModalOpen && (
-        <div
-          className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ${
-            modalFade ? "opacity-100" : "opacity-0"
-          }`}
-          onClick={handleCloseModal}
-        >
-          <div
-            className="w-full max-w-md p-8 transition-all duration-300 transform bg-white shadow-2xl rounded-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {editingListing ? "Edit Listing" : "Add New Listing"}
-              </h2>
-              <button
-                onClick={handleCloseModal}
-                className="text-gray-500 transition-colors hover:text-gray-700"
-              >
-                <XMarkIcon className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleFormChange}
-                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter listing title"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Category
-                </label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleFormChange}
-                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select a category</option>
-                  <option value="Health">Health</option>
-                  <option value="Restaurant">Restaurant</option>
-                  <option value="Services">Services</option>
-                  <option value="Retail">Retail</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleFormChange}
-                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter location (e.g., Sector 63, Noida, Uttar Pradesh)"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Image
-                </label>
-                <input
-                  type="file"
-                  name="image"
-                  accept="image/*"
-                  onChange={handleFormChange}
-                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {editingListing && !formData.image && (
-                  <p className="mt-1 text-sm text-gray-500">
-                    Current image:{" "}
-                    <a
-                      href={editingListing.image}
-                      target="_blank"
-                      className="text-blue-600"
-                    >
-                      View
-                    </a>
-                  </p>
-                )}
-                {formData.image && (
-                  <p className="mt-1 text-sm text-gray-500">
-                    Selected: {formData.image.name}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 mt-6">
-              <button
-                onClick={handleCloseModal}
-                className="px-4 py-2 text-gray-600 rounded-md hover:text-gray-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveListing}
-                className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
-              >
-                <PlusIcon className="w-5 h-5" />
-                {editingListing ? "Save Changes" : "Add Listing"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
-}
+};
+
+export default UserMyListings;
