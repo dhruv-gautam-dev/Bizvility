@@ -56,6 +56,8 @@ import StoreDetailPage from "./pages/HealthCategoryPages/StoreDetailPage.jsx";
 import ForgotPassword from "./components/auth/ForgotPassword.jsx";
 import { ToastContainer } from "react-toastify";
 import toast, { Toaster } from "react-hot-toast";
+import EventsPage from "./pages/User/EventsPage.jsx";
+import EventForm from "./pages/EventForm.jsx";
 // import ProfileSettings from './pages/superAdmin/Profile.jsx';
 
 function App() {
@@ -92,6 +94,7 @@ function App() {
             />
             <Route path="/list-business" element={<BusinessListingPage />} />
             <Route path="/list-business/form" element={<ListBusinessPage />} />
+            <Route path="/list-event/form" element={<EventForm />} />
             <Route path="/support" element={<SupportPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
@@ -123,6 +126,7 @@ function App() {
             <Route path="/user-analytics" element={<UserAnalytics />} />
             <Route path="/user-my-reviews" element={<UserReviews />} />
             <Route path="/user-invoices" element={<UserInvoice />} />
+            <Route path="/user-events" element={<EventsPage />} />
           </Route>
         </Routes>
       </Router>

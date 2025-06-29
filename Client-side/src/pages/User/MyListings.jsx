@@ -30,6 +30,8 @@ const UserMyListings = () => {
       try {
         setLoading(true);
         const data = await fetchUserListings(userId, token);
+        console.log(data);
+
         const transformedListings = data.listings.map((listing) => {
           const parsedDate = new Date(listing.createdAt);
           const formattedDate = isNaN(parsedDate.getTime())
@@ -178,6 +180,13 @@ const UserMyListings = () => {
     navigate("/list-business");
   };
 
+  // Handle create event action (navigate to event form with listing ID and business ID)
+  const handleCreateEvent = (listingId, businessId) => {
+    navigate(`/list-event/form`, {
+      state: { listingId },
+    });
+  };
+
   if (loading) return <div className="p-6 text-center">Loading...</div>;
   if (error)
     return <div className="p-6 text-center text-red-600">Error: {error}</div>;
@@ -291,15 +300,14 @@ const UserMyListings = () => {
                           </span>
                         </div>
                       )}
-                      {/* <span>Created: {listing.date}</span> */}
                     </div>
                   </div>
-                  <div className="flex items-center text-sm text-gray-500">
+                  <div className="flex items-stretch text-sm text-gray-500">
                     <MapPinIcon className="w-4 h-4 mr-1" />
                     {listing.location}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col items-center gap-2">
                   <button
                     onClick={() => handleView(listing)}
                     className="p-2 text-blue-600 rounded hover:text-blue-800 hover:bg-blue-50"
@@ -313,6 +321,20 @@ const UserMyListings = () => {
                     title="Edit Listing"
                   >
                     <PencilIcon className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(listing)}
+                    className="p-2 text-red-600 rounded hover:text-red-800 hover:bg-red-50"
+                    title="Delete Listing"
+                  >
+                    <TrashIcon className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleCreateEvent(listing.id)}
+                    className="p-2 text-purple-600 rounded hover:text-purple-800 hover:bg-purple-50"
+                    title="Create Event for Listing"
+                  >
+                    <PlusIcon className="w-5 h-5" />
                   </button>
                 </div>
               </div>

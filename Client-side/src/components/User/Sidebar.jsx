@@ -26,6 +26,7 @@ const navigation = [
   { name: "My Reviews", href: "/user-my-reviews", icon: StarIcon },
   { name: "Analytics", href: "/user-analytics", icon: ChartBarIcon },
   { name: "Invoices", href: "/user-invoices", icon: DocumentTextIcon },
+  { name: "Events", href: "/user-events", icon: DocumentTextIcon },
 ];
 
 export default function Sidebar() {

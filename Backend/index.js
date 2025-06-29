@@ -11,7 +11,7 @@ import plansRoute from './routes/plansRoute.js';
 import reviewRoute from './routes/reviewRoute.js';
 import path from 'path';
 import cors from "cors"
-
+import eventRoutes from './routes/eventRoute.js';
 
 dotenv.config();
 const app = express();
@@ -36,6 +36,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/superadmin', superAdminRoute);
 app.use('/api/plan', plansRoute);
 app.use('/api/reviews', reviewRoute);
+app.use('/api/events', eventRoutes);
 
 // ✅ Serve static files from 'uploads' folder
 app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));

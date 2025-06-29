@@ -351,7 +351,7 @@ const UserDashboard = () => {
               navigate={navigate}
               icon={ChartBarIcon}
               label="Analytics"
-              href="/analytics"
+              href="/user-analytics"
               color="text-orange-600"
             />
           </div>
