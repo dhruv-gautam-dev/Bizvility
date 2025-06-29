@@ -13,17 +13,16 @@ export default function EventsPage() {
   const [error, setError] = useState(null);
   const imageUrl = import.meta.env.VITE_Image_URL;
   const token = localStorage.getItem("token");
-  const userId = localStorage.getItem("userId"); // Use userId from localStorage
 
-  // Fetch events by user ID
-  const fetchEvents = async (userId) => {
+  // Fetch events by authenticated user
+  const fetchEvents = async () => {
     if (!token) {
       throw new Error("No authentication token found");
     }
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/events/user/${userId}`, // Updated endpoint for user-based events
+        `http://localhost:5000/api/events/my-events`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -31,9 +30,11 @@ export default function EventsPage() {
         }
       );
       if (!response.ok) {
-        throw new Error("Failed to fetch events");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch events");
       }
-      return await response.json();
+      const data = await response.json();
+      return data.events || [];
     } catch (err) {
       throw new Error(err.message);
     }
@@ -44,11 +45,8 @@ export default function EventsPage() {
       setLoading(true);
       setError(null);
       try {
-        if (!userId) {
-          throw new Error("No user ID found in localStorage");
-        }
-        const data = await fetchEvents(userId);
-        setEvents(data.events || []); // Ensure events is an array
+        const data = await fetchEvents();
+        setEvents(data);
       } catch (err) {
         setError(err.message);
         toast.error(`Error: ${err.message}`, {
@@ -60,7 +58,7 @@ export default function EventsPage() {
       }
     };
     loadEvents();
-  }, [userId, token]);
+  }, [token]);
 
   const formatDateTime = (dateTime) => {
     const date = new Date(dateTime);
@@ -75,7 +73,7 @@ export default function EventsPage() {
   };
 
   const isEventPast = (endTime) => {
-    const now = new Date("2025-06-29T17:37:00+05:30"); // Current time: 05:37 PM IST
+    const now = new Date("2025-06-29T18:16:00+05:30"); // Current time: 06:16 PM IST
     return new Date(endTime) < now;
   };
 
@@ -104,7 +102,7 @@ export default function EventsPage() {
               >
                 {event.bannerImage && (
                   <img
-                    src={`${imageUrl}${event.bannerImage}`}
+                    src={`${imageUrl}/${event.bannerImage}`} // Added imageUrl before bannerImage
                     alt={event.title}
                     className="object-cover w-full h-48 mb-4 rounded-t-xl"
                   />

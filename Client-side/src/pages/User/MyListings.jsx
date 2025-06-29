@@ -322,13 +322,7 @@ const UserMyListings = () => {
                   >
                     <PencilIcon className="w-5 h-5" />
                   </button>
-                  <button
-                    onClick={() => handleDelete(listing)}
-                    className="p-2 text-red-600 rounded hover:text-red-800 hover:bg-red-50"
-                    title="Delete Listing"
-                  >
-                    <TrashIcon className="w-5 h-5" />
-                  </button>
+
                   <button
                     onClick={() => handleCreateEvent(listing.id)}
                     className="p-2 text-purple-600 rounded hover:text-purple-800 hover:bg-purple-50"

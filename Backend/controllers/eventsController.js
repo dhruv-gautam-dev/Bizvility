@@ -32,6 +32,29 @@ export const createEvent = asyncHandler(async (req, res) => {
   });
 });
 
+
+export const getEventsByUser = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  // Step 1: Find the business owned by this user
+  const business = await Business.findOne({ owner: userId });
+
+  if (!business) {
+    return res.status(404).json({ message: 'No business found for this user' });
+  }
+
+  // Step 2: Fetch events for that business
+  const events = await Event.find({ business: business._id }).sort({ date: 1 });
+
+  res.status(200).json({
+    message: 'Events fetched successfully',
+    businessId: business._id,
+    count: events.length,
+    events
+  });
+});
+//controller
+
 // ✅ Edit event
 export const updateEvent = asyncHandler(async (req, res) => {
   const { id } = req.params;
