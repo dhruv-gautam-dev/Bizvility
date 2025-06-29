@@ -166,22 +166,6 @@ const UserDashboard = () => {
     return activityIcons[type] || "📝";
   };
 
-  // Navigation handlers
-  const handleViewModal = (listing) => {
-    navigate(`/categories/health/store/${listing.id}`);
-  };
-
-  const handleOpenEditModal = (listing) => {
-    setEditFormData({
-      id: listing.id,
-      title: listing.title,
-      status: listing.status,
-      image: listing.image,
-    });
-    setModalFade(true);
-    setIsEditModalOpen(true);
-  };
-
   const handleCloseEditModal = () => {
     setModalFade(false);
     setTimeout(() => setIsEditModalOpen(false), 300);
@@ -441,29 +425,6 @@ const UserDashboard = () => {
                       </span>
                     )}
                   </div>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleViewModal(listing)}
-                    className="p-2 text-blue-600 hover:text-blue-800"
-                    title="View Listing"
-                  >
-                    <EyeIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleOpenEditModal(listing)}
-                    className="p-2 text-green-600 hover:text-green-800"
-                    title="Edit Listing"
-                  >
-                    <PencilIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(listing)}
-                    className="p-2 text-red-600 hover:text-red-800"
-                    title="Delete Listing"
-                  >
-                    <TrashIcon className="w-4 h-4" />
-                  </button>
                 </div>
               </div>
             ))}

@@ -247,9 +247,12 @@ const UserMyListings = () => {
           </div>
         </div>
 
-        <div className="divide-y divide-gray-200">
+        <div className="grid grid-cols-2 gap-2 p-4 ">
           {filteredListings.map((listing) => (
-            <div key={listing.id} className="p-6 hover:bg-gray-50">
+            <div
+              key={listing.id}
+              className="p-6 border-2 rounded border-gray-50 hover:bg-gray-50"
+            >
               <div className="flex items-start space-x-4">
                 <img
                   src={listing.image}
@@ -278,22 +281,22 @@ const UserMyListings = () => {
                     <span className="text-sm text-gray-600">
                       {listing.category}
                     </span>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <MapPinIcon className="w-4 h-4 mr-1" />
-                      {listing.location}
+                    <div className="flex items-center gap-6 text-sm text-gray-500">
+                      <span>{listing.views} views</span>
+                      {listing.reviews > 0 && (
+                        <div className="flex items-center">
+                          <StarIcon className="w-4 h-4 mr-1 text-yellow-400" />
+                          <span>
+                            {listing.rating} ({listing.reviews} reviews)
+                          </span>
+                        </div>
+                      )}
+                      {/* <span>Created: {listing.date}</span> */}
                     </div>
                   </div>
-                  <div className="flex items-center gap-6 text-sm text-gray-500">
-                    <span>{listing.views} views</span>
-                    {listing.reviews > 0 && (
-                      <div className="flex items-center">
-                        <StarIcon className="w-4 h-4 mr-1 text-yellow-400" />
-                        <span>
-                          {listing.rating} ({listing.reviews} reviews)
-                        </span>
-                      </div>
-                    )}
-                    <span>Created: {listing.date}</span>
+                  <div className="flex items-center text-sm text-gray-500">
+                    <MapPinIcon className="w-4 h-4 mr-1" />
+                    {listing.location}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -310,13 +313,6 @@ const UserMyListings = () => {
                     title="Edit Listing"
                   >
                     <PencilIcon className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(listing)}
-                    className="p-2 text-red-600 rounded hover:text-red-800 hover:bg-red-50"
-                    title="Delete Listing"
-                  >
-                    <TrashIcon className="w-5 h-5" />
                   </button>
                 </div>
               </div>

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Phone,
@@ -21,33 +22,35 @@ import {
   Tags,
   Link2Icon,
 } from "lucide-react";
-import { data, Link, useNavigate } from "react-router-dom";
-import StoreDetailPage from "./HealthCategoryPages/StoreDetailPage";
 import { FaFacebook } from "react-icons/fa";
 import toast from "react-hot-toast";
+import StoreDetailPage from "./HealthCategoryPages/StoreDetailPage";
 
 const ListBusinessPage = () => {
-  const [currentStep, setCurrentStep] = useState("basic");
+  const location = useLocation();
   const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState("basic");
+  const [isFacilitiesOpen, setIsFacilitiesOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
+  // Initialize form data
   const [formData, setFormData] = useState({
+    id: null,
     businessName: "",
     ownerName: "",
     experience: "",
     description: "",
-
     location: {
       address: "",
       pincode: "",
       city: "",
       state: "",
     },
-
     phone: "",
     email: "",
     website: "",
     category: "",
-
     socialLinks: {
       facebook: "",
       instagram: "",
@@ -55,7 +58,6 @@ const ListBusinessPage = () => {
       youtube: "",
       linkedin: "",
     },
-
     businessHours: [
       { day: "Monday", open: "09:00", close: "18:00" },
       { day: "Tuesday", open: "09:00", close: "18:00" },
@@ -65,12 +67,10 @@ const ListBusinessPage = () => {
       { day: "Saturday", open: "09:00", close: "18:00" },
       { day: "Sunday", open: "09:00", close: "18:00" },
     ],
-
     profilePhoto: null,
     Banner: null,
     certificateImages: [],
     galleryImages: [],
-
     services: {
       EventsAvailable: false,
       Birthdays: false,
@@ -85,7 +85,6 @@ const ListBusinessPage = () => {
       ManicurePedicure: false,
       TattooPiercing: false,
     },
-
     categoryData: {
       speciality: "",
       registerNumber: "",
@@ -117,7 +116,102 @@ const ListBusinessPage = () => {
       extraFields: { videoUrl: "", BookingAndDeliveryUrl: "" },
     },
   });
-  // list of facilities labels
+
+  // Function to pre-fill form with business data
+  const prefillFormData = (business) => {
+    setFormData((prev) => ({
+      ...prev,
+      id: business._id || null,
+      businessName: business.businessName || business.name || "",
+      ownerName: business.ownerName || "",
+      experience: business.experience || "",
+      description: business.description || "",
+      location: {
+        ...prev.location,
+        address: business.location?.address || "",
+        pincode: business.location?.pincode || "",
+        city: business.location?.city || "",
+        state: business.location?.state || "",
+      },
+      phone: business.phone || "",
+      email: business.email || "",
+      website: business.website || "",
+      category: business.category || "",
+      socialLinks: {
+        ...prev.socialLinks,
+        facebook: business.socialLinks?.facebook || "",
+        instagram: business.socialLinks?.instagram || "",
+        twitter: business.socialLinks?.twitter || "",
+        youtube: business.socialLinks?.youtube || "",
+        linkedin: business.socialLinks?.linkedin || "",
+      },
+      businessHours: business.businessHours?.length
+        ? business.businessHours.map((bh) => ({
+            day: bh.day,
+            open: bh.open || "09:00",
+            close: bh.close || "18:00",
+          }))
+        : prev.businessHours,
+      profilePhoto: business.profileImage
+        ? {
+            file: null,
+            preview: `http://localhost:5000/${business.profileImage.replace(
+              /\\/g,
+              "/"
+            )}`,
+          }
+        : null,
+      Banner: business.coverImage
+        ? {
+            file: null,
+            preview: `http://localhost:5000/${business.coverImage.replace(
+              /\\/g,
+              "/"
+            )}`,
+          }
+        : null,
+      certificateImages:
+        business.certificateImages?.map((url) => ({
+          file: null,
+          preview: `http://localhost:5000/${url.replace(/\\/g, "/")}`,
+        })) || [],
+      galleryImages:
+        business.galleryImages?.map((url) => ({
+          file: null,
+          preview: `http://localhost:5000/${url.replace(/\\/g, "/")}`,
+        })) || [],
+      services: business.services || prev.services,
+      categoryData: {
+        ...prev.categoryData,
+        speciality: business.categoryData?.speciality || "",
+        registerNumber: business.categoryData?.registerNumber || "",
+        YearOfEstablishment: business.categoryData?.YearOfEstablishment || "",
+        appointmentLink: business.categoryData?.appointmentLink || "",
+        affiliation: business.categoryData?.affiliation || "",
+        consentGiven: business.categoryData?.consentGiven || false,
+        facilities:
+          business.categoryData?.facilities || prev.categoryData.facilities,
+        extraFields: {
+          ...prev.categoryData.extraFields,
+          videoUrl: business.categoryData?.extraFields?.videoUrl || "",
+          BookingAndDeliveryUrl:
+            business.categoryData?.extraFields?.BookingAndDeliveryUrl || "",
+        },
+      },
+    }));
+  };
+
+  // Pre-fill form with business data if coming from UserMyListings
+  useEffect(() => {
+    const business = location.state?.business.business;
+    console.log(location.state);
+    if (business) {
+      console.log("Pre-filling form with:", business); // Debug log
+      prefillFormData(business);
+    }
+  }, [location.state]);
+
+  // List of facilities labels
   const facilitiesList = [
     "Private Rooms",
     "AC",
@@ -139,6 +233,7 @@ const ListBusinessPage = () => {
     "Refund And Cancellation Available",
     "Memberships",
   ];
+
   const servicesByCategory = {
     Hotel: [
       "Events Available",
@@ -156,8 +251,8 @@ const ListBusinessPage = () => {
       "Manicure / Pedicure",
       "Tattoo / Piercing",
     ],
-    // Add more categories if needed
   };
+
   const specialityPlaceholders = {
     Health: "e.g., Neuro Surgeon, Cardiologist, Pediatrician…",
     Hotel: "e.g., Indian, Chinese, Italian, Continental, South Indian…",
@@ -166,13 +261,10 @@ const ListBusinessPage = () => {
 
   const placeholderText =
     specialityPlaceholders[formData.category] || "Enter speciality…";
-
-  const [isFacilitiesOpen, setIsFacilitiesOpen] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
-  const currentCategory = formData.category; // e.g., "Hotels" or "Beauty"
+  const currentCategory = formData.category;
   const servicesList = servicesByCategory[currentCategory] || [];
 
+  // Handle click outside for dropdowns
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -185,26 +277,20 @@ const ListBusinessPage = () => {
     };
   }, []);
 
-  console.log(formData);
-
+  // Handle form submission (create or update business)
   const handleSubmit = async () => {
     try {
-      console.log("inside handle submit ");
-      console.log(formData);
-
       if (!formData.categoryData.consentGiven) {
-        alert("You must give consent to proceed.");
+        toast.error("You must give consent to proceed.");
         return;
       }
-      // if (formData.category == "Health") {
-      //   slug = "health";
-      // }
-      // console.log(slug);
 
       const form = new FormData();
+      const token = localStorage.getItem("token");
+      const ownerId = localStorage.getItem("userId");
 
-      // ✅ Flat fields (corrected)
-      form.append("name", formData.businessName); // ⬅️ Backend expects 'name'
+      // Flat fields
+      form.append("name", formData.businessName);
       form.append("ownerName", formData.ownerName);
       form.append("experience", formData.experience);
       form.append("description", formData.description);
@@ -212,78 +298,88 @@ const ListBusinessPage = () => {
       form.append("email", formData.email);
       form.append("website", formData.website);
       form.append("category", formData.category);
-
-      // ⚠️ Hardcoded owner ID (replace with real user ID in production)
-      const ownerId = localStorage.getItem("userId");
-      console.log(ownerId); // or however you're tracking user
       form.append("owner", ownerId);
 
-      // ✅ Complex objects as JSON strings
+      // Complex objects as JSON strings
       form.append("location", JSON.stringify(formData.location));
       form.append("socialLinks", JSON.stringify(formData.socialLinks));
       form.append("businessHours", JSON.stringify(formData.businessHours));
       form.append("categoryData", JSON.stringify(formData.categoryData));
       form.append("services", JSON.stringify(formData.services));
 
-      // ✅ Files
+      // Files
       if (formData.profilePhoto?.file) {
         form.append("profileImage", formData.profilePhoto.file);
       }
-
       if (formData.Banner?.file) {
-        form.append("coverImage", formData.Banner.file); // ✅ Correct file
+        form.append("coverImage", formData.Banner.file);
       }
-
       formData.certificateImages.forEach((item) => {
-        form.append("certificateImages", item.file);
+        if (item.file) form.append("certificateImages", item.file);
       });
-
       formData.galleryImages.forEach((item) => {
-        form.append("galleryImages", item?.file);
+        if (item.file) form.append("galleryImages", item.file);
       });
 
-      console.log(formData);
-      // ✅ API call
-      const token = localStorage.getItem("token");
-      form.append("token", token);
-      console.log(formData);
-      const response = await axios.post(
-        "http://localhost:5000/api/business/business",
-        form,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      // use conditonsl to store slug
-      console.log(formData);
-
-      if (formData.category == "Health") {
-        //Add commentMore actions
-        navigate(`/categories/health`);
-      } else if (formData.category == "Hotel") {
-        navigate(`/categories/Hotel`);
-      } else if (formData.category == "BeautySpa") {
-        navigate(`/categories/beautySpa`);
+      let response;
+      if (formData.id) {
+        // Update existing business
+        console.log(
+          `Sending PUT request to /api/business/business/${formData.id}`
+        ); // Debug log
+        response = await axios.put(
+          `http://localhost:5000/api/business/business/${formData.id}`,
+          form,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        toast.success("Business updated successfully!");
+      } else {
+        console.log(formData);
+        // Create new business
+        response = await axios.post(
+          "http://localhost:5000/api/business/business",
+          form,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        toast.success("Business created successfully!");
       }
 
-      // const category = formData.category.toLowerCase();
-      // if (["health", "hotel", "beautySpa"].includes(category)) {
-      //   navigate(`/categories/${category}`);
-      // }
-      // console.log(slug);
-
-      console.log("Business created:", response.data);
+      // Navigate based on category
+      const categorySlug =
+        formData.category === "Health"
+          ? "health"
+          : formData.category === "Hotel"
+          ? "Hotel"
+          : formData.category === "BeautySpa"
+          ? "beautySpa"
+          : "";
+      if (categorySlug) {
+        navigate(`/categories/${categorySlug}`);
+      }
     } catch (error) {
       console.error(
         "Error submitting business form:",
         error.response?.data || error
       );
+      toast.error(
+        `Failed to ${formData.id ? "update" : "create"} business: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     }
   };
 
+  // Handle service toggle
   const handleServiceToggle = (serviceKey) => {
     setFormData((prev) => ({
       ...prev,
@@ -294,6 +390,7 @@ const ListBusinessPage = () => {
     }));
   };
 
+  // Handle input changes
   const handleInputChange = (e, index = null, nestedArrayKey = null) => {
     const { name, value, type, files } = e.target;
 
@@ -307,15 +404,13 @@ const ListBusinessPage = () => {
           },
         };
       }
-      // existing nested cases...
-      if (nestedArrayKey && typeof index === "number") {
-        // ...
-      } else if (prev.location && name in prev.location) {
+      if (prev.location && name in prev.location) {
         return {
           ...prev,
           location: { ...prev.location, [name]: value },
         };
-      } else if (prev.socialLinks[name] !== undefined) {
+      }
+      if (prev.socialLinks[name] !== undefined) {
         return {
           ...prev,
           socialLinks: {
@@ -323,23 +418,25 @@ const ListBusinessPage = () => {
             [name]: value,
           },
         };
-      } else if (prev.categoryData && prev.categoryData[name] !== undefined) {
+      }
+      if (prev.categoryData && prev.categoryData[name] !== undefined) {
         return {
           ...prev,
           categoryData: { ...prev.categoryData, [name]: value },
         };
-      } else if (type === "file") {
-        const fileArray = Array.from(files); // convert FileList to Array
+      }
+      if (type === "file") {
+        const fileArray = Array.from(files);
         const filePreviews = fileArray.map((file) => ({
           file,
           preview: URL.createObjectURL(file),
         }));
-
         return {
           ...prev,
           [name]: [...(prev[name] || []), ...filePreviews],
         };
-      } else if (
+      }
+      if (
         prev.categoryData?.extraFields &&
         name in prev.categoryData.extraFields
       ) {
@@ -353,14 +450,12 @@ const ListBusinessPage = () => {
             },
           },
         };
-      } else if (type === "file") {
-        // ...
-      } else {
-        // flat fields
-        return { ...prev, [name]: value };
       }
+      return { ...prev, [name]: value };
     });
   };
+
+  // Handle facility toggle
   const handleFacilityToggle = (facilityKey) => {
     setFormData((prev) => ({
       ...prev,
@@ -374,6 +469,7 @@ const ListBusinessPage = () => {
     }));
   };
 
+  // Handle business hours change
   const handleBusinessHourChange = (index, field, value) => {
     setFormData((prev) => {
       const updatedHours = [...prev.businessHours];
@@ -388,6 +484,7 @@ const ListBusinessPage = () => {
     });
   };
 
+  // Handle file uploads
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     if (!files?.length) return;
@@ -402,7 +499,7 @@ const ListBusinessPage = () => {
         if (prev[name]?.preview) URL.revokeObjectURL(prev[name].preview);
         return {
           ...prev,
-          [name]: { file, preview }, // ✅ Store both
+          [name]: { file, preview },
         };
       });
     } else if (name === "galleryImages" || name === "certificateImages") {
@@ -417,8 +514,6 @@ const ListBusinessPage = () => {
             )
         )
         .map((file) => ({
-          // name: file.name,
-          // size: file.size,
           file,
           preview: URL.createObjectURL(file),
         }));
@@ -427,11 +522,10 @@ const ListBusinessPage = () => {
         ...prev,
         [key]: [...(prev[key] || []), ...newItems],
       }));
-    } else if (name === "businessHours") {
-      handleBusinessHourChange();
     }
   };
 
+  // Render step indicator
   const renderStepIndicator = () => {
     const steps = ["basic", "contact", "location", "hours", "media", "review"];
     return (
@@ -461,9 +555,11 @@ const ListBusinessPage = () => {
       </div>
     );
   };
+
+  // Render Basic Information step
   const renderBasicInfoStep = () => (
     <div>
-      <h2 className="mb-6 text-2xl ml-[22%] font-bold ">Basic Information</h2>
+      <h2 className="mb-6 text-2xl ml-[22%] font-bold">Basic Information</h2>
       <div className="mx-auto space-y-6 max-w-1/2">
         <div>
           <label
@@ -520,12 +616,11 @@ const ListBusinessPage = () => {
               name="businessName"
               required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.businessName}
+              value={formData.businessName || formData.name}
               onChange={handleInputChange}
             />
           </div>
         </div>
-
         <div>
           <label
             htmlFor="category"
@@ -533,10 +628,8 @@ const ListBusinessPage = () => {
           >
             Business Category *
           </label>
-
           <div className="relative">
             <Tags className="absolute text-gray-400 transform -translate-y-1/2 pointer-events-none left-3 top-1/2" />
-
             <select
               id="category"
               name="category"
@@ -566,7 +659,6 @@ const ListBusinessPage = () => {
                     type="text"
                     id="appointmentLink"
                     name="appointmentLink"
-                    required
                     className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={formData.categoryData.appointmentLink || ""}
                     onChange={handleInputChange}
@@ -575,7 +667,7 @@ const ListBusinessPage = () => {
               </div>
               <div className="mt-3">
                 <label
-                  htmlFor="affiliationLink"
+                  htmlFor="affiliation"
                   className="block mb-1 text-sm font-medium text-gray-700"
                 >
                   Affiliation
@@ -586,7 +678,6 @@ const ListBusinessPage = () => {
                     type="text"
                     id="affiliation"
                     name="affiliation"
-                    required
                     className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={formData.categoryData.affiliation}
                     onChange={handleInputChange}
@@ -595,13 +686,12 @@ const ListBusinessPage = () => {
               </div>
             </div>
           )}
-
           <div>
             <label
               htmlFor="speciality"
               className="block mb-1 text-sm font-medium text-gray-700"
             >
-              speciality *
+              Speciality *
             </label>
             <div className="relative mb-4">
               <Badge className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
@@ -617,10 +707,9 @@ const ListBusinessPage = () => {
               />
             </div>
           </div>
-
           <div className="relative" ref={dropdownRef}>
             <label
-              htmlFor="speciality"
+              htmlFor="services"
               className="block mb-1 text-sm font-medium text-gray-700"
             >
               Business Services *
@@ -634,7 +723,6 @@ const ListBusinessPage = () => {
               Select Services…
               <span className="float-right">▼</span>
             </button>
-
             {isOpen && (
               <div className="absolute z-10 w-full mt-1 overflow-y-auto bg-white border border-gray-300 rounded-md max-h-64">
                 {servicesList.length === 0 ? (
@@ -662,7 +750,6 @@ const ListBusinessPage = () => {
             )}
           </div>
         </div>
-
         <div ref={dropdownRef}>
           <h2 className="block mb-1 text-sm font-medium text-gray-700">
             Facilities & Features
@@ -681,7 +768,7 @@ const ListBusinessPage = () => {
               {isFacilitiesOpen && (
                 <div className="absolute z-10 w-full mt-1 overflow-y-auto bg-white border border-gray-300 rounded-md max-h-64">
                   {facilitiesList.map((label) => {
-                    const key = label.replace(/\W/g, ""); // e.g., "Private Rooms" → "PrivateRooms"
+                    const key = label.replace(/\W/g, "");
                     return (
                       <label
                         key={key}
@@ -733,7 +820,7 @@ const ListBusinessPage = () => {
             <CalendarDays className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
             <input
               type="text"
-              id="yearofEstablishment"
+              id="YearOfEstablishment"
               name="YearOfEstablishment"
               required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -742,7 +829,6 @@ const ListBusinessPage = () => {
             />
           </div>
         </div>
-
         <div>
           <label
             htmlFor="description"
@@ -764,6 +850,7 @@ const ListBusinessPage = () => {
     </div>
   );
 
+  // Render Contact Information step
   const renderContactStep = () => (
     <div>
       <h2 className="mb-6 text-2xl ml-[22%] font-bold">Contact Information</h2>
@@ -788,7 +875,6 @@ const ListBusinessPage = () => {
             />
           </div>
         </div>
-
         <div>
           <label
             htmlFor="phone"
@@ -809,7 +895,6 @@ const ListBusinessPage = () => {
             />
           </div>
         </div>
-
         <div>
           <label
             htmlFor="website"
@@ -833,6 +918,7 @@ const ListBusinessPage = () => {
     </div>
   );
 
+  // Render Location Information step
   const renderLocationStep = () => (
     <div>
       <h2 className="mb-6 ml-[22%] text-2xl font-bold">Location Information</h2>
@@ -857,7 +943,6 @@ const ListBusinessPage = () => {
             />
           </div>
         </div>
-
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label
@@ -876,7 +961,6 @@ const ListBusinessPage = () => {
               onChange={handleInputChange}
             />
           </div>
-
           <div>
             <label
               htmlFor="state"
@@ -895,7 +979,6 @@ const ListBusinessPage = () => {
             />
           </div>
         </div>
-
         <div>
           <label
             htmlFor="pincode"
@@ -917,6 +1000,7 @@ const ListBusinessPage = () => {
     </div>
   );
 
+  // Render Business Hours step
   const renderHoursStep = () => (
     <div>
       <h2 className="mb-6 ml-[22%] text-2xl font-bold">Business Hours</h2>
@@ -924,7 +1008,6 @@ const ListBusinessPage = () => {
         {formData.businessHours.map((bh, index) => (
           <div key={bh.day} className="flex items-center space-x-4">
             <div className="w-24 capitalize">{bh.day}</div>
-
             <div className="flex-1">
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Open
@@ -941,7 +1024,6 @@ const ListBusinessPage = () => {
                 />
               </div>
             </div>
-
             <div className="flex-1">
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Close
@@ -964,11 +1046,11 @@ const ListBusinessPage = () => {
     </div>
   );
 
+  // Render Photos & Media step
   const renderMediaStep = () => (
     <div>
       <h2 className="mb-6 ml-[22%] text-2xl font-bold">Photos & Media</h2>
       <div className="mx-auto space-y-6 max-w-1/2">
-        {/* Profile Photo */}
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">
             Profile Photo
@@ -996,8 +1078,16 @@ const ListBusinessPage = () => {
               <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
             </div>
           </div>
+          {formData.profilePhoto?.preview && (
+            <div className="mt-2">
+              <img
+                src={formData.profilePhoto.preview}
+                alt="Profile Preview"
+                className="h-20 rounded-md"
+              />
+            </div>
+          )}
         </div>
-        {/* Banner Image */}
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">
             Banner
@@ -1025,8 +1115,16 @@ const ListBusinessPage = () => {
               <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
             </div>
           </div>
+          {formData.Banner?.preview && (
+            <div className="mt-2">
+              <img
+                src={formData.Banner.preview}
+                alt="Banner Preview"
+                className="h-20 rounded-md"
+              />
+            </div>
+          )}
         </div>
-        {/* Certifications */}
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">
             Certifications
@@ -1055,36 +1153,34 @@ const ListBusinessPage = () => {
               <p className="text-xs text-gray-500">PNG, JPG up to 5MB each</p>
             </div>
           </div>
-        </div>
-        {formData?.certificateImages?.length > 0 && (
-          <div>
-            <h3 className="mb-2 text-sm font-medium text-gray-700">
-              Selected Certifications
-            </h3>
-            <ul className="space-y-2">
-              {formData.certificateImages.map((file, index) => (
-                <li
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-gray-100 rounded-md"
-                >
-                  <span className="w-2/3 text-sm font-medium text-gray-800 truncate">
-                    {file.file.name}
-                  </span>
-                  <a
-                    href={file.preview}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline"
+          {formData?.certificateImages?.length > 0 && (
+            <div>
+              <h3 className="mb-2 text-sm font-medium text-gray-700">
+                Selected Certifications
+              </h3>
+              <ul className="space-y-2">
+                {formData.certificateImages.map((file, index) => (
+                  <li
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-gray-100 rounded-md"
                   >
-                    View
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Gallery */}
+                    <span className="w-2/3 text-sm font-medium text-gray-800 truncate">
+                      {file.file?.name || "Existing Certificate"}
+                    </span>
+                    <a
+                      href={file.preview}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      View
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">
             Gallery
@@ -1113,33 +1209,31 @@ const ListBusinessPage = () => {
               <p className="text-xs text-gray-500">PNG, JPG up to 5MB each</p>
             </div>
           </div>
-        </div>
-        {formData?.galleryImages?.length > 0 && (
-          <div>
-            <h3 className="mb-2 text-sm font-medium text-gray-700">
-              Selected Photos
-            </h3>
-            <div className="flex gap-4 h-45">
-              {formData.galleryImages.map((photo, index) => (
-                <div key={index} className="relative">
-                  <img
-                    src={photo.preview}
-                    alt={`Business photo ${index + 1}`}
-                    className="h-full rounded-md object-fit w-45"
-                  />
-                </div>
-              ))}
+          {formData?.galleryImages?.length > 0 && (
+            <div>
+              <h3 className="mb-2 text-sm font-medium text-gray-700">
+                Selected Photos
+              </h3>
+              <div className="flex gap-4 h-45">
+                {formData.galleryImages.map((photo, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={photo.preview}
+                      alt={`Business photo ${index + 1}`}
+                      className="h-full rounded-md object-fit w-45"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-
-        {/* video URL */}
+          )}
+        </div>
         <div>
           <label
             htmlFor="videoUrl"
             className="block mb-1 text-sm font-medium text-gray-700"
           >
-            Video Url
+            Video URL
           </label>
           <div className="relative">
             <VideoIcon className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
@@ -1147,21 +1241,18 @@ const ListBusinessPage = () => {
               type="text"
               id="videoUrl"
               name="videoUrl"
-              required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={formData?.categoryData?.extraFields?.videoUrl}
               onChange={handleInputChange}
             />
           </div>
         </div>
-
-        {/* BookingAndDeliveryUrlL */}
         <div>
           <label
             htmlFor="BookingAndDeliveryUrl"
             className="block mb-1 text-sm font-medium text-gray-700"
           >
-            Booking And Delivery Url
+            Booking And Delivery URL
           </label>
           <div className="relative">
             <Link2Icon className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
@@ -1169,14 +1260,12 @@ const ListBusinessPage = () => {
               type="text"
               id="BookingAndDeliveryUrl"
               name="BookingAndDeliveryUrl"
-              required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={formData?.categoryData?.extraFields?.BookingAndDeliveryUrl}
               onChange={handleInputChange}
             />
           </div>
         </div>
-        {/* Facebook */}
         <div>
           <label
             htmlFor="facebook"
@@ -1190,21 +1279,18 @@ const ListBusinessPage = () => {
               type="text"
               id="facebook"
               name="facebook"
-              required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={formData?.socialLinks?.facebook}
               onChange={handleInputChange}
             />
           </div>
         </div>
-
-        {/* instagram */}
         <div>
           <label
             htmlFor="instagram"
             className="block mb-1 text-sm font-medium text-gray-700"
           >
-            instagram
+            Instagram
           </label>
           <div className="relative">
             <FaFacebook className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
@@ -1212,14 +1298,12 @@ const ListBusinessPage = () => {
               type="text"
               id="instagram"
               name="instagram"
-              required
               className="w-full px-5 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={formData?.socialLinks?.instagram}
               onChange={handleInputChange}
             />
           </div>
         </div>
-
         <div className="mb-4">
           <label className="inline-flex items-center">
             <input
@@ -1239,16 +1323,16 @@ const ListBusinessPage = () => {
     </div>
   );
 
-  const renderReviewStep = () => {
-    return (
-      <>
-        {formData && Object.keys(formData).length > 0 && (
-          <StoreDetailPage data={formData} />
-        )}
-      </>
-    );
-  };
+  // Render Review step
+  const renderReviewStep = () => (
+    <>
+      {formData && Object.keys(formData).length > 0 && (
+        <StoreDetailPage data={formData} />
+      )}
+    </>
+  );
 
+  // Render current step
   const renderCurrentStep = () => {
     switch (currentStep) {
       case "basic":
@@ -1268,20 +1352,14 @@ const ListBusinessPage = () => {
     }
   };
 
+  // Handle navigation between steps
   const handleNext = () => {
     const steps = ["basic", "contact", "location", "hours", "media", "review"];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
       setCurrentStep(steps[currentIndex + 1]);
     } else {
-      console.log(formData);
-
       handleSubmit();
-      if (formData.category == "Health") {
-        slug = "health";
-      }
-      // console.log(slug);
-      // navigate(`/categories/health`);
     }
   };
 
@@ -1303,14 +1381,11 @@ const ListBusinessPage = () => {
           </p>
         </div>
       </div>
-
       <div className="container px-4 py-16 mx-auto">
-        <div className="mx-auto ">
+        <div className="mx-auto">
           {renderStepIndicator()}
-
-          <div className="p-8 bg-white rounded-lg ">
+          <div className="p-8 bg-white rounded-lg">
             {renderCurrentStep()}
-
             <div className="flex justify-between mt-8">
               <button
                 onClick={handleBack}
@@ -1323,7 +1398,11 @@ const ListBusinessPage = () => {
                 onClick={handleNext}
                 className="px-6 py-2 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
               >
-                {currentStep === "review" ? "Submit" : "Next"}
+                {currentStep === "review"
+                  ? formData.id
+                    ? "Update"
+                    : "Submit"
+                  : "Next"}
               </button>
             </div>
           </div>
