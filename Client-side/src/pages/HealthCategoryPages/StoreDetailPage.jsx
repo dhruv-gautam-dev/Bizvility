@@ -1,15 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useLocation, Link } from "react-router-dom";
-import { MapPin, UserIcon, Mail, Phone } from "lucide-react";
-import { getBusinessById } from "../../data/HealthAndMedical/healthCategoryData";
+// import { MapPin, UserIcon, Mail, Phone } from "lucide-react";
 import {
-  FaStar,
-  FaRegStar,
-  FaThumbsUp,
-  FaCommentAlt,
-  FaShareAlt,
-} from "react-icons/fa";
+  getBusinessById,
+  getEventsByBusinessId,
+} from "../../data/HealthAndMedical/healthCategoryData";
+import { FaStar, FaRegStar, FaThumbsUp, FaCommentAlt } from "react-icons/fa";
 import ReviewForm from "../../components/business/ReviewForm";
+import EventCarousel from "../../components/business/EventCarousel";
+import { MapPinIcon } from "@heroicons/react/24/outline";
 
 const StoreDetailPage = ({ data }) => {
   const location = useLocation();
@@ -19,6 +18,7 @@ const StoreDetailPage = ({ data }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [healthStoreData, setHealthStoreData] = useState(null);
+  const [eventsStoreData, setEventsStoreData] = useState(null);
   // const [storeReviewsData, setStoreReviewsData] = useState(null);
   const [activeTab, setActiveTab] = useState("Overview");
   const [filter, setFilter] = useState("Relevant");
@@ -27,10 +27,6 @@ const StoreDetailPage = ({ data }) => {
   const isFormPreview = location.pathname.includes(
     "/Reacts/list-business/form"
   );
-
-  useEffect(() => {
-    console.log("Initial render useEffect running");
-  }, []);
 
   useEffect(() => {
     const fetchStore = async () => {
@@ -55,7 +51,31 @@ const StoreDetailPage = ({ data }) => {
     else setLoading(false);
   }, [storeId, token, data]);
 
+  useEffect(() => {
+    const fetchEvents = async () => {
+      if (!storeId) {
+        setError("Missing StoreId or token");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await getEventsByBusinessId(storeId, token);
+        setEventsStoreData(res);
+      } catch (err) {
+        console.log("Fetch error:", err);
+        setError("Failed to fetch store data ");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!data) fetchEvents();
+    else setLoading(false);
+  }, [storeId, token, data]);
+
   console.log(healthStoreData);
+  console.log(eventsStoreData);
 
   // ✅ Memoized store logic with safe fallback
   const store = useMemo(() => {
@@ -168,7 +188,7 @@ const StoreDetailPage = ({ data }) => {
                   ))}
               </div>
               <div className="flex flex-wrap items-center mt-2 mb-3 space-x-4 text-gray-600">
-                <MapPin className="w-5 h-5" />
+                <MapPinIcon className="w-5 h-5" />
                 <span>{store?.address || address}</span>
                 <span>• Open until {store?.openUntil}</span>
                 <span>
@@ -647,8 +667,16 @@ const StoreDetailPage = ({ data }) => {
           </section>
           {/* Store detail section  */}
           <section className="w-full p-4 bg-white rounded-lg lg:w-1/3 sm:p-6">
+            <div className="pt-12 mb-4 bg-white rounded-md">
+              {console.log(eventsStoreData)}
+              <EventCarousel
+                events={eventsStoreData.events}
+                // imageUrl={`${imageUrl}/${eventsStoreData?.events.bannerImage}`}
+              />
+            </div>
             {/* Business Hours     */}
-            <div className="p-4 mb-4 bg-white rounded-md">
+
+            <div className="pt-4 mb-4 bg-white rounded-md">
               <h2 className="mb-4 text-lg font-semibold text-red-600 sm:text-xl">
                 Business Hours
               </h2>
@@ -718,164 +746,6 @@ const StoreDetailPage = ({ data }) => {
               </a>
             </div>
             {/* Contact and Info Section  quick info */}
-
-            <div className="bg-white rounded-lg ">
-              <div className="divide-y divide-gray-200">
-                {/* Row Item */}
-                <div className="grid grid-cols-2 py-3">
-                  <div className="font-medium text-gray-700">Phone</div>
-                  <div>
-                    {store?.phone ||
-                      healthStoreData?.business?.phone ||
-                      "Not Available"}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 py-3">
-                  <div className="font-medium text-gray-700">Email</div>
-                  <div>
-                    {store?.email ||
-                      healthStoreData?.business?.email ||
-                      "Not Available"}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 py-3">
-                  <div className="font-medium text-gray-700">
-                    Register Number
-                  </div>
-                  <div>
-                    {store.categoryData.registerNumber ||
-                      store.registrationNumber ||
-                      "Not Available"}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 py-3">
-                  <div className="font-medium text-gray-700">
-                    Appointment Link
-                  </div>
-                  <div>
-                    {store.categoryData.appointmentLink ? (
-                      <a
-                        href={store.categoryData.appointmentLink}
-                        className="text-blue-600 underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Book Now
-                      </a>
-                    ) : (
-                      "Not Available"
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 py-3">
-                  <div className="font-medium text-gray-700">Experience</div>
-                  <div>{store.experience || "Not Available"}</div>
-                </div>
-
-                <div className="grid grid-cols-2 py-1">
-                  <div className="font-medium text-gray-700">Award</div>
-                  {store?.awards?.length > 0 && (
-                    <div>
-                      <ul className="p-0 m-0 list-none list-inside">
-                        {store.awards.map((award, idx) => (
-                          <li key={idx}>{award}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 py-3">
-                  <div className="font-medium text-gray-700">Affiliation</div>
-                  <div>{store.categoryData.affiliation || "Not Available"}</div>
-                </div>
-
-                <div className="grid grid-cols-2 py-3">
-                  <div className="font-medium text-gray-700">Specialty</div>
-                  <div>{store.categoryData.speciality || "Not Available"}</div>
-                </div>
-
-                <div className="grid grid-cols-2 py-3">
-                  <div className="font-medium text-gray-700">Website</div>
-                  <div>
-                    {store.website ? (
-                      <a
-                        href={store.website}
-                        className="text-blue-600 underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {store.website}
-                      </a>
-                    ) : (
-                      "Not Available"
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 py-3">
-                  <div className="font-medium text-gray-700">Video URL</div>
-                  <div>
-                    {store?.categoryData?.extraFields?.videoUrl ? (
-                      <a
-                        href={store?.categoryData.extraFields.videoUrl}
-                        className="text-blue-600 underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Watch Video
-                      </a>
-                    ) : (
-                      "Not Available"
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 py-3">
-                  <div className="font-medium text-gray-700">
-                    Customer Reviews
-                  </div>
-                  <div>{store?.reviews?.length || 0}</div>
-                </div>
-
-                <div className="grid grid-cols-2 py-3">
-                  <div className="font-medium text-gray-700">Social Media</div>
-                  <div className="flex space-x-4">
-                    {(store.socialMedia?.facebook ||
-                      store.socialLinks.facebook) && (
-                      <a
-                        href={store.socialLinks.facebook}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <img
-                          src="https://cdn-icons-png.flaticon.com/512/145/145802.png"
-                          alt="Facebook"
-                          className="w-5 h-5"
-                        />
-                      </a>
-                    )}
-                    {store.socialLinks?.instagram && (
-                      <a
-                        href={store.socialLinks.instagram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <img
-                          src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
-                          alt="Instagram"
-                          className="w-5 h-5"
-                        />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
           </section>
         </section>
       </div>

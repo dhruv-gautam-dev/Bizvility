@@ -4,7 +4,7 @@ import {
   MapPinIcon,
   LinkIcon,
 } from "@heroicons/react/24/outline";
-import { toast, ToastContainer } from "react-toastify";
+// import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function EventsPage() {
@@ -79,7 +79,7 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen p-4 bg-gray-100 sm:p-6 lg:p-8">
-      <ToastContainer />
+      {/* <ToastContainer /> */}
       <div className="max-w-5xl mx-auto">
         <h1 className="mb-8 text-3xl font-bold text-gray-800">Events</h1>
 
@@ -135,7 +135,7 @@ export default function EventsPage() {
                     className="inline-block mt-2 text-indigo-600 underline hover:text-indigo-800"
                   >
                     <LinkIcon className="inline w-4 h-4 mr-1" />
-                    Learn More
+                    Read More
                   </a>
                 )}
                 {!event.isApproved && (

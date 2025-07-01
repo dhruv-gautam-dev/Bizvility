@@ -654,6 +654,23 @@ console.log(token,id);
 };
 
 
+export const getEventsByBusinessId = async (id,token)=>{
+  console.log(token,id);
+  try {
+    const response = await axios.get(`http://localhost:5000/api/events/event/${id}`,{
+      headers :{
+        Authorization : `Bearer ${token}`,
+      },
+    });
+    return response.data ;
+
+  }catch(error){
+    console.log("Error fetching Events by ID", error);
+    throw error.response?.data || error;
+  }
+};
+
+
 
 
 
