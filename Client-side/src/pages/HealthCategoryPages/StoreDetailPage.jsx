@@ -19,11 +19,9 @@ const StoreDetailPage = ({ data }) => {
   const [error, setError] = useState(null);
   const [healthStoreData, setHealthStoreData] = useState(null);
   const [eventsStoreData, setEventsStoreData] = useState(null);
-  // const [storeReviewsData, setStoreReviewsData] = useState(null);
   const [activeTab, setActiveTab] = useState("Overview");
   const [filter, setFilter] = useState("Relevant");
   const imageUrl = import.meta.env.VITE_Image_URL;
-  // console.log(storeId);
   const isFormPreview = location.pathname.includes(
     "/Reacts/list-business/form"
   );

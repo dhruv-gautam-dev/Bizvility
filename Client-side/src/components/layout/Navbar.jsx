@@ -20,8 +20,8 @@ const Navbar = ({ scrolled, user }) => {
 
   // console.log(localStorage);
   user = localStorage.token;
-  // console.log(user);
 
+  // customize this dashboard navigation according to the user role
   const handleMyDashboard = () => {
     navigate("/user-dashboard");
   };

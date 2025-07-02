@@ -83,12 +83,6 @@ export default function EventsPage() {
       <div className="max-w-5xl mx-auto">
         <h1 className="mb-8 text-3xl font-bold text-gray-800">Events</h1>
 
-        {error && (
-          <div className="p-4 mb-6 text-red-700 bg-red-100 rounded-lg">
-            {error}
-          </div>
-        )}
-
         {loading ? (
           <div className="text-center text-gray-600">Loading...</div>
         ) : events.length === 0 ? (
