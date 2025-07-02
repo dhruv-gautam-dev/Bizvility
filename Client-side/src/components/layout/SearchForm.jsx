@@ -185,7 +185,8 @@ function SearchForm() {
                   {business.name}
                 </h4>
                 <p className="text-xs text-gray-600">
-                  {business.location.city}, {business.location.state}
+                  {business.spe}, {business.location.city},{" "}
+                  {business.location.state}
                 </p>
               </div>
             </li>

@@ -595,9 +595,20 @@ export const searchBusinesses = async (req, res) => {
       }
     }
 
+    // ✅ STEP 4: Attach review count to each business
+    const resultsWithReviews = await Promise.all(
+      results.map(async (business) => {
+        const reviewCount = await Review.countDocuments({ business: business._id });
+        return {
+          ...business.toObject(),
+          reviewCount
+        };
+      })
+    );
+
     res.status(200).json({
-      count: results.length,
-      results
+      count: resultsWithReviews.length,
+      results: resultsWithReviews
     });
 
   } catch (error) {
