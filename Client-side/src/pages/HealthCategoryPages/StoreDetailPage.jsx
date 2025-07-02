@@ -670,7 +670,7 @@ const StoreDetailPage = ({ data }) => {
             <div className="pt-12 mb-4 bg-white rounded-md">
               {console.log(eventsStoreData)}
               <EventCarousel
-                events={eventsStoreData.events}
+                events={eventsStoreData?.events}
                 // imageUrl={`${imageUrl}/${eventsStoreData?.events.bannerImage}`}
               />
             </div>

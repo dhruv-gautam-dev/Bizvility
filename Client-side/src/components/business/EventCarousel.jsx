@@ -23,16 +23,16 @@ const EventCarousel = ({ events }) => {
 
   // Handle automatic sliding
   useEffect(() => {
-    if (events.length <= 1) return;
+    if (events?.length <= 1) return;
 
     const slideInterval = setInterval(() => {
       setCurrentIndex((prevIndex) =>
-        prevIndex === events.length - 1 ? 0 : prevIndex + 1
+        prevIndex === events?.length - 1 ? 0 : prevIndex + 1
       );
     }, autoSlideInterval);
 
     return () => clearInterval(slideInterval);
-  }, [events.length]);
+  }, [events?.length]);
 
   // Smooth scroll to current card
   useEffect(() => {
