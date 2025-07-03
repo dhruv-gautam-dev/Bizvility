@@ -10,10 +10,6 @@ export const createReview = async (req, res) => {
     const { businessId } = req.params;
     const { rating, comment } = req.body;
 
-
-    console.log(businessId, rating, comment);
-    console.log(req.body);
-
     // ✅ Optional: prevent empty reviews
     if (!rating && !comment) {
       return res.status(400).json({ message: 'Rating or comment is required' });

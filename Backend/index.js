@@ -9,24 +9,43 @@ import userRoutes from './routes/userRoute.js';
 import superAdminRoute from './routes/superAdminRoute.js';
 import plansRoute from './routes/plansRoute.js';
 import reviewRoute from './routes/reviewRoute.js';
+import permissionRoute from './routes/permissionRoute.js';
+import roleRoute from './routes/roleRoute.js';
 import path from 'path';
-import cors from "cors"
+import requestIp from 'request-ip';
+import salesRoute from './routes/salesRoute.js';
 import eventRoutes from './routes/eventRoute.js';
+import visitRoutes from './routes/visitRoutes.js';
+import leadsRoute from './routes/leadsRoute.js'; // Import leads route
+import './cronJobs/leadReminderJob.js';
+import cors from 'cors';
+
+
+
+
+
+
 
 dotenv.config();
 const app = express();
 
 // Database connection
 connectDB();
+app.use(requestIp.mw());
+
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// CORS
 app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true, // if using cookies, sessions, etc.
+  origin: ['http://localhost:5173', 'http://localhost:5000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  exposedHeaders: ['Content-Type']
 }));
-
+// startLeadReminderCron(); // ✅ This starts the cron job at 9:00 AM daily
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -36,8 +55,12 @@ app.use('/api/user', userRoutes);
 app.use('/api/superadmin', superAdminRoute);
 app.use('/api/plan', plansRoute);
 app.use('/api/reviews', reviewRoute);
+app.use('/api/sales', salesRoute); // Sales route for sales dashboard and referral link
+app.use('/api/permissions', permissionRoute);
+app.use('/api/roles', roleRoute);
 app.use('/api/events', eventRoutes);
-
+app.use('/api/visit', visitRoutes);
+app.use('/api/leads', leadsRoute); // Leads management route
 // ✅ Serve static files from 'uploads' folder
 app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));
 // Error handling

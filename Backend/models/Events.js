@@ -1,4 +1,3 @@
-//Model/Events.js
 // models/Event.js
 import mongoose from 'mongoose';
 

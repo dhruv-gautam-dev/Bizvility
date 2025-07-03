@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout.jsx";
 import AdminLayout from "./components/superAdmin/AdminLayout.jsx";
 import UserLayout from "./components/User/UserLayout.jsx";
+import SalesLayout from "./components/Sales/SalesLayout.jsx";
 
 // Public Pages
 import HomePage from "./pages/HomePage.jsx";
@@ -34,16 +35,26 @@ import ListBusinessPage from "./pages/ListBusinessPage.jsx";
 // User Pages
 import UserDashboard from "./pages/User/Dashboard.jsx";
 import UserProfile from "./pages/User/Profile.jsx";
-
-import UserMyListings from "./pages/User/MyListings.jsx";
-// import UserAnalytics from "./pages/User/Analytics.jsx";
-
-// import UserDashboard from "./pages/User/Dashboard.jsx";
-// import UserProfile from "./pages/User/Profile.jsx";
 import UserListings from "./pages/User/MyListings.jsx";
 import UserAnalytics from "./pages/User/Analytics.jsx";
 import UserReviews from "./pages/User/MyReviews.jsx";
 import UserInvoice from "./pages/User/Invoices.jsx";
+
+// Sales Pages
+import SalesDashboard from "./pages/Sales/Dashboard.jsx";
+import SalesListings from "./pages/Sales/Listings.jsx";
+import SalesCategories from "./pages/Sales/Categories.jsx";
+import SalesProfile from "./pages/Sales/Profile.jsx";
+import SalesAllUsers from "./pages/Sales/Users.jsx";
+import SalesRevenue from "./pages/Sales/Revenue.jsx";
+import SalesReviews from "./pages/Sales/Reviews.jsx";
+import SalesSettings from "./pages/Sales/Settings.jsx";
+import SalesLeads from "./pages/Sales/Leads.jsx";
+import SalesOpportunities from "./pages/Sales/Opportunities.jsx";
+import SalesCustomers from "./pages/Sales/Customers.jsx";
+import SalesReports from "./pages/Sales/SalesReports.jsx";
+import SalesUsers from "./pages/Sales/SalesUsers.jsx";
+import SalesUserAnalytics from "./pages/Sales/SalesUserAnalytics.jsx";
 
 // SuperAdmin Pages
 import Dashboard from "./pages/superAdmin/Dashboard.jsx";
@@ -127,6 +138,30 @@ function App() {
             <Route path="/user-my-reviews" element={<UserReviews />} />
             <Route path="/user-invoices" element={<UserInvoice />} />
             <Route path="/user-events" element={<EventsPage />} />
+          </Route>
+
+          {/* Sales Dashboard (SalesLayout) */}
+          <Route element={<SalesLayout />}>
+            <Route path="/sales-dashboard" element={<SalesDashboard />} />
+            <Route path="/sales-listings" element={<SalesListings />} />
+            <Route path="/sales-categories" element={<SalesCategories />} />
+            <Route path="/sales-profile" element={<SalesProfile />} />
+            <Route path="/sales-users" element={<SalesAllUsers />} />
+            <Route path="/sales-revenue" element={<SalesRevenue />} />
+            <Route path="/sales-reviews" element={<SalesReviews />} />
+            <Route path="/sales-settings" element={<SalesSettings />} />
+            <Route path="/sales-leads" element={<SalesLeads />} />
+            <Route
+              path="/sales-opportunities"
+              element={<SalesOpportunities />}
+            />
+            <Route path="/sales-customers" element={<SalesCustomers />} />
+            <Route path="/sales-reports" element={<SalesReports />} />
+            <Route path="/sales-users-management" element={<SalesUsers />} />
+            <Route
+              path="/sales-user-analytics"
+              element={<SalesUserAnalytics />}
+            />
           </Route>
         </Routes>
       </Router>

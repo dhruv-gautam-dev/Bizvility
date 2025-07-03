@@ -12,6 +12,7 @@ import {
 } from '../controllers/authController.js';
 import { protect } from '../middlewares/auth.js';
 
+
 const router = express.Router();
 
 // @desc    Register new user

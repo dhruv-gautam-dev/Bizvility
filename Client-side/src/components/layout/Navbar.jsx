@@ -18,12 +18,34 @@ const Navbar = ({ scrolled, user }) => {
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
+  const userString = localStorage.getItem("user");
+
+  let userObj;
+  try {
+    userObj = JSON.parse(userString);
+  } catch (error) {
+    console.error("Failed to parse user JSON:", error);
+    return;
+  }
+
   // console.log(localStorage);
   user = localStorage.token;
+  const userProfile = localStorage.user;
 
   // customize this dashboard navigation according to the user role
   const handleMyDashboard = () => {
-    navigate("/user-dashboard");
+    const role = userObj?.data?.role;
+    if (!role) {
+      console.error("Role is missing or undefined in user data:", userObj);
+      return;
+    }
+    console.log("Current user role:", role);
+
+    if (role === "customer") {
+      navigate("/user-dashboard");
+    } else if (role === "sales") {
+      navigate("/sales-dashboard");
+    }
   };
 
   const handleLogout = async () => {

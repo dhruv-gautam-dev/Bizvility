@@ -25,10 +25,16 @@ const storage = multer.diskStorage({
     } else if (file.fieldname === 'galleryImages') {
       folder = 'uploads/gallery';
     }
+    
     //other
     else if (file.fieldname === 'others') {
   folder = 'uploads/others';
 }
+//events
+ 
+     else if (file.fieldname === 'eventImages') {
+      folder = 'uploads/events';
+    }
 
 
     ensureDir(folder);

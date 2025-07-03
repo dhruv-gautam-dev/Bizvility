@@ -1,4 +1,3 @@
-//model/Hotel.js
 // models/Hotel.js
 import mongoose from 'mongoose';
 
@@ -9,8 +8,6 @@ const hotelSchema = new mongoose.Schema({
   },
   registerNumber: {
     type: String,
-    required: true,
-    unique: true,
     default: ''
   },
   YearOfEstablishment: {

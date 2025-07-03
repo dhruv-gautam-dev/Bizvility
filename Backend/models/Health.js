@@ -1,4 +1,3 @@
-//model/Health.js
 // models/HealthMedical.js
 import mongoose from 'mongoose';
 
@@ -9,8 +8,7 @@ const healthMedicalSchema = new mongoose.Schema({
   },
   registerNumber: {
     type: String,
-    required: true,
-    unique: true,
+    required: false,
     default: ''
   },
   YearOfEstablishment: {

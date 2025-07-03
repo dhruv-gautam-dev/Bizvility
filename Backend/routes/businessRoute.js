@@ -15,11 +15,14 @@ const mediaFields = upload.fields([
 ]);
 
 router.post('/business', protect, mediaFields, createBusiness);
-router.get('/search', searchBusinesses);
 router.put('/business/:id', protect, mediaFields, roles('superadmin', 'customer'), updateBusiness);
+// router.get('/business/:id', protect, getBusinessById);
 router.get('/businesses', getAllBusinesses)
 router.get('/byid/:id', getBusinessId);
+
 router.get('/views/analytics', protect, getUserBusinessViewsAnalytics);
+router.get('/search', searchBusinesses);
+
 
 
 export default router;

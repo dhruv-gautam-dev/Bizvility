@@ -1,4 +1,3 @@
-//model/BeautySpa
 // models/BeautySpa.js
 import mongoose from 'mongoose';
 
@@ -9,8 +8,6 @@ const beautySpaSchema = new mongoose.Schema({
   },
   registerNumber: {
     type: String,
-    required: true,
-    unique: true,
     default: ''
   },
   YearOfEstablishment: {

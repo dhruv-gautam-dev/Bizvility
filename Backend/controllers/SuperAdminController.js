@@ -244,3 +244,31 @@ export const addNewUser = asyncHandler(async (req, res) => {
     },
   });
 });
+
+//create user with  permission
+export const createUserBySuperAdmin = asyncHandler(async (req, res) => {
+  const { name, email, password, role } = req.body;
+
+  const userExists = await User.findOne({ email });
+  if (userExists) {
+    return res.status(400).json({ message: 'User already exists' });
+  }
+
+  const newUser = await User.create({
+    name,
+    email,
+    password,
+    role,
+    is_verified: true
+  });
+
+  res.status(201).json({
+    message: 'User created successfully',
+    user: {
+      id: newUser._id,
+      name: newUser.name,
+      email: newUser.email,
+      role
+    }
+  });
+});

@@ -1,4 +1,3 @@
-//Models/Business.js
 // models/Business.js
 import mongoose from 'mongoose';
 
@@ -97,7 +96,8 @@ const businessSchema = new mongoose.Schema({
     ManicurePedicure: { type: Boolean, default: false },
     TattooPiercing: { type: Boolean, default: false }
   },
- 
+ salesExecutive: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  revenue: { type: Number, default: 0 },
  
   category: { type: String, required: true }, // e.g., 'health-medical'
   categoryRef: {
@@ -113,33 +113,43 @@ const businessSchema = new mongoose.Schema({
   numberOfReviews: {
     type: Number,
     default: 0
-  }
-}, {
+  },
 // ✅ New fields for tracking views
   views: {
-    type: Number,
-    default: 0
-  },
-  viewers: [
-    {
-      ip: String,
-      viewedAt: {
-        type: Date,
-        default: Date.now
-      }
-    }
-  ]
+  type: Number,
+  default: 0,
+},
+viewers: [
+  {
+    ip: String,
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    viewedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  }
+],
 
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
-});
+}); 
 // ✅ Virtual field for associated reviews
 businessSchema.virtual('reviews', {
   ref: 'Review', // The model to use
   localField: '_id', // Find reviews where `business` = `_id`
   foreignField: 'business', // In the Review model, the field to match
+});
+
+businessSchema.virtual('events', {
+  ref: 'Event',
+  localField: '_id',
+  foreignField: 'business'
 });
 
 const Business = mongoose.model('Business', businessSchema);

@@ -1,4 +1,3 @@
-//usercontroller.js
 // controllers/userController.js
 
 import User from '../models/user.js';
@@ -286,3 +285,31 @@ export const getUserListings = asyncHandler(async (req, res) => {
 
 
 //edit business listing by id check the businessController.js put api
+
+
+//get the all sales user or user whose role is sales
+export const getAllSalesUsers = asyncHandler(async (req, res) => {
+  try {
+    const currentUserId = req.user?._id;
+
+    const salesUsers = await User.find({
+      role: 'sales',
+      _id: { $ne: currentUserId } // Exclude current logged-in user
+    })
+      .select('-__v')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      status: 'success',
+      total: salesUsers.length,
+      users: salesUsers,
+    });
+  } catch (error) {
+    console.error('❌ Error fetching sales users:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch sales users.',
+      error: error.message,
+    });
+  }
+});
