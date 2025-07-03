@@ -3,6 +3,7 @@ import { Search, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { fetchSearchData } from "../../data/SearchData/searchData";
+import { FaRegStar, FaStar } from "react-icons/fa";
 
 function SearchForm() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -184,6 +185,22 @@ function SearchForm() {
                 <h4 className="text-sm font-medium text-gray-800">
                   {business.name}
                 </h4>
+                {/* Rating */}
+                {/* <div className="flex items-center mt-2 space-x-1 sm:mt-0">
+                  {[1, 2, 3, 4, 5].map((i) =>
+                    i <= Math.round(business.rating) ? (
+                      <FaStar
+                        key={i}
+                        className="w-4 h-4 text-green-500 sm:w-5 sm:h-5"
+                      />
+                    ) : (
+                      <FaRegStar
+                        key={i}
+                        className="w-4 h-4 text-gray-300 sm:w-5 sm:h-5"
+                      />
+                    )
+                  )}
+                </div> */}
                 <p className="text-xs text-left text-gray-600">
                   {business.location.city}, {business.location.state}
                 </p>
