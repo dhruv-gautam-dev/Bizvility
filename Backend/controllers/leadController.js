@@ -4,13 +4,16 @@ import Lead from '../models/Leads.js';
 
 // ✅ Create a new lead
 export const createLead = asyncHandler(async (req, res) => {
-  const { name, contact, businessType, followUpDate, notes } = req.body;
+  const { name, contact, businessType, notes } = req.body;
+
+  // ⏰ Set followUpDate to 2 minutes from now
+  const followUpDate = new Date(Date.now() + 2 * 60 * 1000);
 
   const lead = await Lead.create({
     name,
     contact,
-    businessType, 
-    followUpDate, 
+    businessType,
+    followUpDate,
     notes,
     salesUser: req.user._id
   });
