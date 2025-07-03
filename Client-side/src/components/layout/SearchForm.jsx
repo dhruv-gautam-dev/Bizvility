@@ -132,7 +132,7 @@ function SearchForm() {
               Loading...
             </div>
           ) : suggestions.length > 0 ? (
-            <ul className="absolute right-0 z-10 mt-1 overflow-y-auto bg-white border border-gray-200 rounded shadow top-full left-10 max-h-48">
+            <ul className="absolute right-0 z-10 mt-1 overflow-y-auto bg-white border border-gray-200 rounded shadow top-full left-10 max-h-24 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
               {suggestions.map((city, index) => (
                 <li
                   key={index}
@@ -162,12 +162,12 @@ function SearchForm() {
           Searching...
         </div>
       ) : searchResults.length > 0 ? (
-        <ul className="absolute left-0 w-4/5 mx-auto mt-2 bg-white border border-gray-300 rounded-lg shadow-md top-full">
+        <ul className="absolute left-0 w-full mx-auto mt-1 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-md top-full max-h-54 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
           {searchResults.map((business) => (
             <li
               key={business._id}
               onClick={() => handleBusinessClick(business._id)}
-              className="flex items-center p-3 transition-colors duration-200 cursor-pointer hover:bg-gray-50"
+              className="flex items-center p-2 pl-3 transition-colors duration-200 cursor-pointer hover:bg-gray-50"
             >
               {business.profileImage ? (
                 <img
@@ -177,16 +177,15 @@ function SearchForm() {
                 />
               ) : (
                 <div className="flex items-center justify-center w-12 h-12 mr-3 bg-gray-200 rounded-full">
-                  <span className="text-gray-500">No Image</span>
+                  <span className="text-gray-500"></span>
                 </div>
               )}
               <div>
                 <h4 className="text-sm font-medium text-gray-800">
                   {business.name}
                 </h4>
-                <p className="text-xs text-gray-600">
-                  {business.spe}, {business.location.city},{" "}
-                  {business.location.state}
+                <p className="text-xs text-left text-gray-600">
+                  {business.location.city}, {business.location.state}
                 </p>
               </div>
             </li>

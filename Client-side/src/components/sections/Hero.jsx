@@ -42,7 +42,7 @@ function Hero() {
         <SearchForm />
 
         {/* Categories */}
-        <div className="flex flex-wrap justify-center gap-4 mt-4">
+        {/* <div className="flex flex-wrap justify-center gap-4 mt-4">
           {[
             "Restaurants",
             // 'Shopping',
@@ -59,7 +59,7 @@ function Hero() {
               {cat}
             </button>
           ))}
-        </div>
+        </div> */}
       </div>
     </section>
   );
