@@ -313,3 +313,34 @@ export const getAllSalesUsers = asyncHandler(async (req, res) => {
     });
   }
 });
+
+
+//get those users who have register with sales user refferal code link
+export const getUsersByReferral = asyncHandler(async (req, res) => {
+  try {
+    // Ensure only sales users can access this
+    if (req.user.role !== 'sales') {
+      return res.status(403).json({
+        message: 'Access denied. Only sales users can view referred users.'
+      });
+    }
+
+    const referredUsers = await User.find({ referredBy: req.user._id })
+      .select('-password -refreshTokens -__v') // Hide sensitive fields
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      status: 'success',
+      total: referredUsers.length,
+      users: referredUsers
+    });
+
+  } catch (error) {
+    console.error('❌ Error fetching referred users:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+});
