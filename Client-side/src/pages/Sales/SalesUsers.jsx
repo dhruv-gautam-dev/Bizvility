@@ -193,18 +193,22 @@ export default function SalesUsers() {
   const [filterRole, setFilterRole] = useState("all");
   const [selectedUser, setSelectedUser] = useState(null);
   const [salesUsers, setSalesUser] = useState([]);
+  const imageUrl = import.meta.env.VITE_Image_URL;
 
-  console.log("before useefecg ");
+  const [error, setError] = useState(null);
+
   useEffect(() => {
     const fetchUsers = async () => {
       const token = localStorage.getItem("token");
       console.log("Fetching Users with token:", token);
+
       if (!token) {
         setError(
           "No authentication token found. Please ensure you are logged in."
         );
         return;
       }
+
       try {
         const response = await fetch(
           "http://localhost:5000/api/user/getAllSalesUsers",
@@ -215,44 +219,53 @@ export default function SalesUsers() {
             },
           }
         );
+
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(
             `Failed to fetch customers: ${response.status} - ${errorText}`
           );
         }
+
         const data = await response.json();
-        // Ensure data.users is an array, provide fallback if undefined
+
+        // Ensure it's an array
         const customerData = Array.isArray(data.users) ? data.users : [];
         if (customerData.length === 0) {
-          console.warn("No User found in API response");
+          console.warn("No users found in API response");
         }
-        // Map API data to expected structure with fallbacks
-        const mappedCustomers = customerData.map((user, index) => ({
-          id: user.id || user._id || `temp-${index}`, // Fallback ID
-          fullName: user.fullName || "Unknown",
-          company: user.company || "",
-          email: user.email || "",
-          phone: user.phone || "",
-          status: user.status || "Active",
-          type: user.type || "SMB",
-          totalValue: user.totalValue || 0,
-          lastPurchase: user.lastPurchase || "",
-          joinDate: user.joinDate || new Date().toISOString().split("T")[0],
-          deals: user.deals || 0,
-          role: user.role || "",
-          location: user.location || "",
-        }));
+
+        const mappedCustomers = customerData.map((user, index) => {
+          const { profile = {} } = user; // default empty object
+          return {
+            id: user.id || user._id || `temp-${index}`,
+            fullName: user.fullName || "Unknown",
+            photo: profile.photo || "",
+            company: user.company || "",
+            email: user.email || "",
+            phone: profile.phone || "",
+            status: user.status || "Active",
+            type: user.type || "SMB",
+            totalValue: user.totalValue || 0,
+            lastPurchase: user.lastPurchase || "",
+            joinDate: user.joinDate || new Date().toISOString().split("T")[0],
+            deals: user.deals || 0,
+            role: user.role || "",
+            location: user.location || "",
+          };
+        });
+
         setSalesUser(mappedCustomers);
         console.log("users set to:", mappedCustomers);
+        setError(null); // clear any previous error
       } catch (err) {
         console.error("Fetch users error:", err);
-        setError(
-          `Error fetching users: ${err.message}. Please check your token or server connection.`
-        );
-        toast.error(`Error fetching users: ${err.message}`);
+        const msg = `Error fetching users: ${err.message}. Please check your token or server connection.`;
+        setError(msg);
+        toast.error(msg);
       }
     };
+
     fetchUsers();
   }, []);
 
@@ -432,16 +445,14 @@ export default function SalesUsers() {
                 }}
               >
                 <div className="flex items-center space-x-4">
+                  {/* {imageUrl + user.photo} */}
                   <img
                     src={
-                      user.avatar ||
-                      `https://img.freepik.com/premium-vector/person-with-blue-shirt-that-says-name-person_1029948-7040.jpg?semt=ais_hybrid&w=740`
+                      (imageUrl && user.photo ? imageUrl + user.photo : "") ||
+                      "https://img.freepik.com/premium-vector/person-with-blue-shirt-that-says-name-person_1029948-7040.jpg?semt=ais_hybrid&w=740"
                     }
                     alt={user.fullName}
                     className="object-cover w-16 h-16 border-4 border-white rounded-full"
-                    onError={(e) =>
-                      (e.target.src = "https://via.placeholder.com/64")
-                    }
                   />
                   <div className="flex-1">
                     <h3 className="text-xl font-bold">{user.fullName}</h3>
