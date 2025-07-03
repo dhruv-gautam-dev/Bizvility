@@ -51,14 +51,6 @@ const topPerformers = [
   { name: "Emily Davis", revenue: 76000, deals: 14, conversion: 10.5 },
 ];
 
-const pipelineByStage = [
-  { stage: "Discovery", count: 45, value: 450000 },
-  { stage: "Qualified", count: 32, value: 320000 },
-  { stage: "Proposal", count: 18, value: 270000 },
-  { stage: "Negotiation", count: 12, value: 180000 },
-  { stage: "Closed Won", count: 8, value: 120000 },
-];
-
 export default function SalesReports() {
   const [selectedPeriod, setSelectedPeriod] = useState("thisMonth");
   const [reportType, setReportType] = useState("overview");
@@ -244,16 +236,6 @@ export default function SalesReports() {
           >
             Performance
           </button>
-          <button
-            onClick={() => setReportType("pipeline")}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              reportType === "pipeline"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
-          >
-            Pipeline
-          </button>
         </nav>
       </div>
 
@@ -376,63 +358,6 @@ export default function SalesReports() {
                   ))}
                 </tbody>
               </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {reportType === "pipeline" && (
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6">
-            <h3 className="mb-6 text-lg font-medium text-gray-900">
-              Sales Pipeline Analysis
-            </h3>
-            <div className="space-y-4">
-              {pipelineByStage.map((stage, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-sm font-medium text-gray-900">
-                        {stage.stage}
-                      </h4>
-                      <div className="text-right">
-                        <span className="text-sm font-medium text-gray-900">
-                          {stage.count} opportunities
-                        </span>
-                        <div className="text-sm text-gray-500">
-                          ${stage.value.toLocaleString()}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="w-full h-3 bg-gray-200 rounded-full">
-                      <div
-                        className="h-3 bg-blue-600 rounded-full"
-                        style={{ width: `${(stage.count / 50) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 mt-6 md:grid-cols-3">
-              <div className="p-4 text-center rounded-lg bg-gray-50">
-                <div className="text-2xl font-bold text-gray-900">115</div>
-                <div className="text-sm text-gray-500">Total Opportunities</div>
-              </div>
-              <div className="p-4 text-center rounded-lg bg-gray-50">
-                <div className="text-2xl font-bold text-blue-600">$1.34M</div>
-                <div className="text-sm text-gray-500">
-                  Total Pipeline Value
-                </div>
-              </div>
-              <div className="p-4 text-center rounded-lg bg-gray-50">
-                <div className="text-2xl font-bold text-green-600">7%</div>
-                <div className="text-sm text-gray-500">Win Rate</div>
-              </div>
             </div>
           </div>
         </div>

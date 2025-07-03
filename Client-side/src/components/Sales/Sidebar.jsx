@@ -40,7 +40,7 @@ const navigation = [
     href: "/sales-categories",
     icon: ClipboardDocumentListIcon,
   },
-  { name: "Reviews & Ratings", href: "/sales-reviews", icon: StarIcon },
+  // { name: "Reviews & Ratings", href: "/sales-reviews", icon: StarIcon },
   {
     name: "Revenue Analytics",
     href: "/sales-revenue",
@@ -156,7 +156,7 @@ export default function Sidebar({
           <div className="flex-shrink-0 p-4 border-t border-gray-700">
             <div className="text-xs text-gray-400">
               <div>Business Listing Platform</div>
-              <div>© 2024 ListingPro</div>
+              <div>© 2025 Bizvility</div>
             </div>
           </div>
         )}

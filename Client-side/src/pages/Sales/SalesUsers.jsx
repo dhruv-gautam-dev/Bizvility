@@ -16,182 +16,245 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const salesUsers = [
-  {
-    id: 1,
-    name: "John Smith",
-    email: "john@coffeehouse.com",
-    phone: "+1 (555) 123-4567",
-    location: "New York, NY",
-    avatar:
-      "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg",
-    role: "Senior Sales Rep",
-    joinDate: "2024-01-15",
-    status: "Active",
-    totalListings: 12,
-    activeListings: 10,
-    totalViews: 15420,
-    totalRevenue: 8500,
-    conversionRate: 18.5,
-    avgRating: 4.8,
-    totalReviews: 89,
-    lastActivity: "2 hours ago",
-    topCategories: ["Restaurants", "Cafes", "Food Services"],
-    monthlyTarget: 10000,
-    achievements: ["Top Performer", "Customer Favorite"],
-    recentListings: [
-      { name: "The Coffee House", views: 1247, rating: 4.5 },
-      { name: "Pizza Corner", views: 892, rating: 4.7 },
-      { name: "Burger Palace", views: 567, rating: 4.3 },
-    ],
-  },
-  {
-    id: 2,
-    name: "Sarah Johnson",
-    email: "sarah@techsolutions.com",
-    phone: "+1 (555) 234-5678",
-    location: "San Francisco, CA",
-    avatar:
-      "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg",
-    role: "Sales Manager",
-    joinDate: "2024-01-10",
-    status: "Active",
-    totalListings: 18,
-    activeListings: 16,
-    totalViews: 22340,
-    totalRevenue: 12800,
-    conversionRate: 22.3,
-    avgRating: 4.9,
-    totalReviews: 134,
-    lastActivity: "1 hour ago",
-    topCategories: ["Technology", "Services", "Consulting"],
-    monthlyTarget: 15000,
-    achievements: ["Sales Leader", "Innovation Award"],
-    recentListings: [
-      { name: "Tech Solutions Inc", views: 2340, rating: 4.8 },
-      { name: "Digital Agency Pro", views: 1890, rating: 4.9 },
-      { name: "Software Hub", views: 1456, rating: 4.7 },
-    ],
-  },
-  {
-    id: 3,
-    name: "Mike Brown",
-    email: "mike@retailsolutions.com",
-    phone: "+1 (555) 345-6789",
-    location: "Los Angeles, CA",
-    avatar:
-      "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg",
-    role: "Sales Associate",
-    joinDate: "2024-01-08",
-    status: "Active",
-    totalListings: 8,
-    activeListings: 7,
-    totalViews: 9870,
-    totalRevenue: 5200,
-    conversionRate: 15.2,
-    avgRating: 4.6,
-    totalReviews: 56,
-    lastActivity: "4 hours ago",
-    topCategories: ["Retail", "Fashion", "Shopping"],
-    monthlyTarget: 7500,
-    achievements: ["Rising Star"],
-    recentListings: [
-      { name: "Fashion Boutique", views: 1234, rating: 4.6 },
-      { name: "Style Store", views: 987, rating: 4.5 },
-      { name: "Trendy Shop", views: 756, rating: 4.4 },
-    ],
-  },
-  {
-    id: 4,
-    name: "Emily Davis",
-    email: "emily@healthfitness.com",
-    phone: "+1 (555) 456-7890",
-    location: "Chicago, IL",
-    avatar:
-      "https://images.pexels.com/photos/3184644/pexels-photo-3184644.jpeg",
-    role: "Sales Specialist",
-    joinDate: "2024-01-05",
-    status: "Active",
-    totalListings: 15,
-    activeListings: 14,
-    totalViews: 18650,
-    totalRevenue: 9800,
-    conversionRate: 19.7,
-    avgRating: 4.7,
-    totalReviews: 102,
-    lastActivity: "30 minutes ago",
-    topCategories: ["Health & Fitness", "Wellness", "Sports"],
-    monthlyTarget: 12000,
-    achievements: ["Health Expert", "Customer Champion"],
-    recentListings: [
-      { name: "Fitness Center Pro", views: 1890, rating: 4.7 },
-      { name: "Yoga Studio Plus", views: 1456, rating: 4.8 },
-      { name: "Gym Elite", views: 1234, rating: 4.6 },
-    ],
-  },
-  {
-    id: 5,
-    name: "David Wilson",
-    email: "david@autoservices.com",
-    phone: "+1 (555) 567-8901",
-    location: "Miami, FL",
-    avatar:
-      "https://images.pexels.com/photos/3184658/pexels-photo-3184658.jpeg",
-    role: "Junior Sales Rep",
-    joinDate: "2024-01-01",
-    status: "Active",
-    totalListings: 6,
-    activeListings: 5,
-    totalViews: 7230,
-    totalRevenue: 3800,
-    conversionRate: 12.8,
-    avgRating: 4.4,
-    totalReviews: 34,
-    lastActivity: "1 day ago",
-    topCategories: ["Automotive", "Services", "Repair"],
-    monthlyTarget: 5000,
-    achievements: ["New Talent"],
-    recentListings: [
-      { name: "Auto Repair Shop", views: 890, rating: 4.4 },
-      { name: "Car Wash Pro", views: 678, rating: 4.3 },
-      { name: "Tire Center", views: 567, rating: 4.2 },
-    ],
-  },
-  {
-    id: 6,
-    name: "Lisa Anderson",
-    email: "lisa@realestate.com",
-    phone: "+1 (555) 678-9012",
-    location: "Boston, MA",
-    avatar:
-      "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg",
-    role: "Sales Director",
-    joinDate: "2023-12-15",
-    status: "Active",
-    totalListings: 25,
-    activeListings: 23,
-    totalViews: 35670,
-    totalRevenue: 18500,
-    conversionRate: 25.4,
-    avgRating: 4.9,
-    totalReviews: 187,
-    lastActivity: "15 minutes ago",
-    topCategories: ["Real Estate", "Property", "Investment"],
-    monthlyTarget: 20000,
-    achievements: ["Top Director", "Excellence Award", "Leadership Star"],
-    recentListings: [
-      { name: "Premium Properties", views: 3456, rating: 4.9 },
-      { name: "Luxury Homes", views: 2890, rating: 4.8 },
-      { name: "Investment Group", views: 2340, rating: 4.7 },
-    ],
-  },
-];
+// const salesUsers = [
+//   {
+//     id: 1,
+//     name: "John Smith",
+//     email: "john@coffeehouse.com",
+//     phone: "+1 (555) 123-4567",
+//     location: "New York, NY",
+//     avatar:
+//       "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg",
+//     role: "Senior Sales Rep",
+//     joinDate: "2024-01-15",
+//     status: "Active",
+//     totalListings: 12,
+//     activeListings: 10,
+//     totalViews: 15420,
+//     totalRevenue: 8500,
+//     conversionRate: 18.5,
+//     avgRating: 4.8,
+//     totalReviews: 89,
+//     lastActivity: "2 hours ago",
+//     topCategories: ["Restaurants", "Cafes", "Food Services"],
+//     monthlyTarget: 10000,
+//     achievements: ["Top Performer", "Customer Favorite"],
+//     recentListings: [
+//       { name: "The Coffee House", views: 1247, rating: 4.5 },
+//       { name: "Pizza Corner", views: 892, rating: 4.7 },
+//       { name: "Burger Palace", views: 567, rating: 4.3 },
+//     ],
+//   },
+//   {
+//     id: 2,
+//     name: "Sarah Johnson",
+//     email: "sarah@techsolutions.com",
+//     phone: "+1 (555) 234-5678",
+//     location: "San Francisco, CA",
+//     avatar:
+//       "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg",
+//     role: "Sales Manager",
+//     joinDate: "2024-01-10",
+//     status: "Active",
+//     totalListings: 18,
+//     activeListings: 16,
+//     totalViews: 22340,
+//     totalRevenue: 12800,
+//     conversionRate: 22.3,
+//     avgRating: 4.9,
+//     totalReviews: 134,
+//     lastActivity: "1 hour ago",
+//     topCategories: ["Technology", "Services", "Consulting"],
+//     monthlyTarget: 15000,
+//     achievements: ["Sales Leader", "Innovation Award"],
+//     recentListings: [
+//       { name: "Tech Solutions Inc", views: 2340, rating: 4.8 },
+//       { name: "Digital Agency Pro", views: 1890, rating: 4.9 },
+//       { name: "Software Hub", views: 1456, rating: 4.7 },
+//     ],
+//   },
+//   {
+//     id: 3,
+//     name: "Mike Brown",
+//     email: "mike@retailsolutions.com",
+//     phone: "+1 (555) 345-6789",
+//     location: "Los Angeles, CA",
+//     avatar:
+//       "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg",
+//     role: "Sales Associate",
+//     joinDate: "2024-01-08",
+//     status: "Active",
+//     totalListings: 8,
+//     activeListings: 7,
+//     totalViews: 9870,
+//     totalRevenue: 5200,
+//     conversionRate: 15.2,
+//     avgRating: 4.6,
+//     totalReviews: 56,
+//     lastActivity: "4 hours ago",
+//     topCategories: ["Retail", "Fashion", "Shopping"],
+//     monthlyTarget: 7500,
+//     achievements: ["Rising Star"],
+//     recentListings: [
+//       { name: "Fashion Boutique", views: 1234, rating: 4.6 },
+//       { name: "Style Store", views: 987, rating: 4.5 },
+//       { name: "Trendy Shop", views: 756, rating: 4.4 },
+//     ],
+//   },
+//   {
+//     id: 4,
+//     name: "Emily Davis",
+//     email: "emily@healthfitness.com",
+//     phone: "+1 (555) 456-7890",
+//     location: "Chicago, IL",
+//     avatar:
+//       "https://images.pexels.com/photos/3184644/pexels-photo-3184644.jpeg",
+//     role: "Sales Specialist",
+//     joinDate: "2024-01-05",
+//     status: "Active",
+//     totalListings: 15,
+//     activeListings: 14,
+//     totalViews: 18650,
+//     totalRevenue: 9800,
+//     conversionRate: 19.7,
+//     avgRating: 4.7,
+//     totalReviews: 102,
+//     lastActivity: "30 minutes ago",
+//     topCategories: ["Health & Fitness", "Wellness", "Sports"],
+//     monthlyTarget: 12000,
+//     achievements: ["Health Expert", "Customer Champion"],
+//     recentListings: [
+//       { name: "Fitness Center Pro", views: 1890, rating: 4.7 },
+//       { name: "Yoga Studio Plus", views: 1456, rating: 4.8 },
+//       { name: "Gym Elite", views: 1234, rating: 4.6 },
+//     ],
+//   },
+//   {
+//     id: 5,
+//     name: "David Wilson",
+//     email: "david@autoservices.com",
+//     phone: "+1 (555) 567-8901",
+//     location: "Miami, FL",
+//     avatar:
+//       "https://images.pexels.com/photos/3184658/pexels-photo-3184658.jpeg",
+//     role: "Junior Sales Rep",
+//     joinDate: "2024-01-01",
+//     status: "Active",
+//     totalListings: 6,
+//     activeListings: 5,
+//     totalViews: 7230,
+//     totalRevenue: 3800,
+//     conversionRate: 12.8,
+//     avgRating: 4.4,
+//     totalReviews: 34,
+//     lastActivity: "1 day ago",
+//     topCategories: ["Automotive", "Services", "Repair"],
+//     monthlyTarget: 5000,
+//     achievements: ["New Talent"],
+//     recentListings: [
+//       { name: "Auto Repair Shop", views: 890, rating: 4.4 },
+//       { name: "Car Wash Pro", views: 678, rating: 4.3 },
+//       { name: "Tire Center", views: 567, rating: 4.2 },
+//     ],
+//   },
+//   {
+//     id: 6,
+//     name: "Lisa Anderson",
+//     email: "lisa@realestate.com",
+//     phone: "+1 (555) 678-9012",
+//     location: "Boston, MA",
+//     avatar:
+//       "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg",
+//     role: "Sales Director",
+//     joinDate: "2023-12-15",
+//     status: "Active",
+//     totalListings: 25,
+//     activeListings: 23,
+//     totalViews: 35670,
+//     totalRevenue: 18500,
+//     conversionRate: 25.4,
+//     avgRating: 4.9,
+//     totalReviews: 187,
+//     lastActivity: "15 minutes ago",
+//     topCategories: ["Real Estate", "Property", "Investment"],
+//     monthlyTarget: 20000,
+//     achievements: ["Top Director", "Excellence Award", "Leadership Star"],
+//     recentListings: [
+//       { name: "Premium Properties", views: 3456, rating: 4.9 },
+//       { name: "Luxury Homes", views: 2890, rating: 4.8 },
+//       { name: "Investment Group", views: 2340, rating: 4.7 },
+//     ],
+//   },
+// ];
 
 export default function SalesUsers() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [selectedUser, setSelectedUser] = useState(null);
+  const [salesUsers, setSalesUser] = useState([]);
+
+  console.log("before useefecg ");
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const token = localStorage.getItem("token");
+      console.log("Fetching Users with token:", token);
+      if (!token) {
+        setError(
+          "No authentication token found. Please ensure you are logged in."
+        );
+        return;
+      }
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/user/getAllSalesUsers",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(
+            `Failed to fetch customers: ${response.status} - ${errorText}`
+          );
+        }
+        const data = await response.json();
+        // Ensure data.users is an array, provide fallback if undefined
+        const customerData = Array.isArray(data.users) ? data.users : [];
+        if (customerData.length === 0) {
+          console.warn("No User found in API response");
+        }
+        // Map API data to expected structure with fallbacks
+        const mappedCustomers = customerData.map((user, index) => ({
+          id: user.id || user._id || `temp-${index}`, // Fallback ID
+          fullName: user.fullName || "Unknown",
+          company: user.company || "",
+          email: user.email || "",
+          phone: user.phone || "",
+          status: user.status || "Active",
+          type: user.type || "SMB",
+          totalValue: user.totalValue || 0,
+          lastPurchase: user.lastPurchase || "",
+          joinDate: user.joinDate || new Date().toISOString().split("T")[0],
+          deals: user.deals || 0,
+          role: user.role || "",
+          location: user.location || "",
+        }));
+        setSalesUser(mappedCustomers);
+        console.log("users set to:", mappedCustomers);
+      } catch (err) {
+        console.error("Fetch users error:", err);
+        setError(
+          `Error fetching users: ${err.message}. Please check your token or server connection.`
+        );
+        toast.error(`Error fetching users: ${err.message}`);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
@@ -214,7 +277,7 @@ export default function SalesUsers() {
 
   const filteredUsers = salesUsers.filter((user) => {
     const matchesSearch =
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === "all" || user.role === filterRole;
@@ -296,12 +359,12 @@ export default function SalesUsers() {
           },
           {
             title: "Total Listings",
-            value: totalListings,
+            value: totalListings || "0",
             color: "text-blue-600",
           },
           {
             title: "Total Revenue",
-            value: `$${totalRevenue.toLocaleString()}`,
+            value: totalRevenue || "0",
             color: "text-purple-600",
           },
         ].map((stat) => (
@@ -370,18 +433,22 @@ export default function SalesUsers() {
               >
                 <div className="flex items-center space-x-4">
                   <img
-                    src={user.avatar}
-                    alt={user.name}
+                    src={
+                      user.avatar ||
+                      `https://img.freepik.com/premium-vector/person-with-blue-shirt-that-says-name-person_1029948-7040.jpg?semt=ais_hybrid&w=740`
+                    }
+                    alt={user.fullName}
                     className="object-cover w-16 h-16 border-4 border-white rounded-full"
                     onError={(e) =>
                       (e.target.src = "https://via.placeholder.com/64")
                     }
                   />
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold">{user.name}</h3>
+                    <h3 className="text-xl font-bold">{user.fullName}</h3>
                     <span
                       className={`inline-block px-2 py-1 text-xs font-semibold rounded-full bg-white/20 text-white`}
                     >
+                      {console.log(user)}
                       {user.role}
                     </span>
                   </div>
@@ -419,13 +486,15 @@ export default function SalesUsers() {
                     <div className="flex items-center justify-center mb-1">
                       <EyeIcon className="w-5 h-5 mr-1 text-green-500" />
                       <span className="text-2xl font-bold text-gray-900">
-                        {user.totalViews.toLocaleString()}
+                        {user?.totalViews?.toLocaleString()}
                       </span>
                     </div>
                     <p className="text-sm text-gray-500">Total Views</p>
                     <p className="text-xs text-blue-600">
                       {user.totalListings > 0
-                        ? Math.round(user.totalViews / user.totalListings)
+                        ? Math.round(
+                            user?.totalViews / user?.totalListings || "1200"
+                          )
                         : 0}{" "}
                       avg/listing
                     </p>
@@ -437,7 +506,7 @@ export default function SalesUsers() {
                     <div className="flex items-center justify-center mb-1">
                       <CurrencyDollarIcon className="w-5 h-5 mr-1 text-purple-500" />
                       <span className="text-lg font-bold text-gray-900">
-                        ${user.totalRevenue.toLocaleString()}
+                        ${user?.totalRevenue?.toLocaleString() || "0"}
                       </span>
                     </div>
                     <p className="text-sm text-gray-500">Revenue</p>
@@ -448,8 +517,8 @@ export default function SalesUsers() {
                           width: `${
                             user.monthlyTarget > 0
                               ? Math.min(
-                                  (user.totalRevenue / user.monthlyTarget) *
-                                    100,
+                                  (user.totalRevenue / user.monthlyTarget ||
+                                    "0") * 100,
                                   100
                                 )
                               : 0
@@ -492,36 +561,44 @@ export default function SalesUsers() {
                       <EnvelopeIcon className="w-4 h-4 mr-2" />
                       <span className="truncate">{user.email}</span>
                     </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <PhoneIcon className="w-4 h-4 mr-2" />
-                      <span className="truncate">{user.phone}</span>
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <MapPinIcon className="w-4 h-4 mr-2" />
-                      <span className="truncate">{user.location}</span>
-                    </div>
+                    {user.phone && (
+                      <div className="flex items-center text-sm text-gray-600">
+                        <PhoneIcon className="w-4 h-4 mr-2" />
+                        <span className="truncate">{user.phone}</span>
+                      </div>
+                    )}
+                    {user.location && (
+                      <div className="flex items-center text-sm text-gray-600">
+                        <MapPinIcon className="w-4 h-4 mr-2" />
+                        <span className="truncate">{user.location}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Top Categories */}
-                <div className="mb-4">
-                  <p className="mb-2 text-sm font-medium text-gray-700">
-                    Top Categories:
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {user.topCategories.slice(0, 3).map((category, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 text-xs text-blue-800 bg-blue-100 rounded"
-                      >
-                        {category}
-                      </span>
-                    ))}
+                {user?.categories && (
+                  <div className="mb-4">
+                    <p className="mb-2 text-sm font-medium text-gray-700">
+                      Top Categories:
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {user?.topCategories
+                        ?.slice(0, 3)
+                        .map((category, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 text-xs text-blue-800 bg-blue-100 rounded"
+                          >
+                            {category}
+                          </span>
+                        ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Achievements */}
-                {user.achievements.length > 0 && (
+                {user?.achievements?.length > 0 && (
                   <div className="mb-4">
                     <p className="mb-2 text-sm font-medium text-gray-700">
                       Achievements:
@@ -539,36 +616,6 @@ export default function SalesUsers() {
                     </div>
                   </div>
                 )}
-
-                {/* Recent Listings Preview */}
-                <div className="mb-4">
-                  <p className="mb-2 text-sm font-medium text-gray-700">
-                    Recent Listings:
-                  </p>
-                  <div className="space-y-1">
-                    {user.recentListings.slice(0, 2).map((listing, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between text-xs"
-                      >
-                        <span className="text-gray-600 truncate">
-                          {listing.name}
-                        </span>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-gray-500">
-                            {listing.views} views
-                          </span>
-                          <div className="flex items-center">
-                            <StarIcon className="w-3 h-3 text-yellow-400" />
-                            <span className="text-gray-600">
-                              {listing.rating}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
 
                 {/* Action Buttons */}
                 <div className="flex space-x-2">
