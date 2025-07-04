@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   UserCircleIcon,
   BellIcon,
@@ -8,49 +8,50 @@ import {
   Bars3Icon,
 } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
+import { fetchNotification } from "../../data/Notification/notification";
 
-const notifications = [
-  {
-    id: 1,
-    title: "New user registration",
-    message: "John Smith has registered as a new user",
-    time: "5 minutes ago",
-    read: false,
-    type: "user",
-  },
-  {
-    id: 2,
-    title: "New business listing",
-    message: "Coffee House submitted a new listing for review",
-    time: "15 minutes ago",
-    read: false,
-    type: "listing",
-  },
-  {
-    id: 3,
-    title: "Payment received",
-    message: "Payment of $299 received from Tech Solutions Inc",
-    time: "1 hour ago",
-    read: true,
-    type: "payment",
-  },
-  {
-    id: 4,
-    title: "Review flagged",
-    message: "A review has been flagged for inappropriate content",
-    time: "2 hours ago",
-    read: false,
-    type: "review",
-  },
-  {
-    id: 5,
-    title: "System maintenance",
-    message: "Scheduled maintenance completed successfully",
-    time: "3 hours ago",
-    read: true,
-    type: "system",
-  },
-];
+// const notifications = [
+//   {
+//     id: 1,
+//     title: "New user registration",
+//     message: "John Smith has registered as a new user",
+//     time: "5 minutes ago",
+//     read: false,
+//     type: "user",
+//   },
+//   {
+//     id: 2,
+//     title: "New business listing",
+//     message: "Coffee House submitted a new listing for review",
+//     time: "15 minutes ago",
+//     read: false,
+//     type: "listing",
+//   },
+//   {
+//     id: 3,
+//     title: "Payment received",
+//     message: "Payment of $299 received from Tech Solutions Inc",
+//     time: "1 hour ago",
+//     read: true,
+//     type: "payment",
+//   },
+//   {
+//     id: 4,
+//     title: "Review flagged",
+//     message: "A review has been flagged for inappropriate content",
+//     time: "2 hours ago",
+//     read: false,
+//     type: "review",
+//   },
+//   {
+//     id: 5,
+//     title: "System maintenance",
+//     message: "Scheduled maintenance completed successfully",
+//     time: "3 hours ago",
+//     read: true,
+//     type: "system",
+//   },
+// ];
 
 export default function Header({
   toggleSidebar,
@@ -64,6 +65,40 @@ export default function Header({
   const [isNotificationSidebarOpen, setIsNotificationSidebarOpen] =
     useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState();
+  const [error, setError] = useState();
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
+
+  // Fetch listings and dynamically set categories and plans
+  useEffect(() => {
+    const loadNotification = async () => {
+      if (!userId || !token) {
+        setError("User ID or token is missing. Please log in.");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await fetchNotification(userId, token);
+
+        // Adjust based on API response structure
+        const fetchedNotification = data?.businesses || data || [];
+        console.log(fetchedNotification);
+        setNotifications(fetchedNotification.notifications);
+        console.log(notifications);
+      } catch (err) {
+        console.error("Failed to fetch listings:", err);
+        setError("Failed to load listings. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadNotification();
+  }, [userId, token]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 

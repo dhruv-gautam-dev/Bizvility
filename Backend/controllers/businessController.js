@@ -8,6 +8,7 @@ import Review from '../models/Review.js';
 import User from '../models/user.js';
 import moment from 'moment'; // Optional for time comparison
 import Leads from '../models/Leads.js';
+import { notifyUser, notifyRole } from '../utils/sendNotification.js';
 
 
 const categoryModels = {
@@ -15,338 +16,6 @@ const categoryModels = {
   Hotel: Hotel,
   BeautySpa: BeautySpa
 };
-
-// export const createBusiness = async (req, res) => {
-//   try {
-//     const {
-//       name,
-//       ownerName,
-//       owner,
-//       location,
-//       phone,
-//       website,
-//       email,
-//       socialLinks,
-//       businessHours,
-//       category, // expecting value: "Health", "Hotel", or "BeautySpa"
-//       experience,
-//       description,
-//       referralCode, // ✅ Optional field for sales tracking
-//       services,
-//       categoryData
-//     } = req.body;
-
-//     // ✅ Resolve category model
-//     const categoryModel = category; // e.g. "Health"
-//     const CategoryModel = categoryModels[categoryModel];
-//     if (!CategoryModel) {
-//       return res.status(400).json({ message: 'Invalid category model' });
-//     }
-
-//     // ✅ Parse complex fields
-//     const parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
-//     const parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
-
-//     let parsedBusinessHours = [];
-//     try {
-//       parsedBusinessHours =
-//         typeof businessHours === 'string' ? JSON.parse(businessHours) : businessHours;
-//       if (!Array.isArray(parsedBusinessHours)) {
-//         throw new Error('businessHours must be an array');
-//       }
-//     } catch (err) {
-//       console.error('❌ Invalid businessHours format:', err.message);
-//       return res.status(400).json({
-//         message: 'Invalid businessHours format. It must be an array of objects with day, open, and close.'
-//       });
-//     }
-
-//     const formattedBusinessHours = parsedBusinessHours.map(entry => ({
-//       day: entry.day || '',
-//       open: entry.open || '',
-//       close: entry.close || ''
-//     }));
-
-//     const parsedServices =
-//       services && typeof services === 'string' ? JSON.parse(services) : services || {};
-
-//     const parsedCategoryData =
-//       categoryData && typeof categoryData === 'string'
-//         ? JSON.parse(categoryData)
-//         : categoryData || {};
-
-//     // ✅ Handle file uploads
-//     const files = req.files || {};
-//     const profileImage = files.profileImage?.[0]?.path || null;
-//     const coverImage = files.coverImage?.[0]?.path || null;
-//     const certificateImages = files.certificateImages?.map(file => file.path).slice(0, 5) || [];
-//     const galleryImages = files.galleryImages?.map(file => file.path).slice(0, 10) || [];
-
-//     // ✅ Referral logic: lookup sales executive using referralCode
-//     let salesExecutive = null;
-//     if (referralCode) {
-//       const refUser = await User.findOne({ referralCode });
-//       if (!refUser) {
-//         return res.status(400).json({ message: 'Invalid referral code' });
-//       }
-//       salesExecutive = refUser._id;
-//     }
-
-//     // ✅ Step 1: Create Business document
-//     const business = new Business({
-//       name,
-//       ownerName,
-//       owner,
-//       location: parsedLocation,
-//       phone,
-//       website,
-//       email,
-//       socialLinks: parsedSocialLinks,
-//       businessHours: formattedBusinessHours,
-//       experience,
-//       description,
-//       profileImage,
-//       coverImage,
-//       certificateImages,
-//       galleryImages,
-//       category,
-//       categoryModel,
-//       services: parsedServices,
-//       salesExecutive // ✅ tracked from referralCode
-//     });
-
-//     const savedBusiness = await business.save();
-//     console.log("✅ Business saved with ID:", savedBusiness._id);
-
-//     // ✅ Step 2: Create category-specific data with business reference
-//     const categoryDoc = new CategoryModel({
-//       ...parsedCategoryData,
-//       business: savedBusiness._id
-//     });
-//     const savedCategoryData = await categoryDoc.save();
-//     console.log("✅ Category data saved:", savedCategoryData);
-
-//     // ✅ Step 3: Link business to saved category data
-//     savedBusiness.categoryRef = savedCategoryData._id;
-//     await savedBusiness.save();
-
-// // ✅ Step 3: Auto-create Lead for Sales team
-//     try {
-//       const user = await User.findById(owner).select('fullName email');
-
-//       if (user) {
-//         await Lead.create({
-//   name: user.fullName,
-//   contact: user.email,
-//   businessType: 'Unknown',
-//   status: 'Interested',
-//   notes: 'Signed up on website',
-//   salesUser: salesExecutive || null,
-//   followUpDate: new Date(Date.now() + 2 * 60 * 1000) // follow-up in 2 mins (for testing)
-// });
-//         console.log("📈 Lead created for business listing");
-//       }
-//     } catch (leadErr) {
-//       console.warn("⚠️ Lead creation failed:", leadErr.message);
-//       // Don't throw: fail silently here to preserve business creation
-//     }
-
-
-
-//     // ✅ Step 4: Populate salesExecutive field before returning
-//     const finalBusiness = await Business.findById(savedBusiness._id).populate('salesExecutive');
-
-//     res.status(201).json({
-//       message: 'Business created successfully',
-//       business: finalBusiness
-//     });
-
-//   } catch (error) {
-//     console.error('❌ Error creating business:', error);
-//     res.status(500).json({
-//       message: 'Server Error',
-//       error: error.message
-//     });
-//   }
-// };
-
-
-
-// export const updateBusiness = async (req, res) => {
-
-//   try {
-//     const { id } = req.params;
-
-//     // 1️⃣  Pull raw body values (strings from form‑data)
-//     const {
-//       name,
-//       ownerName,
-//       phone,
-//       website,
-//       email,
-//       category: newCategory,     // user may change category
-//       experience,
-//       description,
-//       location: rawLocation,
-//       socialLinks: rawSocialLinks,
-//       businessHours: rawBusinessHours
-//     } = req.body;
-
-//     // 2️⃣  Parse JSON‑string fields
-//     let location = {};
-//     let socialLinks = {};
-//     let businessHoursArr = [];
-//     let categoryData = {};
-
-//     try { location = rawLocation ? JSON.parse(rawLocation) : {}; }        catch { return res.status(400).json({ message: 'Invalid JSON in location' }); }
-//     try { socialLinks = rawSocialLinks ? JSON.parse(rawSocialLinks) : {}; }catch { return res.status(400).json({ message: 'Invalid JSON in socialLinks' }); }
-//     try { businessHoursArr = rawBusinessHours ? JSON.parse(rawBusinessHours) : []; } catch { return res.status(400).json({ message: 'Invalid JSON in businessHours' }); }
-//     try { categoryData = req.body.categoryData ? JSON.parse(req.body.categoryData) : {}; } catch { return res.status(400).json({ message: 'Invalid JSON in categoryData' }); }
-
-//     // 3️⃣  Fetch the listing
-//     const business = await Business.findById(id);
-//     if (!business) return res.status(404).json({ message: 'Business not found' });
-
-//     /* ------------------------------------------------------------------ */
-//     /* 4️⃣  Handle file uploads                                           */
-//     /* ------------------------------------------------------------------ */
-//     const files = req.files || {};
-
-//     if (files.profileImage?.length)  business.profileImage  = files.profileImage[0].path;
-//     if (files.coverImage?.length)    business.coverImage    = files.coverImage[0].path;
-//     if (files.certificateImages?.length)
-//       business.certificateImages = files.certificateImages.map(f => f.path).slice(0, 5);
-//     if (files.galleryImages?.length)
-//       business.galleryImages = files.galleryImages.map(f => f.path).slice(0, 10);
-
-//     /* ------------------------------------------------------------------ */
-//     /* 5️⃣  Update simple scalar fields                                   */
-//     /* ------------------------------------------------------------------ */
-//     business.name        = name        ?? business.name;
-//     business.ownerName   = ownerName   ?? business.ownerName;
-//     business.phone       = phone       ?? business.phone;
-//     business.website     = website     ?? business.website;
-//     business.email       = email       ?? business.email;
-//     business.experience  = experience  ?? business.experience;
-//     business.description = description ?? business.description;
-
-//     /* ------------------------------------------------------------------ */
-//     /* 6️⃣  Replace complex objects if sent                               */
-//     /* ------------------------------------------------------------------ */
-//     if (Object.keys(location).length)      business.location    = location;
-//     if (Object.keys(socialLinks).length)   business.socialLinks = socialLinks;
-//     if (Array.isArray(businessHoursArr) && businessHoursArr.length) {
-//       business.businessHours = businessHoursArr.map(bh => ({
-//         day:   bh.day,
-//         open:  bh.open  || '',
-//         close: bh.close || ''
-//       }));
-//     }
-
-//     /* ------------------------------------------------------------------ */
-//     /* 7️⃣  CATEGORY CHANGE or CATEGORY DATA UPDATE                       */
-//     /* ------------------------------------------------------------------ */
-//     if (newCategory && newCategory !== business.category) {
-//       /* --- user picked a new category --- */
-//       const newModelName = newCategory;
-//       const NewCategoryModel = categoryModels[newModelName];
-//       if (!NewCategoryModel)
-//         return res.status(400).json({ message: `Invalid category "${newCategory}"` });
-
-//       // create fresh category doc
-//       const newCatDoc = new NewCategoryModel(categoryData);
-//       await newCatDoc.save();
-
-//       business.category      = newCategory;
-//       business.categoryModel = newModelName;
-//       business.categoryRef   = newCatDoc._id;
-//     } else {
-//       /* --- same category, just update its extra data (if any) --- */
-//       const CurrentCatModel = categoryModels[business.categoryModel];
-//       if (CurrentCatModel && Object.keys(categoryData).length && business.categoryRef) {
-//         const catDoc = await CurrentCatModel.findById(business.categoryRef);
-//         if (catDoc) {
-//           catDoc.set(categoryData);
-//           await catDoc.save();
-//         }
-//       }
-//     }
-
-//     /* ------------------------------------------------------------------ */
-//     /* 8️⃣  Save & respond                                                */
-//     /* ------------------------------------------------------------------ */
-//     const updatedBusiness = await business.save();
-
-//     res.status(200).json({
-//       message: 'Business listing updated successfully',
-//       business: updatedBusiness
-//     });
-//   } catch (error) {
-//     console.error('Error updating business listing:', error);
-//     res.status(500).json({
-//       message: 'Server Error while updating business listing',
-//       error: error.message
-//     });
-//   }
-// };
-
-//get the business by id
-// export const getBusinessById = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-
-//     // 🔍 Step 1: Fetch main business info
-//     const business = await Business.findById(id).lean(); // plain JS object
-//     if (!business) {
-//       console.log('❌ Business not found with id:', id);
-//       return res.status(404).json({ message: 'Business not found' });
-//     }
-
-//     console.log('✅ Fetched business:', business);
-
-//     // 🧠 Step 2: Resolve category model and ref
-//     const CategoryModel = categoryModels[business.categoryModel];
-//     let categoryData = {};
-
-//     if (!CategoryModel) {
-//       console.warn(`⚠️ No model found for category: ${business.categoryModel}`);
-//     } else if (!business.categoryRef) {
-//       console.warn(`⚠️ categoryRef is missing in business document`);
-//     } else {
-//       console.log('✅ Using category model:', business.categoryModel);
-//       console.log('Looking for categoryRef:', business.categoryRef);
-
-//       const categoryDoc = await CategoryModel.findById(business.categoryRef).lean();
-//       if (!categoryDoc) {
-//         console.warn(`⚠️ No category document found with ID: ${business.categoryRef}`);
-//       } else {
-//         const { _id, __v, ...rest } = categoryDoc;
-//         categoryData = rest;
-//         console.log('✅ Fetched category document:', categoryData);
-//       }
-//     }
-
-//     // 🧩 Step 3: Merge and return
-//     const fullData = {
-//       ...business,
-//       categoryData
-//     };
-
-//     console.log('✅ Final response object:', fullData);
-
-//     res.status(200).json({
-//       message: 'Business fetched successfully',
-//       business: fullData
-//     });
-
-//   } catch (error) {
-//     console.error('❌ Error fetching business:', error);
-//     res.status(500).json({
-//       message: 'Server error while fetching business data',
-//       error: error.message
-//     });
-//   }
-// };
 
 export const createBusiness = async (req, res) => {
   try {
@@ -360,7 +29,7 @@ export const createBusiness = async (req, res) => {
       email,
       socialLinks,
       businessHours,
-      category, // "Health", "Hotel", or "BeautySpa"
+      category,
       experience,
       description,
       referralCode,
@@ -368,28 +37,20 @@ export const createBusiness = async (req, res) => {
       categoryData
     } = req.body;
 
-    const categoryModel = category;
-    const CategoryModel = categoryModels[categoryModel];
+    const CategoryModel = categoryModels[category];
     if (!CategoryModel) {
       return res.status(400).json({ message: 'Invalid category model' });
     }
 
     const parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
     const parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
+    const parsedServices = typeof services === 'string' ? JSON.parse(services) : services || {};
+    const parsedCategoryData = typeof categoryData === 'string' ? JSON.parse(categoryData) : categoryData || {};
 
-    let parsedBusinessHours = [];
-    try {
-      parsedBusinessHours = typeof businessHours === 'string'
-        ? JSON.parse(businessHours)
-        : businessHours;
-      if (!Array.isArray(parsedBusinessHours)) {
-        throw new Error('businessHours must be an array');
-      }
-    } catch (err) {
-      return res.status(400).json({
-        message: 'Invalid businessHours format. It must be an array of objects with day, open, and close.'
-      });
-    }
+    // 📅 Handle Business Hours
+    let parsedBusinessHours = Array.isArray(businessHours)
+      ? businessHours
+      : JSON.parse(businessHours || '[]');
 
     const formattedBusinessHours = parsedBusinessHours.map(entry => ({
       day: entry.day || '',
@@ -397,42 +58,32 @@ export const createBusiness = async (req, res) => {
       close: entry.close || ''
     }));
 
-    const parsedServices = services && typeof services === 'string'
-      ? JSON.parse(services)
-      : services || {};
-
-    const parsedCategoryData = categoryData && typeof categoryData === 'string'
-      ? JSON.parse(categoryData)
-      : categoryData || {};
-
+    // 🖼️ Handle File Uploads
     const files = req.files || {};
     const profileImage = files.profileImage?.[0]?.path || null;
     const coverImage = files.coverImage?.[0]?.path || null;
-    const certificateImages = files.certificateImages?.map(file => file.path).slice(0, 5) || [];
-    const galleryImages = files.galleryImages?.map(file => file.path).slice(0, 10) || [];
+    const certificateImages = files.certificateImages?.map(f => f.path).slice(0, 5) || [];
+    const galleryImages = files.galleryImages?.map(f => f.path).slice(0, 10) || [];
 
-    // ✅ Determine sales executive
+    // 🎯 Assign Sales Executive
     let salesExecutive = null;
+
     if (referralCode) {
       const refUser = await User.findOne({ referralCode });
-      if (refUser) {
-        salesExecutive = refUser._id;
-      } else {
-        return res.status(400).json({ message: 'Invalid referral code' });
-      }
+      if (refUser) salesExecutive = refUser._id;
+      else return res.status(400).json({ message: 'Invalid referral code' });
     }
 
-    // ✅ Fallback round-robin if referral code not given
     if (!salesExecutive) {
       const salesUsers = await User.find({ role: 'sales' });
       if (salesUsers.length > 0) {
-        const index = Math.floor(Math.random() * salesUsers.length);
-        salesExecutive = salesUsers[index]._id;
+        const randomIndex = Math.floor(Math.random() * salesUsers.length);
+        salesExecutive = salesUsers[randomIndex]._id;
       }
     }
 
-    // ✅ Step 1: Create business
-    const business = new Business({
+    // 📦 Step 1: Create Business
+    const business = await Business.create({
       name,
       ownerName,
       owner,
@@ -449,36 +100,32 @@ export const createBusiness = async (req, res) => {
       certificateImages,
       galleryImages,
       category,
-      categoryModel,
+      categoryModel: category,
       services: parsedServices,
       salesExecutive
     });
 
-    const savedBusiness = await business.save();
-
-    // ✅ Step 2: Create category model data
-    const categoryDoc = new CategoryModel({
+    // 🗂️ Step 2: Create category specific doc
+    const categoryDoc = await CategoryModel.create({
       ...parsedCategoryData,
-      business: savedBusiness._id
+      business: business._id
     });
-    const savedCategoryData = await categoryDoc.save();
 
-    // ✅ Step 3: Update business with category ref
-    savedBusiness.categoryRef = savedCategoryData._id;
-    await savedBusiness.save();
+    business.categoryRef = categoryDoc._id;
+    await business.save();
 
-    // ✅ Step 4: Create associated lead for follow-up
+    // 📇 Step 3: Create Lead
     try {
       const user = await User.findById(owner).select('fullName email');
       if (user) {
-        await Lead.create({
+        await Leads.create({
           name: user.fullName,
           contact: user.email,
-          businessType: categoryModel,
+          businessType: category,
           status: 'Interested',
           notes: 'Business listed on website',
           salesUser: salesExecutive || null,
-          followUpDate: new Date(Date.now() + 2 * 60 * 1000) // Follow-up in 2 mins (test mode)
+          followUpDate: new Date(Date.now() + 2 * 60 * 1000)
         });
         console.log("📈 Lead created for business listing");
       }
@@ -486,7 +133,49 @@ export const createBusiness = async (req, res) => {
       console.warn("⚠️ Lead creation failed:", err.message);
     }
 
-    const finalBusiness = await Business.findById(savedBusiness._id).populate('salesExecutive');
+    // 🔔 Step 4: Notifications
+    // ➤ Notify Sales Executive (only 1)
+    if (salesExecutive) {
+      await notifyUser({
+        userId: salesExecutive,
+        type: 'NEW_BUSINESS_BY_REFERRAL',
+        title: '📢 New Business Listed',
+        message: `A new business "${name}" was listed by your referred user.`,
+        data: {
+          businessId: business._id,
+          businessName: name,
+          userId: owner
+        }
+      });
+    }
+
+    // ➤ Notify Admins and SuperAdmins (1 per role)
+    await Promise.all([
+      notifyRole({
+        role: 'admin',
+        type: 'NEW_BUSINESS_LISTED',
+        title: '🆕 Business Listing Submitted',
+        message: `"${name}" has been listed and assigned to a sales executive.`,
+        data: {
+          businessId: business._id,
+          ownerId: owner,
+          assignedTo: salesExecutive
+        }
+      }),
+      notifyRole({
+        role: 'superadmin',
+        type: 'NEW_BUSINESS_LISTED',
+        title: '🆕 Business Listing Submitted',
+        message: `"${name}" has been listed and assigned to a sales executive.`,
+        data: {
+          businessId: business._id,
+          ownerId: owner,
+          assignedTo: salesExecutive
+        }
+      })
+    ]);
+
+    const finalBusiness = await Business.findById(business._id).populate('salesExecutive');
 
     res.status(201).json({
       message: 'Business created successfully',
@@ -495,10 +184,7 @@ export const createBusiness = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error creating business:', error);
-    res.status(500).json({
-      message: 'Server Error',
-      error: error.message
-    });
+    res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
 

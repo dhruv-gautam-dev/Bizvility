@@ -1,31 +1,81 @@
+//reviewController.js
 import Review from '../models/Review.js';
 import Business from '../models/Business.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import { updateBusinessRating } from '../utils/calculateAverageRating.js';
+import { notifyUser, notifyRole } from '../utils/sendNotification.js'; // ✅ Import the utility
 
 
-// ⭐ Create Review
 export const createReview = async (req, res) => {
   try {
     const { businessId } = req.params;
     const { rating, comment } = req.body;
 
-    // ✅ Optional: prevent empty reviews
     if (!rating && !comment) {
       return res.status(400).json({ message: 'Rating or comment is required' });
     }
 
+    // 🔍 Validate business
+    const business = await Business.findById(businessId).populate('owner', 'fullName email');
+    if (!business) {
+      return res.status(404).json({ message: 'Business not found' });
+    }
+
+    // 📝 Create review
     const review = new Review({
       user: req.user._id,
       business: businessId,
       rating: rating || undefined,
       comment: comment || ''
     });
-
     await review.save();
 
-    // 🔁 Update average rating after new review
+    // 🔁 Update average rating
     await updateBusinessRating(businessId);
+
+    // 🔔 Notify business owner
+    if (business.owner?._id) {
+      await notifyUser({
+        userId: business.owner._id,
+        type: 'REVIEW_RECEIVED',
+        title: '📢 New Review Received',
+        message: `${req.user.fullName} left a review on your business "${business.name}".`,
+        data: {
+          businessId,
+          rating,
+          comment,
+          reviewerId: req.user._id
+        }
+      });
+    }
+
+    // 🔔 Notify admin and superadmin (single notification per role)
+    await Promise.all([
+      notifyRole({
+        role: 'admin',
+        type: 'REVIEW_RECEIVED',
+        title: '📝 Business Received Review',
+        message: `"${business.name}" just received a review from ${req.user.fullName}.`,
+        data: {
+          businessId,
+          rating,
+          comment,
+          reviewerId: req.user._id
+        }
+      }),
+      notifyRole({
+        role: 'superadmin',
+        type: 'REVIEW_RECEIVED',
+        title: '📝 Business Received Review',
+        message: `"${business.name}" just received a review from ${req.user.fullName}.`,
+        data: {
+          businessId,
+          rating,
+          comment,
+          reviewerId: req.user._id
+        }
+      })
+    ]);
 
     res.status(201).json({
       message: 'Review submitted successfully',
@@ -33,7 +83,7 @@ export const createReview = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error creating review:', error);
+    console.error('❌ Error creating review:', error);
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };

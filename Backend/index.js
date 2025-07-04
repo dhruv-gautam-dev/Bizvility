@@ -17,9 +17,9 @@ import salesRoute from './routes/salesRoute.js';
 import eventRoutes from './routes/eventRoute.js';
 import visitRoutes from './routes/visitRoutes.js';
 import leadsRoute from './routes/leadsRoute.js'; // Import leads route
+import notificationRoutes from './routes/notificationRoutes.js';
 import './cronJobs/leadReminderJob.js';
 import cors from 'cors';
-
 
 
 
@@ -61,6 +61,7 @@ app.use('/api/roles', roleRoute);
 app.use('/api/events', eventRoutes);
 app.use('/api/visit', visitRoutes);
 app.use('/api/leads', leadsRoute); // Leads management route
+app.use('/api/notifications',notificationRoutes )
 // ✅ Serve static files from 'uploads' folder
 app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));
 // Error handling

@@ -16,7 +16,7 @@ export async function fetchNotification(userId,token) {
   };
 
   try {
-    const response = await axios.get(`http://localhost:5000/api/business/sales/listings`, data);
+    const response = await axios.get(`http://localhost:5000/api/notifications`, data);
     return response.data; 
   } catch (err) {
     const message =
