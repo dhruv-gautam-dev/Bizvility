@@ -329,9 +329,7 @@ export default function salesProfile() {
                     )}
                   </div>
                   <div>
-                    <label className="block mb-1 text-sm font-medium text-gray-700">
-                      Username
-                    </label>
+                    <label className="block mb-1 text-sm font-medium text-gray-700"></label>
                     {isEditing ? (
                       <input
                         type="text"
@@ -342,9 +340,7 @@ export default function salesProfile() {
                         className="w-full px-4 py-2 transition-colors duration-200 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                     ) : (
-                      <p className="text-gray-800">
-                        {profile.username || "No username"}
-                      </p>
+                      <p className="text-gray-800">{profile.username || ""}</p>
                     )}
                   </div>
                   <div>

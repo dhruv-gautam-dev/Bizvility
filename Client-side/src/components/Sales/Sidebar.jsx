@@ -28,7 +28,7 @@ const navigation = [
     icon: BuildingStorefrontIcon,
   },
   { name: "Sales Reports", href: "/sales-reports", icon: ChartBarIcon },
-  { name: "Sales Users", href: "/sales-users-management", icon: UsersIcon },
+  { name: "Sales Employee", href: "/sales-users-management", icon: UsersIcon },
   {
     name: "All Listings",
     href: "/sales-listings",
