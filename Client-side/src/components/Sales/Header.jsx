@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import { fetchNotification } from "../../data/Notification/notification";
+import { useSocketEvent } from "../../hooks/useSocketEvent";
 
 // const notifications = [
 //   {
@@ -70,6 +71,11 @@ export default function Header({
   const [error, setError] = useState();
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
+
+  useSocketEvent("new_notification", (data) => {
+    console.log("📥 Notification received from server:", data); // ✅ Debug here
+    setNotifications((prev) => [...prev, data]);
+  });
 
   // Fetch listings and dynamically set categories and plans
   useEffect(() => {
