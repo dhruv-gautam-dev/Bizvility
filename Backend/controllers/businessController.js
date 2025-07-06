@@ -17,6 +17,9 @@ const categoryModels = {
   BeautySpa: BeautySpa
 };
 
+
+//businessController.js
+//create business with notification
 export const createBusiness = async (req, res) => {
   try {
     const {
@@ -135,45 +138,56 @@ export const createBusiness = async (req, res) => {
 
     // 🔔 Step 4: Notifications
     // ➤ Notify Sales Executive (only 1)
-    if (salesExecutive) {
-      await notifyUser({
-        userId: salesExecutive,
-        type: 'NEW_BUSINESS_BY_REFERRAL',
-        title: '📢 New Business Listed',
-        message: `A new business "${name}" was listed by your referred user.`,
-        data: {
-          businessId: business._id,
-          businessName: name,
-          userId: owner
-        }
-      });
-    }
+    // 🔔 Step 4: Notifications
 
-    // ➤ Notify Admins and SuperAdmins (1 per role)
-    await Promise.all([
-      notifyRole({
-        role: 'admin',
-        type: 'NEW_BUSINESS_LISTED',
-        title: '🆕 Business Listing Submitted',
-        message: `"${name}" has been listed and assigned to a sales executive.`,
-        data: {
-          businessId: business._id,
-          ownerId: owner,
-          assignedTo: salesExecutive
-        }
-      }),
-      notifyRole({
-        role: 'superadmin',
-        type: 'NEW_BUSINESS_LISTED',
-        title: '🆕 Business Listing Submitted',
-        message: `"${name}" has been listed and assigned to a sales executive.`,
-        data: {
-          businessId: business._id,
-          ownerId: owner,
-          assignedTo: salesExecutive
-        }
-      })
-    ]);
+if (salesExecutive) {
+  // ✅ Notify Sales Executive
+  await notifyUser({
+    userId: salesExecutive,
+    type: 'NEW_BUSINESS_BY_REFERRAL',
+    title: '📢 New Business Listed',
+    message: `A new business "${name}" was listed by your referred user.`,
+    data: {
+      businessId: business._id,
+      businessName: name,
+      userId: owner,
+      redirectPath: `/sales/business/${business._id}`
+    }
+  });
+}
+
+// ✅ Notify Admins & Superadmins (Always)
+await Promise.all([
+  notifyRole({
+    role: 'admin',
+    type: 'NEW_BUSINESS_LISTED',
+    title: '🆕 Business Listing Submitted',
+    message: salesExecutive
+      ? `"${name}" has been listed and assigned to a sales executive.`
+      : `"${name}" has been listed but not yet assigned to any sales executive.`,
+    data: {
+      businessId: business._id,
+      ownerId: owner,
+      assignedTo: salesExecutive || null,
+      redirectPath: `/admin/business/${business._id}`
+    }
+  }),
+  notifyRole({
+    role: 'superadmin',
+    type: 'NEW_BUSINESS_LISTED',
+    title: '🆕 Business Listing Submitted',
+    message: salesExecutive
+      ? `"${name}" has been listed and assigned to a sales executive.`
+      : `"${name}" has been listed but not yet assigned to any sales executive.`,
+    data: {
+      businessId: business._id,
+      ownerId: owner,
+      assignedTo: salesExecutive || null,
+      redirectPath: `/superadmin/business/${business._id}`
+    }
+  })
+]);
+
 
     const finalBusiness = await Business.findById(business._id).populate('salesExecutive');
 
@@ -187,6 +201,8 @@ export const createBusiness = async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
+
+
 
 
 

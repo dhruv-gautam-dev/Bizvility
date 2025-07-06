@@ -3,6 +3,11 @@ import Event from '../models/Events.js';
 import Business from '../models/Business.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
+
+
+
+//evetnController.js
+//create event with notification
 // ✅ Create new event
 export const createEvent = asyncHandler(async (req, res) => {
   const { business, title, description, startTime, endTime, link, location } = req.body;
@@ -25,11 +30,31 @@ export const createEvent = asyncHandler(async (req, res) => {
     isApproved: false // Admin will approve later
   });
 
+  // ✅ Notify Admin and SuperAdmin
+  const notifyPayload = {
+    type: 'EVENT_REQUEST',
+    title: '📅 New Event Submitted',
+    message: `An event "${title}" has been submitted and is awaiting approval.`,
+    data: {
+      eventId: event._id,
+      businessId: business,
+      redirectPath: `/admin/events/${event._id}`  // your frontend event approval path
+    }
+  };
+
+  const eventsData = await Promise.all([
+    notifyRole({ role: 'admin', ...notifyPayload }),
+    notifyRole({ role: 'superadmin', ...notifyPayload })
+  ]);
+
   res.status(201).json({
     message: 'Event created successfully',
-    event
+    event,
+    eventsData
   });
 });
+
+
 
 // ✅ Edit event
 export const updateEvent = asyncHandler(async (req, res) => {

@@ -16,7 +16,12 @@ import {
   ChatBubbleLeftRightIcon,
   UsersIcon,
   XMarkIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/outline";
+import { useState } from "react";
+import LogoImage from "../imgs/white-logo.png";
+import CollapsedLogoImage from "../imgs/bizvility-logo.ico";
 
 const navigation = [
   { name: "Sales Dashboard", href: "/sales-dashboard", icon: HomeIcon },
@@ -56,12 +61,9 @@ const navigation = [
   // { name: 'Settings', href: '/sales-settings', icon: Cog6ToothIcon },
 ];
 
-export default function Sidebar({
-  isCollapsed,
-  isMobileMenuOpen,
-  setIsMobileMenuOpen,
-}) {
+export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
   const location = useLocation();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
@@ -93,24 +95,34 @@ export default function Sidebar({
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between flex-shrink-0 p-4 border-b border-gray-700">
-          {!isCollapsed || window.innerWidth < 1024 ? (
-            <h1 className="text-lg font-bold truncate lg:text-xl">
-              Sales Dashboard
-            </h1>
-          ) : (
-            <div className="flex items-center justify-center w-8 h-8 mx-auto bg-blue-600 rounded-lg">
-              <span className="text-sm font-bold text-white">SD</span>
-            </div>
-          )}
+        <div className="flex items-center justify-between flex-shrink-0 p-1 border-b border-gray-700">
+          <Link to="/">
+            <img
+              src={isCollapsed ? CollapsedLogoImage : LogoImage}
+              alt="Bizvility Logo"
+              className={`h-11 ${
+                isCollapsed ? "w-11 rounded-full" : "w-32"
+              } object-contain transition-all duration-300`}
+            />
+          </Link>
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-1 transition-colors rounded hover:bg-gray-800"
+          >
+            {isCollapsed ? (
+              <ChevronRightIcon className="w-5 h-5" />
+            ) : (
+              <ChevronDownIcon className="w-5 h-5" />
+            )}
+          </button>
 
           {/* Mobile close button */}
-          <button
+          {/* <button
             onClick={closeMobileMenu}
             className="p-1 transition-colors rounded lg:hidden hover:bg-gray-800"
           >
             <XMarkIcon className="w-6 h-6" />
-          </button>
+          </button> */}
         </div>
 
         {/* Navigation */}

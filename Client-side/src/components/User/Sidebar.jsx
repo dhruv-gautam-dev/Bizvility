@@ -95,7 +95,7 @@ export default function Sidebar() {
         <div className="flex-shrink-0 p-4 border-t border-gray-700">
           <div className="text-xs text-gray-400">
             <div>User Dashboard</div>
-            <div>© 2024 ListingPro</div>
+            <div>© 2025 ListingPro</div>
           </div>
         </div>
       )}

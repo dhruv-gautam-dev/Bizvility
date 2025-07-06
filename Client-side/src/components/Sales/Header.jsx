@@ -5,54 +5,11 @@ import {
   MagnifyingGlassIcon,
   ChevronDownIcon,
   XMarkIcon,
-  Bars3Icon,
 } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import { fetchNotification } from "../../data/Notification/notification";
 import { useSocketEvent } from "../../hooks/useSocketEvent";
-
-// const notifications = [
-//   {
-//     id: 1,
-//     title: "New user registration",
-//     message: "John Smith has registered as a new user",
-//     time: "5 minutes ago",
-//     read: false,
-//     type: "user",
-//   },
-//   {
-//     id: 2,
-//     title: "New business listing",
-//     message: "Coffee House submitted a new listing for review",
-//     time: "15 minutes ago",
-//     read: false,
-//     type: "listing",
-//   },
-//   {
-//     id: 3,
-//     title: "Payment received",
-//     message: "Payment of $299 received from Tech Solutions Inc",
-//     time: "1 hour ago",
-//     read: true,
-//     type: "payment",
-//   },
-//   {
-//     id: 4,
-//     title: "Review flagged",
-//     message: "A review has been flagged for inappropriate content",
-//     time: "2 hours ago",
-//     read: false,
-//     type: "review",
-//   },
-//   {
-//     id: 5,
-//     title: "System maintenance",
-//     message: "Scheduled maintenance completed successfully",
-//     time: "3 hours ago",
-//     read: true,
-//     type: "system",
-//   },
-// ];
+import axios from "axios";
 
 export default function Header({
   toggleSidebar,
@@ -67,62 +24,144 @@ export default function Header({
     useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState();
-  const [error, setError] = useState();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
 
+  // Handle real-time notifications
   useSocketEvent("new_notification", (data) => {
-    console.log("📥 Notification received from server:", data); // ✅ Debug here
-    setNotifications((prev) => [...prev, data]);
+    console.log("📥 New notification received:", data);
+    // Ensure the new notification has the required fields
+    const newNotification = {
+      ...data,
+      _id: data._id || `temp-${Date.now()}`, // Fallback ID if not provided
+      isRead: false,
+      createdAt: data.createdAt || new Date().toISOString(),
+      title: data.title || "New Notification",
+      message: data.message || "No message provided",
+      type: data.type || "GENERAL",
+    };
+    setNotifications((prev) => {
+      const updatedNotifications = [newNotification, ...prev];
+      console.log("🔔 Updated notifications state:", updatedNotifications);
+      return [...updatedNotifications]; // Create a new array to ensure re-render
+    });
   });
 
-  // Fetch listings and dynamically set categories and plans
-  useEffect(() => {
-    const loadNotification = async () => {
-      if (!userId || !token) {
-        setError("User ID or token is missing. Please log in.");
-        return;
-      }
+  // Fetch initial notifications
+  const loadNotification = async () => {
+    if (!userId || !token) {
+      setError("User ID or token is missing. Please log in.");
+      return;
+    }
 
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await fetchNotification(userId, token);
-
-        // Adjust based on API response structure
-        const fetchedNotification = data?.businesses || data || [];
-        console.log(fetchedNotification);
-        setNotifications(fetchedNotification.notifications);
-        console.log(notifications);
-      } catch (err) {
-        console.error("Failed to fetch listings:", err);
-        setError("Failed to load listings. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadNotification();
-  }, [userId, token]);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-      alert(`Searching for: ${searchTerm}`);
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await fetchNotification(userId, token);
+      const fetchedNotifications = data?.notifications || [];
+      console.log("📋 Fetched notifications:", fetchedNotifications);
+      setNotifications(
+        fetchedNotifications.map((notification) => ({
+          ...notification,
+          isRead: notification.isRead || false,
+        }))
+      );
+    } catch (err) {
+      console.error("❌ Failed to fetch notifications:", err.message);
+      setError("Failed to load notifications. Please try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleNotificationClick = () => {
-    setIsNotificationPopupOpen(!isNotificationPopupOpen);
-    setIsDropdownOpen(false);
+  useEffect(() => {
+    loadNotification();
+  }, [userId, token]);
+
+  // Mark all notifications as read
+  const markNotificationsAsRead = async () => {
+    try {
+      const unreadNotifications = notifications.filter((n) => !n.isRead);
+      if (unreadNotifications.length === 0) {
+        console.log("ℹ️ No unread notifications to mark as read");
+        return;
+      }
+
+      const userRole = "t"; // Set role to 't' as specified
+      const response = await axios.patch(
+        "http://localhost:5000/api/notifications/mark-all-read",
+        { userId, role: userRole },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status !== 200) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      console.log(
+        "✅ API Response: All notifications marked as read",
+        response.data
+      );
+
+      // Update local state to reflect all notifications as read
+      setNotifications((prev) => {
+        const updatedNotifications = prev.map((notification) => ({
+          ...notification,
+          isRead: true,
+        }));
+        console.log(
+          "🔔 Updated notifications state (marked as read):",
+          updatedNotifications
+        );
+        return [...updatedNotifications]; // Create a new array to ensure re-render
+      });
+    } catch (err) {
+      console.error(
+        "❌ Failed to mark all notifications as read:",
+        err.message
+      );
+      setError("Failed to mark notifications as read. Please try again.");
+    }
   };
 
-  const showAllNotifications = () => {
+  const handleLogout = async () => {
+    localStorage.clear();
+    navigate("//");
+    console.log("🗑️ Local storage cleared:", localStorage);
+    window.location.reload(); // Reset app state
+  };
+
+  // Handle notification click and navigation
+  const handleNotificationClick = (notification) => {
+    setIsNotificationPopupOpen(false);
+    setIsNotificationSidebarOpen(false);
+    if (notification?.data?.businessId) {
+      navigate(`/categories/health/store/${notification.data.businessId}`);
+    }
+  };
+
+  // Handle notification popup toggle
+  const handleNotificationPopupToggle = async () => {
+    setIsNotificationPopupOpen(!isNotificationPopupOpen);
+    setIsDropdownOpen(false);
+    if (!isNotificationPopupOpen && notifications.some((n) => !n.isRead)) {
+      await markNotificationsAsRead();
+    }
+  };
+
+  const showAllNotifications = async () => {
     setIsNotificationPopupOpen(false);
     setIsNotificationSidebarOpen(true);
+    if (notifications.some((n) => !n.isRead)) {
+      await markNotificationsAsRead();
+    }
   };
 
   const handleProfileAction = (action) => {
@@ -135,12 +174,10 @@ export default function Header({
         navigate("/settings");
         break;
       case "signout":
-        if (window.confirm("Are you sure you want to sign out?")) {
-          alert("Signing out...");
-        }
+        handleLogout();
         break;
       default:
-        console.log("Profile action:", action);
+        console.log("🔍 Profile action:", action);
     }
   };
 
@@ -152,42 +189,38 @@ export default function Header({
     }
   };
 
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      alert(`Searching for: ${searchTerm}`);
+    }
+  };
+
   return (
     <>
       <header className="relative z-30 bg-white border-b border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between h-16 px-4 lg:px-6">
-          <div className="flex items-center gap-x-3">
-            <button
-              onClick={handleMobileToggle}
-              className="p-2 text-blue-600 transition-colors rounded-md hover:text-blue-800 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              title={
-                window.innerWidth < 1024
-                  ? "Toggle menu"
-                  : sidebarCollapsed
-                  ? "Expand sidebar"
-                  : "Collapse sidebar"
-              }
-            >
-              <Bars3Icon className="w-6 h-6" />
-            </button>
-
-            <h1 className="hidden text-lg font-bold text-gray-900 sm:block lg:text-xl">
+        <div className="flex items-center justify-between h-16 px-4 mx-auto sm:px-6 max-w-screen-2xl">
+          <div className="flex items-center w-full gap-x-3 sm:w-auto">
+            <h1 className="text-lg font-bold text-gray-900 truncate sm:text-xl">
               Sales Dashboard
             </h1>
-
-            <form onSubmit={handleSearch} className="relative hidden md:block">
+            <form
+              onSubmit={handleSearch}
+              className="relative flex-1 hidden max-w-sm sm:flex"
+            >
               <MagnifyingGlassIcon className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
               <input
                 type="text"
                 placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-48 py-2 pl-10 pr-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent lg:w-64"
+                className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </form>
           </div>
-
-          <div className="flex items-center gap-x-2 lg:gap-x-4">
+          <div className="flex items-center gap-x-2 sm:gap-x-4">
             <button
               onClick={() => {
                 const searchInput = prompt("Search for:");
@@ -195,15 +228,14 @@ export default function Header({
                   alert(`Searching for: ${searchInput}`);
                 }
               }}
-              className="p-2 text-gray-500 transition-colors rounded-full md:hidden hover:text-gray-700 hover:bg-gray-100"
+              className="p-2 text-gray-500 transition-colors rounded-full sm:hidden hover:text-gray-700 hover:bg-gray-100"
             >
               <MagnifyingGlassIcon className="w-6 h-6" />
             </button>
-
             <div className="relative">
               <button
                 className="relative p-2 text-gray-500 transition-colors rounded-full hover:text-gray-700 hover:bg-gray-100"
-                onClick={handleNotificationClick}
+                onClick={handleNotificationPopupToggle}
               >
                 <BellIcon className="w-6 h-6" />
                 {unreadCount > 0 && (
@@ -212,20 +244,25 @@ export default function Header({
                   </span>
                 )}
               </button>
-
               {isNotificationPopupOpen && (
-                <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                <div className="absolute right-0 mt-2 w-80 sm:w-96 max-w-[calc(100 innerhalb:5000px)] bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50">
                   <div className="p-4 border-b border-gray-200">
                     <h3 className="text-lg font-medium text-gray-900">
                       Notifications
                     </h3>
                   </div>
                   <div className="overflow-y-auto max-h-96">
+                    {notifications.length === 0 && (
+                      <div className="p-4 text-sm text-gray-600">
+                        No notifications available
+                      </div>
+                    )}
                     {notifications.slice(0, 3).map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`p-4 border-b border-gray-100 hover:bg-gray-50 ${
-                          !notification.read ? "bg-blue-50" : ""
+                      <button
+                        key={notification._id}
+                        onClick={() => handleNotificationClick(notification)}
+                        className={`w-full text-left p-4 border-b border-gray-100 hover:bg-gray-50 ${
+                          !notification.isRead ? "bg-blue-50" : ""
                         }`}
                       >
                         <div className="flex items-start">
@@ -237,14 +274,16 @@ export default function Header({
                               {notification.message}
                             </p>
                             <p className="mt-2 text-xs text-gray-400">
-                              {notification.time}
+                              {new Date(
+                                notification.createdAt
+                              ).toLocaleString()}
                             </p>
                           </div>
-                          {!notification.read && (
+                          {!notification.isRead && (
                             <div className="w-2 h-2 mt-2 bg-blue-500 rounded-full"></div>
                           )}
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                   <div className="p-4 border-t border-gray-200">
@@ -258,19 +297,17 @@ export default function Header({
                 </div>
               )}
             </div>
-
             <div className="relative">
               <button
                 className="flex items-center p-2 text-sm transition-colors rounded-lg gap-x-2 hover:bg-gray-100"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
                 <UserCircleIcon className="w-8 h-8 text-gray-500" />
-                <span className="hidden text-gray-700 sm:block">
+                <span className="hidden sm:block text-gray-700 truncate max-w-[150px]">
                   Admin User
                 </span>
                 <ChevronDownIcon className="w-4 h-4 text-gray-500" />
               </button>
-
               {isDropdownOpen && (
                 <div className="absolute right-0 z-10 w-48 py-1 mt-2 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
                   <button
@@ -297,7 +334,6 @@ export default function Header({
           </div>
         </div>
       </header>
-
       {isNotificationSidebarOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
           <div
@@ -317,11 +353,17 @@ export default function Header({
               </button>
             </div>
             <div className="h-full pb-20 overflow-y-auto">
+              {notifications.length === 0 && (
+                <div className="p-4 text-sm text-gray-600">
+                  No notifications available
+                </div>
+              )}
               {notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`p-4 border-b border-gray-100 hover:bg-gray-50 ${
-                    !notification.read ? "bg-blue-50" : ""
+                <button
+                  key={notification._id}
+                  onClick={() => handleNotificationClick(notification)}
+                  className={`w-full text-left p-4 border-b border-gray-100 hover:bg-gray-50 ${
+                    !notification.isRead ? "bg-blue-50" : ""
                   }`}
                 >
                   <div className="flex items-start">
@@ -332,14 +374,8 @@ export default function Header({
                         </p>
                         <span
                           className={`px-2 py-1 text-xs rounded-full ${
-                            notification.type === "user"
-                              ? "bg-green-100 text-green-800"
-                              : notification.type === "listing"
+                            notification.type === "NEW_BUSINESS_BY_REFERRAL"
                               ? "bg-blue-100 text-blue-800"
-                              : notification.type === "payment"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : notification.type === "review"
-                              ? "bg-red-100 text-red-800"
                               : "bg-gray-100 text-gray-800"
                           }`}
                         >
@@ -350,20 +386,19 @@ export default function Header({
                         {notification.message}
                       </p>
                       <p className="mt-2 text-xs text-gray-400">
-                        {notification.time}
+                        {new Date(notification.createdAt).toLocaleString()}
                       </p>
                     </div>
-                    {!notification.read && (
+                    {!notification.isRead && (
                       <div className="w-2 h-2 mt-2 ml-2 bg-blue-500 rounded-full"></div>
                     )}
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
         </div>
       )}
-
       {(isDropdownOpen || isNotificationPopupOpen) && (
         <div
           className="fixed inset-0 z-20"

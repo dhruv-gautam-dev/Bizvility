@@ -306,7 +306,7 @@ export default function Dashboard() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total Revenue</p>
               <p className="text-xl font-semibold text-gray-900 lg:text-2xl">
-                ${platformStats.totalRevenue.toLocaleString()}
+                ₹{platformStats.totalRevenue.toLocaleString()}
               </p>
               <div className="flex items-center mt-1">
                 <ArrowUpIcon className="w-4 h-4 text-green-500" />

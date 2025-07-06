@@ -1,2 +1,10 @@
 rahul@example.com
 Password123!
+
+
+{
+  "fullName": "Ravi Kumar",
+  "email": "rishiraj8618@gmail.com",
+  "password": "rameshpass123",
+  "role":"sales"
+}
