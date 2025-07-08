@@ -89,6 +89,7 @@ const SignInForm = () => {
       console.log(response.data);
       localStorage.setItem("user", JSON.stringify(response));
       localStorage.setItem("userId", response.data._id);
+      localStorage.setItem("role", response.data.role);
 
       console.log(response.data._id);
 

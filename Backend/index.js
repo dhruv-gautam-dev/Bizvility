@@ -23,6 +23,8 @@ import notificationRoutes from './routes/notificationRoutes.js';
 import './cronJobs/leadReminderJob.js';
 import cors from 'cors';
 
+import { initNotificationSystem } from './utils/sendNotification.js';
+
 dotenv.config();
 const app = express();
 
@@ -38,7 +40,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // CORS
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:5000'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  methods: ['GET', 'POST', 'PUT','PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   exposedHeaders: ['Content-Type']
@@ -59,34 +61,62 @@ const io = new Server(httpServer, {
 const onlineUsers = new Map();
 
 // 🎯 Socket.IO connection
-io.on('connection', (socket) => {
-  console.log('✅ Socket connected:', socket.id);
+io.on("connection", (socket) => {
+  console.log("✅ Socket connected:", socket.id);
 
-  // Receive and register userId from frontend
-  socket.on('register', (userId) => {
-    onlineUsers.set(userId, socket.id); // 🔄 Ensure .toString()
-  console.log(`🟢 User registered: ${userId} -> ${socket.id}`);
-  console.log('✅ Current Online Users Map:', Array.from(onlineUsers.entries()));
+  // Handle user registration
+  socket.on("register", (data) => {
+    console.log("📩 Received register payload:", data);
+
+    // 🚫 Reject invalid data
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+      console.warn("❌ Invalid register payload. Expected an object with userId and role.");
+      return;
+    }
+
+    const { userId, role } = data;
+
+    // 🚫 Reject if userId is not a string
+    if (!userId || typeof userId !== "string") {
+      console.warn("⚠️ Invalid or missing userId in registration.");
+      return;
+    }
+
+    const userStr = userId.trim();
+    onlineUsers.set(userStr, socket.id); // ✅ store string key only
+
+    // Join per-user room
+    socket.join(`user_${userStr}`);
+
+    // Join role-based room
+    if (role && typeof role === "string") {
+      socket.join(`role_${role}`);
+    }
+
+    console.log(`🟢 User ${userStr} joined room`);
+    console.log("✅ Current onlineUsers:", Array.from(onlineUsers.entries()));
   });
 
-  // Clean up on disconnect
-  socket.on('disconnect', () => {
+  // Cleanup on disconnect
+  socket.on("disconnect", () => {
     for (const [userId, sockId] of onlineUsers.entries()) {
       if (sockId === socket.id) {
         onlineUsers.delete(userId);
-        console.log(`🔴 User disconnected: ${userId}`);
+        console.log(`🔴 Disconnected: ${userId}`);
         break;
       }
     }
   });
 });
-import { initNotificationSystem } from './utils/sendNotification.js';
+
+
+
+
+
 initNotificationSystem(io, onlineUsers);
 
 // Make io and onlineUsers accessible globally
 export { io, onlineUsers };
-
-
 
 
 

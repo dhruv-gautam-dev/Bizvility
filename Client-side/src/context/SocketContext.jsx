@@ -1,4 +1,3 @@
-// src/context/SocketContext.jsx
 import { createContext, useEffect } from "react";
 import socket from "../socket";
 
@@ -6,16 +5,21 @@ export const SocketContext = createContext();
 
 export const SocketProvider = ({ children }) => {
   useEffect(() => {
-    socket.connect();
+    if (!socket.connected) {
+      socket.connect();
+    }
 
     socket.on("connect", () => {
-      console.log("✅ Socket connected:", socket.id);
       const userId = localStorage.getItem("userId");
-      socket.emit("register", userId); // ✅ important
+      const role = localStorage.getItem("role");
 
-      socket.on("new_notification", (data) => {
-        console.log("📥 New Notification received:", data);
-      });
+      if (userId) {
+        socket.emit("register", { userId: userId.toString(), role });
+      } else {
+        console.warn(
+          "⚠️ Skipping registration: No userId found in localStorage"
+        );
+      }
     });
 
     socket.on("disconnect", () => {
@@ -23,7 +27,7 @@ export const SocketProvider = ({ children }) => {
     });
 
     return () => {
-      socket.disconnect(); // Clean up on unmount
+      socket.disconnect();
     };
   }, []);
 

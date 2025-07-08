@@ -89,10 +89,10 @@ export default function Header({
         return;
       }
 
-      const userRole = "t"; // Set role to 't' as specified
+      // const userRole = "t"; // Set role to 't' as specified
       const response = await axios.patch(
         "http://localhost:5000/api/notifications/mark-all-read",
-        { userId, role: userRole },
+        { userId },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -257,6 +257,7 @@ export default function Header({
                         No notifications available
                       </div>
                     )}
+                    {console.log(notifications)}
                     {notifications.slice(0, 3).map((notification) => (
                       <button
                         key={notification._id}

@@ -17,6 +17,7 @@ export async function fetchNotification(userId,token) {
 
   try {
     const response = await axios.get(`http://localhost:5000/api/notifications`, data);
+    console.log(data);
     return response.data; 
   } catch (err) {
     const message =

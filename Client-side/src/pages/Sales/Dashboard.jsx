@@ -117,7 +117,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchCustomers = async () => {
       const token = localStorage.getItem("token");
-      console.log("Fetching customers with token:", token);
+
       if (!token) {
         setError(
           "No authentication token found. Please ensure you are logged in."
@@ -163,8 +163,6 @@ export default function Dashboard() {
           location: user.location || "",
         }));
         setRecentUsers(mappedCustomers);
-
-        console.log("Customers set to:", mappedCustomers);
       } catch (err) {
         console.error("Fetch customers error:", err);
         setError(
@@ -408,7 +406,7 @@ export default function Dashboard() {
               <div className="space-y-4">
                 {recentListings.map((listing) => (
                   <div
-                    key={listing.id}
+                    key={listing._id}
                     className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
                   >
                     <div className="flex-1 min-w-0">
