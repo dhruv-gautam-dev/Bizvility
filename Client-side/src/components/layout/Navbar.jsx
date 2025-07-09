@@ -45,6 +45,8 @@ const Navbar = ({ scrolled, user }) => {
       navigate("/user-dashboard");
     } else if (role === "sales") {
       navigate("/sales-dashboard");
+    } else if (role === "admin") {
+      navigate("/admin-dashboard");
     }
   };
 

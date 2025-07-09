@@ -1,9 +1,16 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout.jsx";
-import AdminLayout from "./components/superAdmin/AdminLayout.jsx";
+import SuperAdminLayout from "./components/superAdmin/AdminLayout.jsx";
+import AdminLayout from "./components/Admin/AdminLayout.jsx";
 import UserLayout from "./components/User/UserLayout.jsx";
 import SalesLayout from "./components/Sales/SalesLayout.jsx";
+
+//auth
+import StoreDetailPage from "./pages/HealthCategoryPages/StoreDetailPage.jsx";
+import ForgotPassword from "./components/auth/ForgotPassword.jsx";
+import EventsPage from "./pages/User/EventsPage.jsx";
+import EventForm from "./pages/EventForm.jsx";
 
 // Public Pages
 import HomePage from "./pages/HomePage.jsx";
@@ -32,6 +39,14 @@ import JobApplicationPage from "./pages/JobApplicationPage.jsx";
 import BusinessListingPage from "./pages/BusinessListingPage.jsx";
 import ListBusinessPage from "./pages/ListBusinessPage.jsx";
 
+// Admin Pages
+import AdminDashboard from "./pages/Admin/AdminDashboardPage.jsx";
+import AdminBusinesses from "./pages/Admin/AdminBusinessesPage.jsx";
+import AdminCategories from "./pages/Admin/AdminCategoriesPage.jsx";
+import AdminUsers from "./pages/Admin/AdminUsersPage.jsx";
+import AdminAnalytics from "./pages/Admin/AdminAnalyticsPage.jsx";
+import AdminSettings from "./pages/Admin/Settings.jsx";
+
 // User Pages
 import UserDashboard from "./pages/User/Dashboard.jsx";
 import UserProfile from "./pages/User/Profile.jsx";
@@ -55,21 +70,21 @@ import SalesCustomers from "./pages/Sales/Customers.jsx";
 import SalesReports from "./pages/Sales/SalesReports.jsx";
 import SalesUsers from "./pages/Sales/SalesUsers.jsx";
 import SalesUserAnalytics from "./pages/Sales/SalesUserAnalytics.jsx";
-
-// SuperAdmin Pages
-import Dashboard from "./pages/superAdmin/Dashboard.jsx";
-import Businesses from "./pages/superAdmin/Businesses.jsx";
-import Categories from "./pages/superAdmin/Categories.jsx";
-import Users from "./pages/superAdmin/Users.jsx";
-import Analytics from "./pages/superAdmin/Analytics.jsx";
-import Settings from "./pages/superAdmin/Settings.jsx";
-import StoreDetailPage from "./pages/HealthCategoryPages/StoreDetailPage.jsx";
-import ForgotPassword from "./components/auth/ForgotPassword.jsx";
-import { ToastContainer } from "react-toastify";
-import toast, { Toaster } from "react-hot-toast";
-import EventsPage from "./pages/User/EventsPage.jsx";
-import EventForm from "./pages/EventForm.jsx";
 import { SocketProvider } from "./context/SocketContext.jsx";
+import { Toaster } from "react-hot-toast";
+
+// // SuperAdmin Pages
+import SuperDashboard from "./pages/superAdmin/Dashboard.jsx";
+import SuperBusinesses from "./pages/superAdmin/Businesses.jsx";
+import SuperCategories from "./pages/superAdmin/Categories.jsx";
+import SuperUsers from "./pages/superAdmin/Users.jsx";
+import SuperAnalytics from "./pages/superAdmin/Analytics.jsx";
+import SuperSettings from "./pages/superAdmin/Settings.jsx";
+import AdminProfile from "./pages/Admin/AdminProfile.jsx";
+
+// import { ToastContainer } from "react-toastify";
+// import toast, { Toaster } from "react-hot-toast";
+
 // import ProfileSettings from './pages/superAdmin/Profile.jsx';
 
 function App() {
@@ -128,13 +143,29 @@ function App() {
 
             {/* Super Admin Dashboard (AdminLayout) */}
             <Route element={<AdminLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/businesses" element={<Businesses />} />
-              <Route path="/dashboard-categories" element={<Categories />} />
-              <Route path="/users" element={<Users />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/settings" element={<Settings />} />
-              {/* <Route path="/profile" element={<ProfileSettings/>} /> */}
+              <Route path="/dashboard" element={<SuperDashboard />} />
+              <Route path="/businesses" element={<SuperBusinesses />} />
+              <Route
+                path="/dashboard-categories"
+                element={<SuperCategories />}
+              />
+              <Route path="/users" element={<SuperUsers />} />
+              <Route path="/analytics" element={<SuperAnalytics />} />
+              <Route path="/settings" element={<SuperSettings />} />
+            </Route>
+
+            {/* Admin Dashboard (AdminLayout) */}
+            <Route element={<AdminLayout />}>
+              <Route path="/admin-dashboard" element={<AdminDashboard />} />
+              <Route path="/admin-businesses" element={<AdminBusinesses />} />
+              <Route
+                path="/admin-dashboard-categories"
+                element={<AdminCategories />}
+              />
+              <Route path="/admin-users-list" element={<AdminUsers />} />
+              <Route path="/admin-analytics" element={<AdminAnalytics />} />
+              <Route path="/admin-settings" element={<AdminSettings />} />
+              <Route path="/profile-settings" element={<AdminProfile />} />
             </Route>
 
             {/* User Dashboard (UserLayout) */}
