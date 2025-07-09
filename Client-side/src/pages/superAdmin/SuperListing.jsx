@@ -71,6 +71,11 @@ export default function SuperListing() {
   const IMAGE_BASE_URL = "http://localhost:5000/";
   // ...existing imports...
 
+  const handleView = (listing) => {
+    console.log("Viewing listing:", listing);
+    navigate(`/categories/health/store/${listing.id}`);
+  };
+
   const refreshAccessToken = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
     console.log(
@@ -1089,7 +1094,10 @@ export default function SuperListing() {
                   </td>
                   <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                     <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900">
+                      <button
+                        className="text-blue-600 hover:text-blue-900"
+                        onClick={() => handleView(listing)}
+                      >
                         <EyeIcon className="w-4 h-4" />
                       </button>
                       <button

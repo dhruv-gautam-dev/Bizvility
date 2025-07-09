@@ -22,6 +22,11 @@ export default function SuperReviews() {
   const navigate = useNavigate();
   const API_BASE_URL = "http://localhost:5000/api";
 
+  const handleView = (review) => {
+    console.log("Viewing listing:", review);
+    navigate(`/categories/health/store/${review.businessId}`);
+  };
+
   const refreshAccessToken = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
     if (!refreshToken) {
@@ -86,6 +91,7 @@ export default function SuperReviews() {
         id: review._id,
         reviewer: review.user?.fullName || "Anonymous",
         business: review.business?.name || "Unknown Business",
+        businessId: review.businessId || "Unknown Business",
         rating: Number(review.rating) || 0,
         title: review.comment
           ? review.comment.split(" ").slice(0, 3).join(" ") + "..."
@@ -338,6 +344,7 @@ export default function SuperReviews() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
+              {console.log("Filtered Reviews:", filteredReviews)}
               {filteredReviews.map((review) => (
                 <tr key={review.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
@@ -383,6 +390,7 @@ export default function SuperReviews() {
                       <button
                         className="p-1 text-blue-600 hover:text-blue-800"
                         title="View Details"
+                        onClick={() => handleView(review)}
                       >
                         <EyeIcon className="w-4 h-4" />
                       </button>

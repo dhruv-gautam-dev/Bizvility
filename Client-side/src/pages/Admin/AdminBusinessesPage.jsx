@@ -64,6 +64,11 @@ export default function AdminBusinessesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const handleView = (listing) => {
+    console.log("Viewing listing:", listing);
+    navigate(`/categories/health/store/${listing.id}`);
+  };
+
   const categories = ["Restaurant", "Services", "Retail", "Health & Fitness"];
   const totalSteps = 5;
   const navigate = useNavigate();
@@ -1008,6 +1013,7 @@ export default function AdminBusinessesPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
+              {console.log("Filtered Listings:", filteredListings)}
               {filteredListings.map((listing) => (
                 <tr key={listing.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -1089,7 +1095,11 @@ export default function AdminBusinessesPage() {
                   </td>
                   <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                     <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900">
+                      <button
+                        className="text-blue-600 hover:text-blue-900"
+                        // onClick={handleView(listing)}
+                        onClick={() => handleView(listing)}
+                      >
                         <EyeIcon className="w-4 h-4" />
                       </button>
                       <button
