@@ -2,11 +2,9 @@
 import Event from '../models/Events.js';
 import Business from '../models/Business.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import { notifyRole, notifyUser } from '../utils/sendNotification.js';
 
 
-
-
-//evetnController.js
 //create event with notification
 // ✅ Create new event
 export const createEvent = asyncHandler(async (req, res) => {
@@ -102,20 +100,58 @@ export const getEventsByBusiness = asyncHandler(async (req, res) => {
 });
 
 // ✅ Approve event (admin)
+// export const approveEvent = asyncHandler(async (req, res) => {
+//   const { id } = req.params;
+
+//   const event = await Event.findByIdAndUpdate(id, { isApproved: true }, { new: true });
+
+//   if (!event) {
+//     return res.status(404).json({ message: 'Event not found' });
+//   }
+
+//   res.status(200).json({
+//     message: 'Event approved',
+//     event
+//   });
+// });
+
+// ✅ Update event (SuperAdmin)
 export const approveEvent = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const {
+    title,
+    description,
+    startTime,
+    endTime,
+    link,
+    location,
+    isApproved,
+    bannerImage
+  } = req.body;
 
-  const event = await Event.findByIdAndUpdate(id, { isApproved: true }, { new: true });
+  const updatedFields = {
+    title,
+    description,
+    startTime,
+    endTime,
+    link,
+    location,
+    isApproved,
+    bannerImage
+  };
+
+  const event = await Event.findByIdAndUpdate(id, updatedFields, { new: true });
 
   if (!event) {
     return res.status(404).json({ message: 'Event not found' });
   }
 
   res.status(200).json({
-    message: 'Event approved',
+    message: 'Event updated successfully',
     event
   });
 });
+
 
 // ✅ Get all events according to user id
 // ✅ Get all events created by the logged-in user
@@ -135,6 +171,17 @@ export const getEventsByUser = asyncHandler(async (req, res) => {
   res.status(200).json({
     message: 'Events fetched successfully',
     businessId: business._id,
+    count: events.length,
+    events
+  });
+});
+
+//get all events
+export const getAllEvents = asyncHandler(async (req, res) => {
+  const events = await Event.find().sort({ startTime: -1 });
+
+  res.status(200).json({
+    message: 'All events fetched successfully',
     count: events.length,
     events
   });

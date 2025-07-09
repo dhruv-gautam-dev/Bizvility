@@ -24,8 +24,8 @@ router.put(
 router.get('/my-business-reviews', protect, getUserReviews);
 router.get('/getbusinessbyid', protect, getUserListings);
 router.get('/getAllSalesUsers', protect, getAllSalesUsers);
-router.get('/getreferralUser', protect, getUsersByReferral); // Get users by referral code
 
+router.get('/getreferralUser', protect, getUsersByReferral); // Get users by referral code
 // router.get('/getbusinessbyid/:id', protect, getUserBusinesses);
 
 export default router;

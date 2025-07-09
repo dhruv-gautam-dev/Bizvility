@@ -124,5 +124,3 @@ export const markAllNotificationsAsRead = asyncHandler(async (req, res) => {
     modifiedCount: result.modifiedCount
   });
 });
-
-//notifications controlle.js

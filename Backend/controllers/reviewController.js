@@ -1,4 +1,3 @@
-//reviewController.js
 import Review from '../models/Review.js';
 import Business from '../models/Business.js';
 import asyncHandler from '../utils/asyncHandler.js';
@@ -7,7 +6,6 @@ import { notifyUser, notifyRole } from '../utils/sendNotification.js'; // ✅ Im
 
 
 
-//reviewController.js
 //create review with notification
 // ⭐ Create Review
 export const createReview = async (req, res) => {
@@ -96,7 +94,6 @@ await Promise.all([
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
-
 
 
 // ✏️ Update Review

@@ -18,7 +18,6 @@ const categoryModels = {
 };
 
 
-//businessController.js
 //create business with notification
 export const createBusiness = async (req, res) => {
   try {
@@ -201,7 +200,6 @@ await Promise.all([
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
-
 
 
 
@@ -456,6 +454,155 @@ export const getAllBusinesses = async (req, res) => {
 };
 
 
+
+  
+//get the business by id with reveiws data
+// export const getBusinessId = asyncHandler(async (req, res) => {
+//   const { id } = req.params;
+
+//   // 🔍 1. Find the business by ID
+//   const business = await Business.findById(id).lean();
+//   if (!business) {
+//     console.log('❌ Business not found with id:', id);
+//     return res.status(404).json({ message: 'Business not found' });
+//   }
+
+//   // 🧠 2. Resolve dynamic category model and fetch category-specific data
+//   const CategoryModel = categoryModels[business.categoryModel];
+//   let categoryData = {};
+
+//   if (CategoryModel && business.categoryRef) {
+//     const categoryDoc = await CategoryModel.findById(business.categoryRef).lean();
+//     if (categoryDoc) {
+//       const { _id, __v, ...rest } = categoryDoc;
+//       categoryData = rest;
+//     }
+//   }
+
+//   // 💬 3. Fetch reviews related to this business
+//   const reviews = await Review.find({ business: id })
+//     .populate('user', 'fullName profile.avatar')
+//     .sort({ createdAt: -1 }) // latest first
+//     .lean();
+
+//   // 🧾 4. Format reviews
+//   const formattedReviews = reviews.map((r) => ({
+//     reviewerName: r.user?.fullName || 'Anonymous',
+//     reviewerAvatar: r.user?.profile?.avatar || null,
+//     rating: r.rating,
+//     comment: r.comment,
+//     time: r.createdAt,
+//   }));
+
+//   // 📦 5. Combine everything
+//   const fullData = {
+//     ...business,
+//     categoryData,
+//     reviews: formattedReviews,
+//   };
+
+//   res.status(200).json({
+//     message: 'Business fetched successfully',
+//     business: fullData,
+//   });
+// });
+
+// export const getBusinessId = async (req, res) => {
+
+
+
+//   try {
+//     const { id } = req.params;
+
+//     // Step 1: Fetch business
+//     const businessDoc = await Business.findById(id);
+//     if (!businessDoc) {
+//       return res.status(404).json({ message: 'Business not found' });
+//     }
+
+//     // Step 2: Determine IP
+//     let userIp =
+//       req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || '127.0.0.1';
+//     if (userIp.startsWith('::ffff:')) {
+//       userIp = userIp.replace('::ffff:', '');
+//     }
+//     console.log('👀 Visitor IP:', userIp);
+
+//     // Step 2.5: Ensure viewers is initialized
+//     if (!Array.isArray(businessDoc.viewers)) {
+//       businessDoc.viewers = [];
+//     }
+
+//     // Step 3: Check if IP has viewed in the last 24h
+//     const now = new Date();
+//     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+//     const hasViewed = businessDoc.viewers.some(
+//       (v) => v.ip === userIp && new Date(v.viewedAt) > oneDayAgo
+//     );
+
+//     if (!hasViewed) {
+//   await Business.updateOne(
+//     { _id: businessDoc._id },
+//     {
+//       $inc: { views: 1 },
+//       $push: { viewers: { ip: userIp, viewedAt: now } }
+//     }
+//   );
+//   console.log('✅ Counted new unique view from', userIp);
+// } else {
+//   console.log('🔁 Repeated view from same IP in last 24h:', userIp);
+// }
+
+
+//     // Step 4: Get plain object
+//     const business = businessDoc.toObject();
+
+//     // Step 5: Load categoryData
+//     let categoryData = {};
+//     const CategoryModel = categoryModels[business.categoryModel];
+//     if (CategoryModel && business.categoryRef) {
+//       const categoryDoc = await CategoryModel.findById(business.categoryRef).lean();
+//       if (categoryDoc) {
+//         const { _id, __v, ...rest } = categoryDoc;
+//         categoryData = rest;
+//       }
+//     }
+
+//     // Step 6: Load reviews
+//     const reviews = await Review.find({ business: id })
+//       .populate('user', 'fullName profile.avatar')
+//       .sort({ createdAt: -1 })
+//       .lean();
+
+//     const formattedReviews = reviews.map((r) => ({
+//       reviewerName: r.user?.fullName || 'Anonymous',
+//       reviewerAvatar: r.user?.profile?.avatar || null,
+//       rating: r.rating,
+//       comment: r.comment,
+//       time: r.createdAt,
+//     }));
+
+//     // Step 7: Final Response
+//     const fullData = {
+//       ...business,
+//       categoryData,
+//       reviews: formattedReviews,
+//       totalViews: businessDoc.views || 0, // make sure to read from saved doc
+//     };
+
+//     res.status(200).json({
+//       message: 'Business fetched successfully',
+//       business: fullData,
+//     });
+
+//   } catch (error) {
+//     console.error('❌ Error fetching business by ID:', error);
+//     res.status(500).json({ message: 'Server error', error: error.message });
+//   }
+// };
+
+
 //get user view
 // 🔥 Analytics API for business owner's dashboard
 export const getUserBusinessViewsAnalytics = asyncHandler(async (req, res) => {
@@ -672,6 +819,8 @@ export const searchBusinesses = async (req, res) => {
   }
 };
 
+
+//get the business by current sales user id
 export const getBusinessBySalesId = asyncHandler(async (req, res) => {
   const salesUserId = req.user._id;
 
@@ -688,7 +837,7 @@ export const getBusinessBySalesId = asyncHandler(async (req, res) => {
         : 0;
 
       return {
-        _id:biz._id,
+        _id: biz._id,
         title: biz.name,
         owner: biz.owner?.fullName || '',
         ownerEmail: biz.owner?.email || '',

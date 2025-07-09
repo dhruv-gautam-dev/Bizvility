@@ -22,8 +22,9 @@ router.get('/byid/:id', getBusinessId);
 
 router.get('/views/analytics', protect, getUserBusinessViewsAnalytics);
 router.get('/search', searchBusinesses);
-router.get('/sales/listings', protect, getBusinessBySalesId);
 
+// 🛡️ Protected route for logged-in sales users
+router.get('/sales/listings', protect, getBusinessBySalesId);
 
 
 export default router;

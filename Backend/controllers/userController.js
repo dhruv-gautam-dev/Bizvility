@@ -344,3 +344,4 @@ export const getUsersByReferral = asyncHandler(async (req, res) => {
     });
   }
 });
+

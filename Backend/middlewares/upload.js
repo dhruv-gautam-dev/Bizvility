@@ -32,7 +32,7 @@ const storage = multer.diskStorage({
 }
 //events
  
-     else if (file.fieldname === 'eventImages') {
+     else if (file.fieldname === 'bannerImage') { 
       folder = 'uploads/events';
     }
 

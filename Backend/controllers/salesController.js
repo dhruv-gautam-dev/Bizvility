@@ -47,4 +47,11 @@ export const getReferralLink = asyncHandler(async (req, res) => {
   });
 });
 
-//
+// //get business by current user id
+// export const getBusinessByUserId = asyncHandler(async (req, res) => {
+//   const userId = req.user._id;
+
+//   const businesses = await Business.find({ salesExecutive: userId });
+
+//   res.status(200).json(businesses);
+// });

@@ -2,8 +2,9 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
+
 import connectDB from './config/db.js';
-import authRoutes from './routes/authRoute.js';
+import authRoutes from './routes/authRoute.js'; 
 import adminRoutes from './routes/adminRoute.js';
 import { errorHandler } from './utils/errorHandler.js';
 import businessRoutes from './routes/businessRoute.js';
@@ -19,13 +20,13 @@ import salesRoute from './routes/salesRoute.js';
 import eventRoutes from './routes/eventRoute.js';
 import visitRoutes from './routes/visitRoutes.js';
 import leadsRoute from './routes/leadsRoute.js'; // Import leads route
-import notificationRoutes from './routes/notificationRoutes.js';
+import notificationRoutes from './routes/notificationRoute.js';
+import paymentRoutes from "./routes/paymentRoute.js";
 import './cronJobs/leadReminderJob.js';
 import cors from 'cors';
-
-import { initNotificationSystem } from './utils/sendNotification.js';
-
 dotenv.config();
+
+
 const app = express();
 
 // Database connection
@@ -108,20 +109,13 @@ io.on("connection", (socket) => {
     }
   });
 });
-
-
-
-
-
+import { initNotificationSystem } from './utils/sendNotification.js';
 initNotificationSystem(io, onlineUsers);
 
 // Make io and onlineUsers accessible globally
 export { io, onlineUsers };
 
-
-
-
-
+// console.log("RAZORPAY_KEY_ID:", process.env.RAZORPAY_KEY_ID);
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
@@ -137,29 +131,8 @@ app.use('/api/events', eventRoutes);
 app.use('/api/visit', visitRoutes);
 app.use('/api/leads', leadsRoute); // Leads management route
 app.use('/api/notifications', notificationRoutes);
-
-
-// app.get("/api/test-notification", (req, res) => {
-//   const userId = "68612341c102a6966e31e5cf"; // Replace with a valid user ID from your DB
-
-//   const payload = {
-//     title: "🧪 Test Notification",
-//     message: "You received this in real-time!",
-//     time: new Date().toLocaleTimeString(),
-//     read: false,
-//     type: "system",
-//     id: Math.random(),
-//   };
-
-//   if (global.sendNotificationToUser) {
-//     global.sendNotificationToUser(userId, payload);
-//     return res.send("✅ Test notification sent!");
-//   } else {
-//     return res.status(500).send("❌ Notification system not initialized.");
-//   }
-// });
-
-
+app.use("/api/payments", paymentRoutes);
+app.use("/invoices", express.static(path.join(path.resolve(), "invoices")));
 
 
 // ✅ Serve static files from 'uploads' folder

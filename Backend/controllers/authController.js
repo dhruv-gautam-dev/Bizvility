@@ -5,6 +5,7 @@ import sendEmail from '../utils/emailSender.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import Lead from '../models/Leads.js'; // Import Lead model
+import { notifyUser, notifyRole } from '../utils/sendNotification.js'; // Import notification functions
 
 // Helper: Generate JWT
 const generateToken = (id, expiresIn) => {
@@ -13,12 +14,12 @@ const generateToken = (id, expiresIn) => {
 
 // Helper: Generate 6-digit OTP
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
-
+// ✅ ADD THIS FUNCTION
 const generateReferralCode = () => {
   return 'SLS' + Math.floor(1000 + Math.random() * 9000);
 };
 
-//authcontroller.js 
+
 export const register = asyncHandler(async (req, res) => {
   const {
     fullName,
@@ -52,7 +53,7 @@ export const register = asyncHandler(async (req, res) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const otpExpires = Date.now() + 10 * 60 * 1000;
 
-  let referredBy = null;
+let referredBy = null;
   let salesExecutive = null;
 
   // 🔁 Assign sales executive via referral
@@ -61,6 +62,8 @@ export const register = asyncHandler(async (req, res) => {
     if (refUser) {
       referredBy = refUser._id;
       salesExecutive = refUser._id;
+    } else {
+      return res.status(400).json({ message: 'Invalid referral code' });
     }
   }
 
@@ -93,13 +96,14 @@ export const register = asyncHandler(async (req, res) => {
   });
 
   // 🔁 Round-robin fallback sales assignment (if no referral)
-  if (!salesExecutive) {
-    const salesUsers = await User.find({ role: 'sales' });
-    if (salesUsers.length > 0) {
-      const index = Math.floor(Math.random() * salesUsers.length);
-      salesExecutive = salesUsers[index]._id;
-    }
-  }
+// ✅ Assign sales executive ONLY if referral code is used
+// if (referralCode && !salesExecutive) {
+//   const salesUsers = await User.find({ role: 'sales' });
+//   if (salesUsers.length > 0) {
+//     const index = Math.floor(Math.random() * salesUsers.length);
+//     salesExecutive = salesUsers[index]._id;
+//   }
+// }
 
   // 📌 Create a lead with follow-up reminder (for cron job)
   await Lead.create({
@@ -171,8 +175,6 @@ await Promise.all([
     message: 'OTP sent to your email for verification'
   });
 });
-
-
 
 
 
@@ -386,8 +388,6 @@ export const resendOTP = asyncHandler(async (req, res) => {
 });
 
 
-//password reset
-// @desc    Update password after OTP verified
 //reset password
 export const resetPassword = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
