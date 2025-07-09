@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout.jsx";
-import SuperAdminLayout from "./components/superAdmin/AdminLayout.jsx";
+import SuperAdminLayout from "./components/superAdmin/SuperAdminLayout.jsx";
 import AdminLayout from "./components/Admin/AdminLayout.jsx";
 import UserLayout from "./components/User/UserLayout.jsx";
 import SalesLayout from "./components/Sales/SalesLayout.jsx";
@@ -46,6 +46,7 @@ import AdminCategories from "./pages/Admin/AdminCategoriesPage.jsx";
 import AdminUsers from "./pages/Admin/AdminUsersPage.jsx";
 import AdminAnalytics from "./pages/Admin/AdminAnalyticsPage.jsx";
 import AdminSettings from "./pages/Admin/Settings.jsx";
+import AdminProfile from "./pages/Admin/AdminProfile.jsx";
 
 // User Pages
 import UserDashboard from "./pages/User/Dashboard.jsx";
@@ -73,14 +74,44 @@ import SalesUserAnalytics from "./pages/Sales/SalesUserAnalytics.jsx";
 import { SocketProvider } from "./context/SocketContext.jsx";
 import { Toaster } from "react-hot-toast";
 
-// // SuperAdmin Pages
-import SuperDashboard from "./pages/superAdmin/Dashboard.jsx";
-import SuperBusinesses from "./pages/superAdmin/Businesses.jsx";
-import SuperCategories from "./pages/superAdmin/Categories.jsx";
-import SuperUsers from "./pages/superAdmin/Users.jsx";
-import SuperAnalytics from "./pages/superAdmin/Analytics.jsx";
-import SuperSettings from "./pages/superAdmin/Settings.jsx";
-import AdminProfile from "./pages/Admin/AdminProfile.jsx";
+// SuperAdmin Pages
+import SuperAcademics from "./pages/SuperAdmin/Academics.jsx";
+import SuperAdmissions from "./pages/SuperAdmin/Admissions.jsx";
+import SuperAds from "./pages/SuperAdmin/Ads.jsx";
+import SuperAnalytics from "./pages/SuperAdmin/Analytics.jsx";
+import SuperAppearance from "./pages/SuperAdmin/Appearance.jsx";
+import SuperBusinesses from "./pages/SuperAdmin/Businesses.jsx";
+import SuperCampusLife from "./pages/SuperAdmin/CampusLife.jsx";
+import SuperCategories from "./pages/SuperAdmin/Categories.jsx";
+import SuperClaims from "./pages/SuperAdmin/Claims.jsx";
+import SuperComments from "./pages/SuperAdmin/Comments.jsx";
+import CubeWP from "./pages/SuperAdmin/CubeWP.jsx";
+import CubeWPForms from "./pages/SuperAdmin/CubeWPForms.jsx";
+import SuperDashboard from "./pages/SuperAdmin/SuperDashboard.jsx";
+import SuperElementor from "./pages/SuperAdmin/Elementor.jsx";
+import SuperEvents from "./pages/SuperAdmin/SuperEvents.jsx";
+import SuperFlag from "./pages/SuperAdmin/Flag.jsx";
+import SuperHome from "./pages/SuperAdmin/Home.jsx";
+import SuperInvoices from "./pages/SuperAdmin/SuperInvoices.jsx";
+import SuperLeads from "./pages/SuperAdmin/SuperLeads.jsx";
+import SuperListing from "./pages/SuperAdmin/SuperListing.jsx";
+import ListingProCC from "./pages/SuperAdmin/ListingProCC.jsx";
+import SuperMedia from "./pages/SuperAdmin/Media.jsx";
+import SuperPages from "./pages/SuperAdmin/Pages.jsx";
+import SuperPlugins from "./pages/SuperAdmin/Plugins.jsx";
+import SuperPosts from "./pages/SuperAdmin/Posts.jsx";
+import SuperPricingPlans from "./pages/SuperAdmin/SuperPricingPlans.jsx";
+import SuperProfile from "./pages/SuperAdmin/SuperProfile.jsx";
+import SuperRazorpay from "./pages/SuperAdmin/SuperRazorpay.jsx";
+import SuperResearch from "./pages/SuperAdmin/Research.jsx";
+import SuperReviews from "./pages/SuperAdmin/SuperReviews.jsx";
+import SuperSettings from "./pages/SuperAdmin/Settings.jsx";
+import SuperSubcription from "./pages/SuperAdmin/Subscription.jsx";
+import SuperTemplates from "./pages/SuperAdmin/Templates.jsx";
+import SuperThemeOptions from "./pages/SuperAdmin/ThemeOptions.jsx";
+import SuperTools from "./pages/SuperAdmin/Tools.jsx";
+import SuperUsers from "./pages/SuperAdmin/SuperUsers.jsx";
+import SuperUserSettings from "./pages/SuperAdmin/UserSettings.jsx";
 
 // import { ToastContainer } from "react-toastify";
 // import toast, { Toaster } from "react-hot-toast";
@@ -141,17 +172,93 @@ function App() {
               <Route path="/support/faqs" element={<FAQPage />} />
             </Route>
 
-            {/* Super Admin Dashboard (AdminLayout) */}
-            <Route element={<AdminLayout />}>
-              <Route path="/dashboard" element={<SuperDashboard />} />
-              <Route path="/businesses" element={<SuperBusinesses />} />
+            {/* Super Admin Dashboard (SuperAdminLayout) */}
+            <Route element={<SuperAdminLayout />}>
               <Route
-                path="/dashboard-categories"
+                path="/super-admin-academics"
+                element={<SuperAcademics />}
+              />
+              <Route
+                path="/super-admin-admissions"
+                element={<SuperAdmissions />}
+              />
+              <Route path="/super-admin-ads" element={<SuperAds />} />
+              <Route
+                path="super-admin-analytics"
+                element={<SuperAnalytics />}
+              />
+              <Route
+                path="/super-admin-appearance"
+                element={<SuperAppearance />}
+              />
+              <Route
+                path="/super-admin-businesses"
+                element={<SuperBusinesses />}
+              />
+              <Route
+                path="/super-admin-campuslife"
+                element={<SuperCampusLife />}
+              />
+              <Route
+                path="/super-admin-categories"
                 element={<SuperCategories />}
               />
-              <Route path="/users" element={<SuperUsers />} />
-              <Route path="/analytics" element={<SuperAnalytics />} />
-              <Route path="/settings" element={<SuperSettings />} />
+              <Route path="/super-admin-claims" element={<SuperClaims />} />
+              <Route path="/super-admin-comments" element={<SuperComments />} />
+              <Route path="/super-cubeWP" element={<CubeWP />} />
+              <Route
+                path="/super-admin-cubeWPforms"
+                element={<CubeWPForms />}
+              />
+              <Route
+                path="/super-admin-dashboard"
+                element={<SuperDashboard />}
+              />
+              <Route
+                path="/super-admin-adminelementor"
+                element={<SuperElementor />}
+              />
+              <Route path="/super-admin-events" element={<SuperEvents />} />
+              <Route path="/super-admin-flag" element={<SuperFlag />} />
+              <Route path="/super-admin-home" element={<SuperHome />} />
+              <Route path="/super-admin-invoices" element={<SuperInvoices />} />
+              <Route path="/super-admin-leads" element={<SuperLeads />} />
+              <Route path="/super-admin-listings" element={<SuperListing />} />
+              <Route
+                path="/super-admin-listingProCC"
+                element={<ListingProCC />}
+              />
+              <Route path="/super-admin-media" element={<SuperMedia />} />
+              <Route path="/super-admin-pages" element={<SuperPages />} />
+              <Route path="/super-admin-plugins" element={<SuperPlugins />} />
+              <Route path="/super-admin-posts" element={<SuperPosts />} />
+              <Route
+                path="/super-admin-pricingPlans"
+                element={<SuperPricingPlans />}
+              />
+              <Route path="/super-admin-profile" element={<SuperProfile />} />
+              <Route path="/super-admin-razorpay" element={<SuperRazorpay />} />
+              <Route path="/super-admin-research" element={<SuperResearch />} />
+              <Route path="/super-admin-reviews" element={<SuperReviews />} />
+              <Route path="/super-admin-settings" element={<SuperSettings />} />
+              <Route
+                path="/super-admin-subscription"
+                element={<SuperSubcription />}
+              />
+              <Route
+                path="/super-admin-templates"
+                element={<SuperTemplates />}
+              />
+              <Route
+                path="/super-admin-theme-options"
+                element={<SuperThemeOptions />}
+              />
+              <Route path="/super-admin-tools" element={<SuperTools />} />
+              <Route path="/super-admin-users" element={<SuperUsers />} />
+              <Route
+                path="/super-admin-user-settings"
+                element={<SuperUserSettings />}
+              />
             </Route>
 
             {/* Admin Dashboard (AdminLayout) */}

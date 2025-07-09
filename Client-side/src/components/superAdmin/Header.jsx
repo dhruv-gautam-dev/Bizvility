@@ -1,171 +1,297 @@
-import { Fragment, useState } from 'react';
-import { Menu, Transition } from '@headlessui/react';
-import { UserCircleIcon, BellIcon } from '@heroicons/react/24/outline';
+import { useState } from 'react';
+import { UserCircleIcon, BellIcon, MagnifyingGlassIcon, ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
-import NotificationSidebar from './NotificationSidebar';
 
-function Header() {
+const initialNotifications = [
+  {
+    id: 1,
+    title: 'New user registration',
+    message: 'John Smith has registered as a new user',
+    time: '5 minutes ago',
+    read: false,
+    type: 'user'
+  },
+  {
+    id: 2,
+    title: 'New business listing',
+    message: 'Coffee House submitted a new listing for review',
+    time: '15 minutes ago',
+    read: false,
+    type: 'listing'
+  },
+  {
+    id: 3,
+    title: 'Payment received',
+    message: 'Payment of $299 received from Tech Solutions Inc',
+    time: '1 hour ago',
+    read: true,
+    type: 'payment'
+  },
+  {
+    id: 4,
+    title: 'Review flagged',
+    message: 'A review has been flagged for inappropriate content',
+    time: '2 hours ago',
+    read: false,
+    type: 'review'
+  },
+  {
+    id: 5,
+    title: 'System maintenance',
+    message: 'Scheduled maintenance completed successfully',
+    time: '3 hours ago',
+    read: true,
+    type: 'system'
+  }
+];
+
+export default function Header({ profile }) {
   const navigate = useNavigate();
+  const [notifications, setNotifications] = useState(initialNotifications);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isNotificationPopupOpen, setIsNotificationPopupOpen] = useState(false);
+  const [isNotificationSidebarOpen, setIsNotificationSidebarOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // State for notifications and sidebar
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: 'New user registered: Vishal', timestamp: '2025-06-11 18:00', read: false },
-    { id: 2, message: 'User Rajat updated their profile', timestamp: '2025-06-11 17:45', read: false },
-    { id: 3, message: 'System maintenance scheduled', timestamp: '2025-06-11 17:30', read: true },
-    { id: 4, message: 'New comment on your post', timestamp: '2025-06-11 17:15', read: true },
-  ]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  // Calculate unread notifications count
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  // Mark a notification as read
-  const markAsRead = (id) => {
-    setNotifications(
-      notifications.map(n => (n.id === id ? { ...n, read: true } : n))
-    );
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      console.log('Searching for:', searchTerm);
+      alert(`Searching for: ${searchTerm}`);
+    }
   };
 
-  // Mark all notifications as read
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  const handleNotificationClick = () => {
+    setIsNotificationPopupOpen(!isNotificationPopupOpen);
+    setIsDropdownOpen(false);
   };
 
-  const handleSignOut = () => {
-    localStorage.removeItem('token');
-    navigate('/signin');
+  const showAllNotifications = () => {
+    setIsNotificationPopupOpen(false);
+    setIsNotificationSidebarOpen(true);
   };
 
-  const profilePage = () => {
-    navigate('/profile'); // Updated to match the new route in App.jsx
+  const handleProfileAction = (action) => {
+    setIsDropdownOpen(false);
+    
+    switch (action) {
+      case 'profile':
+        navigate('/super-admin-profile');
+        break;
+      case 'settings':
+        navigate('/super-admin-user-settings');
+        break;
+      case 'signout':
+        navigate('/signin');
+        break;
+      default:
+        console.log('Profile action:', action);
+    }
+  };
+
+  const handleNotificationNavigation = (notification) => {
+    setNotifications(notifications.map(n => 
+      n.id === notification.id ? { ...n, read: true } : n
+    ));
+
+    let route = '';
+    switch (notification.type) {
+      case 'user':
+        route = '/super-admin-users';
+        break;
+      case 'listing':
+        route = '/super-admin-listings';
+        break;
+      case 'payment':
+        route = '/super-admin-razorpay';
+        break;
+      case 'review':
+        route = '/super-admin-reviews';
+        break;
+      case 'system':
+        route = '/super-admin-settings';
+        break;
+      default:
+        route = '/super-admin-dashboard';
+    }
+
+    navigate(route);
+    setIsNotificationPopupOpen(false);
+    setIsNotificationSidebarOpen(false);
   };
 
   return (
     <>
-      <header className="bg-white shadow fixed top-0 left-64 right-0 z-10">
-        <div className="flex h-16 items-center justify-between px-6">
-          <div className="flex items-center gap-x-4">
-            <h2 className="text-lg font-semibold">Welcome, Admin</h2>
+      <header className="bg-white shadow-sm border-b border-gray-200 relative z-40">
+        <div className="flex flex-col sm:flex-row sm:h-16 items-center justify-between px-4 sm:px-6 py-2 sm:py-0 gap-2">
+          <div className="flex items-center w-full sm:w-auto">
+            <form onSubmit={handleSearch} className="relative w-full sm:w-64">
+              <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-3/4 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </form>
           </div>
-          <div className="flex items-center gap-x-4">
-            {/* Notification Icon with Dropdown */}
-            <Menu as="div" className="relative">
-              <div className="relative">
-                <Menu.Button className="text-gray-500 hover:text-gray-700">
-                  <BellIcon className="h-6 w-6" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-2 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-                      {unreadCount}
-                    </span>
-                  )}
-                </Menu.Button>
-              </div>
-              <Transition
-                as={Fragment}
-                enter="transition ease-out duration-100"
-                enterFrom="transform opacity-0 scale-95"
-                enterTo="transform opacity-100 scale-100"
-                leave="transition ease-in duration-75"
-                leaveFrom="transform opacity-100 scale-100"
-                leaveTo="transform opacity-0 scale-95"
+          
+          <div className="flex items-center gap-x-2 sm:gap-x-4">
+            <div className="relative">
+              <button 
+                className="text-gray-500 hover:text-gray-700 relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+                onClick={handleNotificationClick}
               >
-                <Menu.Items className="absolute right-0 z-10 mt-2 w-80 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 max-h-96 overflow-y-auto">
-                  {notifications.length === 0 ? (
-                    <div className="px-4 py-2 text-sm text-gray-700">
-                      No notifications
-                    </div>
-                  ) : (
-                    <>
-                      {notifications.slice(0, 5).map(notification => (
-                        <Menu.Item key={notification.id}>
-                          {({ active }) => (
-                            <div
-                              onClick={() => markAsRead(notification.id)}
-                              className={`${
-                                active ? 'bg-gray-100' : ''
-                              } block px-4 py-2 text-sm text-gray-700 cursor-pointer ${
-                                notification.read ? 'opacity-50' : 'font-semibold'
-                              }`}
-                            >
-                              <p>{notification.message}</p>
-                              <p className="text-xs text-gray-500">
-                                {notification.timestamp}
-                              </p>
-                            </div>
-                          )}
-                        </Menu.Item>
-                      ))}
-                      <Menu.Item>
-                        <div
-                          onClick={() => {
-                            setIsSidebarOpen(true);
-                            markAllAsRead();
-                          }}
-                          className="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100 cursor-pointer text-center"
-                        >
-                          View all notifications
-                        </div>
-                      </Menu.Item>
-                    </>
-                  )}
-                </Menu.Items>
-              </Transition>
-            </Menu>
+                <BellIcon className="h-6 w-6" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
 
-            {/* Profile Dropdown */}
-            <Menu as="div" className="relative">
-              <Menu.Button className="flex items-center gap-x-4 text-sm">
-                <UserCircleIcon className="h-8 w-8 text-gray-500" />
-              </Menu.Button>
-              <Transition
-                as={Fragment}
-                enter="transition ease-out duration-100"
-                enterFrom="transform opacity-0 scale-95"
-                enterTo="transform opacity-100 scale-100"
-                leave="transition ease-in duration-75"
-                leaveFrom="transform opacity-100 scale-100"
-                leaveTo="transform opacity-0 scale-95"
-              >
-                <Menu.Items className="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
-                  <Menu.Item>
-                    {({ active }) => (
-                      <a
-                        onClick={profilePage}
-                        className={`${
-                          active ? 'bg-gray-100' : ''
-                        } block px-4 py-2 text-sm text-gray-700 cursor-pointer`}
-                      >
-                        Your Profile
-                      </a>
-                    )}
-                  </Menu.Item>
-                  <Menu.Item>
-                    {({ active }) => (
+              {isNotificationPopupOpen && (
+                <div className="absolute right-0 mt-2 w-64 sm:w-80 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50 max-w-[calc(100vw-2rem)]">
+                  <div className="p-4 border-b border-gray-200">
+                    <h3 className="text-lg font-medium text-gray-900">Notifications</h3>
+                  </div>
+                  <div className="max-h-96 overflow-y-auto">
+                    {notifications.slice(0, 3).map((notification) => (
                       <button
-                        onClick={handleSignOut}
-                        className={`${
-                          active ? 'bg-gray-100' : ''
-                        } block w-full text-left px-4 py-2 text-sm text-gray-700`}
+                        key={notification.id}
+                        onClick={() => handleNotificationNavigation(notification)}
+                        className={`w-full text-left p-4 border-b border-gray-100 hover:bg-gray-50 ${!notification.read ? 'bg-blue-50' : ''}`}
                       >
-                        Sign out
+                        <div className="flex items-start">
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900">{notification.title}</p>
+                            <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                            <p className="text-xs text-gray-400 mt-2">{notification.time}</p>
+                          </div>
+                          {!notification.read && (
+                            <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                          )}
+                        </div>
                       </button>
-                    )}
-                  </Menu.Item>
-                </Menu.Items>
-              </Transition>
-            </Menu>
+                    ))}
+                  </div>
+                  <div className="p-4 border-t border-gray-200">
+                    <button 
+                      onClick={showAllNotifications}
+                      className="w-full text-center text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      Show all notifications
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="relative">
+              <button 
+                className="flex items-center gap-x-1 sm:gap-x-2 text-sm p-2 rounded-lg hover:bg-gray-100 transition-colors max-w-[150px] sm:max-w-none"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              >
+                {profile.avatar ? (
+                  <img
+                    src={profile.avatar}
+                    alt={profile.name}
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <UserCircleIcon className="h-8 w-8 text-gray-500" />
+                )}
+                <span className="text-gray-700 hidden sm:inline truncate">{profile.name}</span>
+                <ChevronDownIcon className="h-4 w-4 text-gray-500" />
+              </button>
+              
+              {isDropdownOpen && (
+                <div className="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 max-w-[calc(100vw-2rem)]">
+                  <button
+                    onClick={() => handleProfileAction('profile')}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Your Profile
+                  </button>
+                  <button
+                    onClick={() => handleProfileAction('settings')}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Settings
+                  </button>
+                  <button
+                    onClick={() => handleProfileAction('signout')}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Notification Sidebar */}
-      <NotificationSidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        notifications={notifications}
-      />
+      {isNotificationSidebarOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setIsNotificationSidebarOpen(false)}></div>
+          <div className="absolute right-0 top-0 h-full w-80 sm:w-96 bg-white shadow-xl">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-lg font-medium text-gray-900">All Notifications</h2>
+              <button 
+                onClick={() => setIsNotificationSidebarOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <XMarkIcon className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="h-full overflow-y-auto pb-20">
+              {notifications.map((notification) => (
+                <button
+                  key={notification.id}
+                  onClick={() => handleNotificationNavigation(notification)}
+                  className={`w-full text-left p-4 border-b border-gray-100 hover:bg-gray-50 ${!notification.read ? 'bg-blue-50' : ''}`}
+                >
+                  <div className="flex items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-gray-900">{notification.title}</p>
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          notification.type === 'user' ? 'bg-green-100 text-green-800' :
+                          notification.type === 'listing' ? 'bg-blue-100 text-blue-800' :
+                          notification.type === 'payment' ? 'bg-yellow-100 text-yellow-800' :
+                          notification.type === 'review' ? 'bg-red-100 text-red-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {notification.type}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                      <p className="text-xs text-gray-400 mt-2">{notification.time}</p>
+                    </div>
+                    {!notification.read && (
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 ml-2"></div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {(isDropdownOpen || isNotificationPopupOpen) && (
+        <div 
+          className="fixed inset-0 z-30" 
+          onClick={() => {
+            setIsDropdownOpen(false);
+            setIsNotificationPopupOpen(false);
+          }}
+        ></div>
+      )}
     </>
   );
 }
-
-export default Header;

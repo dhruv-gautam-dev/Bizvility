@@ -94,9 +94,9 @@ export default function EventsPage() {
                 key={event._id}
                 className="p-6 transition-all duration-300 bg-white shadow-lg rounded-xl hover:shadow-xl"
               >
-                {event.bannerImage && (
+                {event.eventImages && (
                   <img
-                    src={`${imageUrl}/${event.bannerImage}`} // Added imageUrl before bannerImage
+                    src={`${imageUrl}/${event.eventImages}`} // Added imageUrl before bannerImage
                     alt={event.title}
                     className="object-cover w-full h-48 mb-4 rounded-t-xl"
                   />

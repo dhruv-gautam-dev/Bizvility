@@ -105,13 +105,13 @@ function Header({ isCollapsed, profile }) {
           onSubmit={(e) => e.preventDefault()}
           className="relative w-full sm:w-64"
         >
-          <MagnifyingGlassIcon className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
+          {/* <MagnifyingGlassIcon className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
           <input
             type="text"
             placeholder="Search..."
             className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             aria-label="Search"
-          />
+          /> */}
         </form>
 
         <div className="flex items-center gap-x-4">
