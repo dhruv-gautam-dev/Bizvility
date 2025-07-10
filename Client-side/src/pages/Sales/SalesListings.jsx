@@ -25,7 +25,7 @@ const defaultPlans = [
   "Enterprise",
 ];
 
-export default function Listings() {
+export default function SalesListings() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");

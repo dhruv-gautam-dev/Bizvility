@@ -272,7 +272,7 @@ function LeadModal({ isOpen, onClose, lead, onSubmit, isEdit, isView }) {
   );
 }
 
-export default function Leads() {
+export default function SalesLeads() {
   const [leads, setLeads] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");

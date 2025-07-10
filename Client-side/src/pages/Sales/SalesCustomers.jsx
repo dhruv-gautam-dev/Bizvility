@@ -404,7 +404,7 @@ function CustomerModal({
   );
 }
 
-export default function Customers() {
+export default function SalesCustomers() {
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");

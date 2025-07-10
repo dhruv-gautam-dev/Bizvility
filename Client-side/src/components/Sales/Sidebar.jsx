@@ -26,7 +26,6 @@ import CollapsedLogoImage from "../imgs/bizvility-logo.ico";
 const navigation = [
   { name: "Sales Dashboard", href: "/sales-dashboard", icon: HomeIcon },
   { name: "Leads Management", href: "/sales-leads", icon: UserGroupIcon },
-  { name: "Opportunities", href: "/sales-opportunities", icon: TrophyIcon },
   {
     name: "My Customers",
     href: "/sales-customers",

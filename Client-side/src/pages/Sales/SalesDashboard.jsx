@@ -30,80 +30,8 @@ const platformStats = {
   pendingApprovals: 156,
 };
 
-// Sample listings
-const recentListings = [
-  {
-    id: 1,
-    title: "The Coffee House",
-    owner: "John Smith",
-    category: "Restaurant",
-    location: "New York, NY",
-    status: "Active",
-    views: 1247,
-    rating: 4.5,
-    revenue: 299,
-    createdAt: "2 hours ago",
-  },
-  {
-    id: 2,
-    title: "Tech Solutions Inc",
-    owner: "Sarah Johnson",
-    category: "Services",
-    location: "San Francisco, CA",
-    status: "Pending",
-    views: 892,
-    rating: 4.8,
-    revenue: 599,
-    createdAt: "4 hours ago",
-  },
-  {
-    id: 3,
-    title: "Fashion Boutique",
-    owner: "Mike Brown",
-    category: "Retail",
-    location: "Los Angeles, CA",
-    status: "Active",
-    views: 567,
-    rating: 4.2,
-    revenue: 149,
-    createdAt: "1 day ago",
-  },
-];
-
-// Sample users
-// const recentUsers = [
-//   {
-//     name: "John Smith",
-//     email: "john@example.com",
-//     joinedAt: "2 hours ago",
-//     listings: 1,
-//     status: "Active",
-//   },
-//   {
-//     name: "Sarah Johnson",
-//     email: "sarah@example.com",
-//     joinedAt: "4 hours ago",
-//     listings: 2,
-//     status: "Active",
-//   },
-//   {
-//     name: "Mike Brown",
-//     email: "mike@example.com",
-//     joinedAt: "1 day ago",
-//     listings: 1,
-//     status: "Pending",
-//   },
-//   {
-//     name: "Emily Davis",
-//     email: "emily@example.com",
-//     joinedAt: "2 days ago",
-//     listings: 3,
-//     status: "Active",
-//   },
-// ];
-
 // JSX Component
-export default function Dashboard() {
+export default function SalesDashboard() {
   const [topListingsExpanded, setTopListingsExpanded] = useState(true);
   const [recentUsers, setRecentUsers] = useState([]);
   const [recentListings, setRecentListings] = useState([]);
@@ -236,7 +164,7 @@ export default function Dashboard() {
       <div className="flex flex-col mb-6 space-y-4 lg:flex-row lg:justify-between lg:items-center lg:space-y-0">
         <div>
           <h1 className="text-xl font-semibold text-gray-900 lg:text-2xl">
-            Platform Dashboard
+            Sales Dashboard
           </h1>
           <p className="text-gray-600">
             Monitor your business listing platform performance

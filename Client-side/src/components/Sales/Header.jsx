@@ -203,22 +203,10 @@ export default function Header({
       <header className="relative z-30 bg-white border-b border-gray-200 shadow-sm">
         <div className="flex items-center justify-between h-16 px-4 mx-auto sm:px-6 max-w-screen-2xl">
           <div className="flex items-center w-full gap-x-3 sm:w-auto">
-            <h1 className="text-lg font-bold text-gray-900 truncate sm:text-xl">
-              Sales Dashboard
-            </h1>
             <form
               onSubmit={handleSearch}
               className="relative flex-1 hidden max-w-sm sm:flex"
-            >
-              <MagnifyingGlassIcon className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-3/4" />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </form>
+            ></form>
           </div>
           <div className="flex items-center gap-x-2 sm:gap-x-4">
             <button
